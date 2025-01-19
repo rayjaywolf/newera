@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const aeonikProBold = localFont({
   src: "./fonts/AeonikProTRIAL-Bold.otf",
@@ -35,6 +36,11 @@ export default function RootLayout({
         className={`${aeonikProRegular.variable} antialiased bg-primary-bg`}
       >
         {children}
+        <Toaster 
+          position="bottom-right" 
+          richColors 
+          expand={true}
+        />
       </body>
     </html>
   );

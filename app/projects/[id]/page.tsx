@@ -87,9 +87,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               variant="outline"
               className={cn(
                 "px-4 py-1.5",
-                project.status === "ONGOING" && "border-[#E65F2B] text-[#E65F2B]",
-                project.status === "COMPLETED" && "border-blue-500 text-blue-500",
-                project.status === "SUSPENDED" && "border-orange-500 text-orange-500"
+                project.status === "ONGOING" &&
+                  "border-[#E65F2B] text-[#E65F2B]",
+                project.status === "COMPLETED" &&
+                  "border-blue-500 text-blue-500",
+                project.status === "SUSPENDED" &&
+                  "border-orange-500 text-orange-500"
               )}
             >
               {project.status.toLowerCase()}
@@ -217,11 +220,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <td className="py-4 px-4 capitalize">
                       {material.type.toLowerCase().replace("_", " ")}
                     </td>
-                    <td className="py-4 px-4 text-center">{material.volume} units</td>
+                    <td className="py-4 px-4 text-center">
+                      {material.volume} units
+                    </td>
                     <td className="py-4 px-4 text-center">
                       ₹{material.cost.toLocaleString()}
                     </td>
-                    <td className="py-4 px-4 text-right">{formatDate(material.date)}</td>
+                    <td className="py-4 px-4 text-right">
+                      {formatDate(material.date)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -282,14 +289,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       {usage.slmSubtype &&
                         `- ${usage.slmSubtype.toLowerCase().replace("_", " ")}`}
                     </td>
-                    <td className="py-4 px-4 text-center">{usage.hoursUsed} hrs</td>
+                    <td className="py-4 px-4 text-center">
+                      {usage.hoursUsed} hrs
+                    </td>
                     <td className="py-4 px-4 text-center">
                       ₹{usage.hourlyRate.toLocaleString()}/hr
                     </td>
                     <td className="py-4 px-4 text-center">
                       ₹{usage.totalCost.toLocaleString()}
                     </td>
-                    <td className="py-4 px-4 text-right">{formatDate(usage.date)}</td>
+                    <td className="py-4 px-4 text-right">
+                      {formatDate(usage.date)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

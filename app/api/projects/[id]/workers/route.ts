@@ -1,6 +1,36 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export async function GET(
+    req: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const workers = await prisma.workerAssignment.findMany({
+            where: {
+                projectId: params.id,
+                endDate: null, // Only get currently assigned workers
+            },
+            include: {
+                worker: true,
+            },
+        });
+
+        // Transform the data to return just the worker information
+        const activeWorkers = workers.map(assignment => ({
+            ...assignment.worker,
+        }));
+
+        return NextResponse.json(activeWorkers);
+    } catch (error) {
+        console.error('Error fetching workers:', error);
+        return NextResponse.json(
+            { error: "Failed to fetch workers" },
+            { status: 500 }
+        );
+    }
+}
+
 export async function POST(
     req: Request,
     { params }: { params: { id: string } }
