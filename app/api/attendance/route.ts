@@ -25,14 +25,7 @@ export async function GET(req: Request) {
         });
 
         // Calculate daily income for each record
-        const recordsWithIncome = attendanceRecords.map((record: { 
-            hoursWorked: number; 
-            overtime: number; 
-            worker: { 
-                hourlyRate: number 
-            }; 
-            [key: string]: any;
-        }) => {
+        const recordsWithIncome = attendanceRecords.map(record => {
             const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
             const dailyIncome = totalHours * record.worker.hourlyRate;
             return {
@@ -114,14 +107,7 @@ export async function POST(req: Request) {
         });
 
         // Calculate daily income for each record
-        const recordsWithIncome = updatedRecords.map((record: { 
-            hoursWorked: number; 
-            overtime: number; 
-            worker: { 
-                hourlyRate: number 
-            }; 
-            [key: string]: any;
-        }) => {
+        const recordsWithIncome = updatedRecords.map(record => {
             const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
             const dailyIncome = totalHours * record.worker.hourlyRate;
             return {

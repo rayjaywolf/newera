@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { WorkersView } from "@/components/workers/workers-view";
@@ -75,19 +80,7 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
             </div>
           ) : (
             <WorkersView
-              workers={project.workers.map((w) => ({
-                ...w,
-                workerId: w.worker.id,
-                startDate: w.startDate.toISOString(),
-                endDate: w.endDate?.toISOString() ?? null,
-                worker: {
-                  id: w.worker.id,
-                  name: w.worker.name,
-                  role: w.worker.type, // assuming type is equivalent to role
-                  isActive: w.worker.isActive,
-                  type: w.worker.type,
-                },
-              }))}
+              workers={project.workers}
               projectId={params.id}
             />
           )}
