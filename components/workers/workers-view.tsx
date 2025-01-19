@@ -21,6 +21,7 @@ interface Worker {
     name: string;
     role: string;
     isActive: boolean;
+    type: string;
   };
   startDate: string;
   endDate: string | null;
@@ -91,7 +92,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
               <div>
                 <p className="font-medium text-lg">{projectWorker.worker.name}</p>
                 <p className="text-sm text-gray-500 capitalize mt-1">
-                  {projectWorker.worker.role?.toLowerCase().replace("_", " ")}
+                  {projectWorker.worker.type.toLowerCase().replace("_", " ")}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Since {formatDate(projectWorker.startDate)}
@@ -171,7 +172,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500 capitalize">
-                      {projectWorker.worker.role?.toLowerCase().replace("_", " ")}
+                      {projectWorker.worker.type.toLowerCase().replace("_", " ")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

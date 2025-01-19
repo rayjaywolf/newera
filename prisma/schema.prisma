@@ -8,9 +8,20 @@ datasource db {
   relationMode = "prisma"
 }
 
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  firstName   String
+  lastName    String
+  email       String   @unique
+  phoneNumber String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Project {
   id         String        @id @default(cuid())
-  projectId  String       @unique
+  projectId  String        @unique
   location   String
   clientName String
   startDate  DateTime
@@ -18,9 +29,9 @@ model Project {
   status     ProjectStatus @default(ONGOING)
 
   // Relations
-  workers   WorkerAssignment[]
-  machinery MachineryUsage[]
-  materials MaterialUsage[]
+  workers    WorkerAssignment[]
+  machinery  MachineryUsage[]
+  materials  MaterialUsage[]
   attendance Attendance[]
   advances   Advance[]
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const aeonikProBold = localFont({
   src: "./fonts/AeonikProTRIAL-Bold.otf",
@@ -31,17 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${aeonikProRegular.variable} antialiased bg-primary-bg`}
-      >
-        {children}
-        <Toaster 
-          position="bottom-right" 
-          richColors 
-          expand={true}
-        />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${aeonikProRegular.variable} antialiased bg-primary-bg`}
+        >
+          {children}
+          <Toaster position="bottom-right" richColors expand={true} />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
