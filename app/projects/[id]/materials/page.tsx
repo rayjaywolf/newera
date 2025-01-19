@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Package2 } from "lucide-react";
 import Link from "next/link";
 import { MaterialsView } from "@/components/materials/materials-view";
@@ -55,28 +50,31 @@ async function getProject(id: string) {
   if (!project) return null;
 
   // Aggregate materials by type
-  const aggregatedMaterials = project.materials.reduce((acc, material) => {
-    if (!acc[material.type]) {
-      acc[material.type] = {
-        type: material.type,
-        totalVolume: 0,
-        totalCost: 0,
-        lastUpdated: material.date,
-        entries: 0,
-      };
-    }
-    
-    acc[material.type].totalVolume += material.volume;
-    acc[material.type].totalCost += material.cost;
-    acc[material.type].entries += 1;
-    
-    // Keep the most recent date
-    if (new Date(material.date) > new Date(acc[material.type].lastUpdated)) {
-      acc[material.type].lastUpdated = material.date;
-    }
-    
-    return acc;
-  }, {} as Record<string, AggregatedMaterial>);
+  const aggregatedMaterials = project.materials.reduce(
+    (acc, material) => {
+      if (!acc[material.type]) {
+        acc[material.type] = {
+          type: material.type,
+          totalVolume: 0,
+          totalCost: 0,
+          lastUpdated: material.date.toISOString(),
+          entries: 0,
+        };
+      }
+
+      acc[material.type].totalVolume += material.volume;
+      acc[material.type].totalCost += material.cost;
+      acc[material.type].entries += 1;
+
+      // Keep the most recent date
+      if (new Date(material.date) > new Date(acc[material.type].lastUpdated)) {
+        acc[material.type].lastUpdated = material.date.toISOString();
+      }
+
+      return acc;
+    },
+    {} as Record<string, AggregatedMaterial>
+  );
 
   return {
     ...project,
@@ -112,7 +110,9 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
         <CardContent>
           {project.aggregatedMaterials.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-gray-500">No materials found in this project</p>
+              <p className="text-gray-500">
+                No materials found in this project
+              </p>
             </div>
           ) : (
             <MaterialsView
