@@ -19,22 +19,16 @@ export async function GET(req: Request) {
                 projectId,
                 date: new Date(date),
             },
-            include: {
-                worker: true,
+            select: {
+                workerId: true,
+                date: true,
+                present: true,
+                hoursWorked: true,
+                overtime: true,
             },
         });
 
-        // Calculate daily income for each record
-        const recordsWithIncome = attendanceRecords.map(record => {
-            const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-            const dailyIncome = totalHours * record.worker.hourlyRate;
-            return {
-                ...record,
-                dailyIncome
-            };
-        });
-
-        return NextResponse.json(recordsWithIncome);
+        return NextResponse.json(attendanceRecords);
     } catch (error) {
         console.error('Error fetching attendance:', error);
         return NextResponse.json(

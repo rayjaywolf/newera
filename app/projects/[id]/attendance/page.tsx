@@ -51,7 +51,6 @@ export default function AttendancePage() {
     try {
       const response = await fetch(`/api/projects/${params.id}/workers`);
       const data = await response.json();
-      setWorkers(data);
       return data;
     } catch (error) {
       console.error('Error fetching workers:', error);
@@ -68,31 +67,33 @@ export default function AttendancePage() {
     return totalHours * hourlyRate;
   }, []);
 
-  const fetchAttendance = useCallback(async (date: string, currentWorkers: Worker[]) => {
-    try {
-      const response = await fetch(`/api/attendance?projectId=${params.id}&date=${date}`);
-      const data = await response.json();
-      const attendanceMap: { [key: string]: AttendanceRecord } = {};
-      data.forEach((record: AttendanceRecord) => {
-        record.dailyIncome = calculateDailyIncome(record, currentWorkers);
-        attendanceMap[record.workerId] = record;
-      });
-      setAttendance(attendanceMap);
-    } catch (error) {
-      console.error('Error fetching attendance:', error);
-      toast.error("Failed to fetch attendance records");
-    } finally {
-      setLoading(false);
-    }
-  }, [params.id, calculateDailyIncome]);
-
   useEffect(() => {
     const initializeData = async () => {
-      const fetchedWorkers = await fetchWorkers();
-      await fetchAttendance(format(selectedDate, 'yyyy-MM-dd'), fetchedWorkers);
+      setLoading(true);
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      
+      // Make API calls in parallel
+      const [workersResponse, attendanceResponse] = await Promise.all([
+        fetchWorkers(),
+        fetch(`/api/attendance?projectId=${params.id}&date=${formattedDate}`).then(res => res.json())
+      ]);
+
+      // Process attendance records on client
+      const attendanceMap: { [key: string]: AttendanceRecord } = {};
+      attendanceResponse.forEach((record: AttendanceRecord) => {
+        const worker = workersResponse.find(w => w.id === record.workerId);
+        const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
+        record.dailyIncome = record.present ? totalHours * (worker?.hourlyRate || 0) : 0;
+        attendanceMap[record.workerId] = record;
+      });
+
+      setWorkers(workersResponse);
+      setAttendance(attendanceMap);
+      setLoading(false);
     };
+
     initializeData();
-  }, [selectedDate, fetchAttendance]);
+  }, [selectedDate, params.id]);
 
   const handleAttendanceChange = (workerId: string, field: string, value: any) => {
     setAttendance(prev => {
@@ -159,7 +160,16 @@ export default function AttendancePage() {
       });
 
       // Refresh attendance data to ensure we have the latest state
-      await fetchAttendance(format(selectedDate, 'yyyy-MM-dd'), workers);
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      const attendanceResponse = await fetch(`/api/attendance?projectId=${params.id}&date=${formattedDate}`).then(res => res.json());
+      const attendanceMap: { [key: string]: AttendanceRecord } = {};
+      attendanceResponse.forEach((record: AttendanceRecord) => {
+        const worker = workers.find(w => w.id === record.workerId);
+        const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
+        record.dailyIncome = record.present ? totalHours * (worker?.hourlyRate || 0) : 0;
+        attendanceMap[record.workerId] = record;
+      });
+      setAttendance(attendanceMap);
     } catch (error) {
       console.error('Error saving attendance:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save attendance', {
