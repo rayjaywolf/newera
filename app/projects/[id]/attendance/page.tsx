@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { format } from 'date-fns';
-import { useParams } from 'next/navigation';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { format } from "date-fns";
+import { useParams } from "next/navigation";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   Card,
@@ -43,7 +43,9 @@ export default function AttendancePage() {
   const params = useParams();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [attendance, setAttendance] = useState<{ [key: string]: AttendanceRecord }>({});
+  const [attendance, setAttendance] = useState<{
+    [key: string]: AttendanceRecord;
+  }>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -53,37 +55,44 @@ export default function AttendancePage() {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching workers:', error);
+      console.error("Error fetching workers:", error);
       toast.error("Failed to fetch workers");
       return [];
     }
   };
 
-  const calculateDailyIncome = useCallback((record: AttendanceRecord, workers: Worker[]) => {
-    if (!record.present) return 0;
-    const worker = workers.find(w => w.id === record.workerId);
-    const hourlyRate = worker?.hourlyRate || 0;
-    const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-    return totalHours * hourlyRate;
-  }, []);
+  const calculateDailyIncome = useCallback(
+    (record: AttendanceRecord, workers: Worker[]) => {
+      if (!record.present) return 0;
+      const worker = workers.find((w) => w.id === record.workerId);
+      const hourlyRate = worker?.hourlyRate || 0;
+      const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
+      return totalHours * hourlyRate;
+    },
+    []
+  );
 
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+
       // Make API calls in parallel
       const [workersResponse, attendanceResponse] = await Promise.all([
         fetchWorkers(),
-        fetch(`/api/attendance?projectId=${params.id}&date=${formattedDate}`).then(res => res.json())
+        fetch(
+          `/api/attendance?projectId=${params.id}&date=${formattedDate}`
+        ).then((res) => res.json()),
       ]);
 
       // Process attendance records on client
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
       attendanceResponse.forEach((record: AttendanceRecord) => {
-        const worker = workersResponse.find(w => w.id === record.workerId);
+        const worker = workersResponse.find((w) => w.id === record.workerId);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present ? totalHours * (worker?.hourlyRate || 0) : 0;
+        record.dailyIncome = record.present
+          ? totalHours * (worker?.hourlyRate || 0)
+          : 0;
         attendanceMap[record.workerId] = record;
       });
 
@@ -95,24 +104,28 @@ export default function AttendancePage() {
     initializeData();
   }, [selectedDate, params.id]);
 
-  const handleAttendanceChange = (workerId: string, field: string, value: any) => {
-    setAttendance(prev => {
+  const handleAttendanceChange = (
+    workerId: string,
+    field: string,
+    value: any
+  ) => {
+    setAttendance((prev) => {
       const current = prev[workerId] || {
         workerId,
-        date: format(selectedDate, 'yyyy-MM-dd'),
+        date: format(selectedDate, "yyyy-MM-dd"),
         present: false,
         hoursWorked: 0,
         overtime: 0,
-        dailyIncome: 0
+        dailyIncome: 0,
       };
 
       const updated = {
         ...current,
-        [field]: value
+        [field]: value,
       };
 
       if (updated.present) {
-        const worker = workers.find(w => w.id === workerId);
+        const worker = workers.find((w) => w.id === workerId);
         const hourlyRate = worker?.hourlyRate || 0;
         const regularHours = Number(updated.hoursWorked) || 0;
         const overtimeHours = Number(updated.overtime) || 0;
@@ -131,28 +144,28 @@ export default function AttendancePage() {
     const toastId = toast.loading("Saving attendance...");
     setIsSaving(true);
     try {
-      const records = Object.values(attendance).map(record => ({
+      const records = Object.values(attendance).map((record) => ({
         workerId: record.workerId,
         present: record.present,
         hoursWorked: record.hoursWorked || 0,
-        overtime: record.overtime || 0
+        overtime: record.overtime || 0,
       }));
 
-      const response = await fetch('/api/attendance', {
-        method: 'POST',
+      const response = await fetch("/api/attendance", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           projectId: params.id,
-          date: format(selectedDate, 'yyyy-MM-dd'),
-          records
+          date: format(selectedDate, "yyyy-MM-dd"),
+          records,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.details || 'Failed to save attendance');
+        throw new Error(error.details || "Failed to save attendance");
       }
 
       toast.success("Attendance saved successfully", {
@@ -160,21 +173,28 @@ export default function AttendancePage() {
       });
 
       // Refresh attendance data to ensure we have the latest state
-      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      const attendanceResponse = await fetch(`/api/attendance?projectId=${params.id}&date=${formattedDate}`).then(res => res.json());
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      const attendanceResponse = await fetch(
+        `/api/attendance?projectId=${params.id}&date=${formattedDate}`
+      ).then((res) => res.json());
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
       attendanceResponse.forEach((record: AttendanceRecord) => {
-        const worker = workers.find(w => w.id === record.workerId);
+        const worker = workers.find((w) => w.id === record.workerId);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present ? totalHours * (worker?.hourlyRate || 0) : 0;
+        record.dailyIncome = record.present
+          ? totalHours * (worker?.hourlyRate || 0)
+          : 0;
         attendanceMap[record.workerId] = record;
       });
       setAttendance(attendanceMap);
     } catch (error) {
-      console.error('Error saving attendance:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to save attendance', {
-        id: toastId,
-      });
+      console.error("Error saving attendance:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save attendance",
+        {
+          id: toastId,
+        }
+      );
     } finally {
       setIsSaving(false);
     }
@@ -190,7 +210,9 @@ export default function AttendancePage() {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-3xl font-bold">Daily Attendance</CardTitle>
+              <CardTitle className="text-3xl font-bold">
+                Daily Attendance
+              </CardTitle>
               <CardDescription>
                 Manage worker attendance and hours
               </CardDescription>
@@ -201,7 +223,7 @@ export default function AttendancePage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "justify-start text-left font-normal border-[#E65F2B] text-[#E65F2B]",
+                      "justify-start text-left font-normal border-[#E65F2B] text-[#E65F2B]"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -217,8 +239,8 @@ export default function AttendancePage() {
                   />
                 </PopoverContent>
               </Popover>
-              <Button 
-                onClick={saveAttendance} 
+              <Button
+                onClick={saveAttendance}
                 className={cn(
                   "text-white bg-black hover:bg-white hover:text-[#E65F2B] border border-transparent hover:border-[#E65F2B] transition-colors",
                   isSaving && "bg-white text-[#E65F2B] border-[#E65F2B]"
@@ -235,20 +257,37 @@ export default function AttendancePage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/40">
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Worker Type</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Present</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Hours Worked</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Overtime</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">Daily Income</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Worker Type
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Present
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Hours Worked
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Overtime
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                    Daily Income
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
                 {workers.map((worker) => {
                   const record = attendance[worker.id];
                   return (
-                    <tr key={worker.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">{worker.name}</td>
+                    <tr
+                      key={worker.id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                        {worker.name}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                           {worker.type}
@@ -257,7 +296,13 @@ export default function AttendancePage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Checkbox
                           checked={record?.present || false}
-                          onCheckedChange={(checked) => handleAttendanceChange(worker.id, 'present', checked)}
+                          onCheckedChange={(checked) =>
+                            handleAttendanceChange(
+                              worker.id,
+                              "present",
+                              checked
+                            )
+                          }
                           className={cn(
                             "h-5 w-5 border border-black/20 rounded-sm shadow-none",
                             "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
@@ -268,8 +313,14 @@ export default function AttendancePage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Input
                           type="number"
-                          value={record?.hoursWorked || ''}
-                          onChange={(e) => handleAttendanceChange(worker.id, 'hoursWorked', e.target.value)}
+                          value={record?.hoursWorked || ""}
+                          onChange={(e) =>
+                            handleAttendanceChange(
+                              worker.id,
+                              "hoursWorked",
+                              e.target.value
+                            )
+                          }
                           disabled={!record?.present}
                           className={cn(
                             "w-24 bg-transparent border border-black/20 rounded-md shadow-none",
@@ -281,8 +332,14 @@ export default function AttendancePage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Input
                           type="number"
-                          value={record?.overtime || ''}
-                          onChange={(e) => handleAttendanceChange(worker.id, 'overtime', e.target.value)}
+                          value={record?.overtime || ""}
+                          onChange={(e) =>
+                            handleAttendanceChange(
+                              worker.id,
+                              "overtime",
+                              e.target.value
+                            )
+                          }
                           disabled={!record?.present}
                           className={cn(
                             "w-24 bg-transparent border border-black/20 rounded-md shadow-none",
@@ -292,11 +349,15 @@ export default function AttendancePage() {
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={cn(
-                          "font-medium",
-                          record?.dailyIncome > 0 ? "text-[#E65F2B]" : "text-muted-foreground"
-                        )}>
-                          ₹{record?.dailyIncome?.toFixed(2) || '0.00'}
+                        <span
+                          className={cn(
+                            "font-medium",
+                            record?.dailyIncome > 0
+                              ? "text-[#E65F2B]"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          ₹{record?.dailyIncome?.toFixed(2) || "0.00"}
                         </span>
                       </td>
                     </tr>
