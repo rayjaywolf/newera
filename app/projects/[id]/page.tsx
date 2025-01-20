@@ -142,7 +142,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Link
                 key={assignment.id}
                 href={`/projects/${params.id}/workers/${assignment.worker.id}`}
-                className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+                className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
               >
                 <div>
                   <p className="font-medium text-lg">
@@ -196,7 +196,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="overflow-x-auto">
             <table className="w-full table-fixed">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-[rgba(0,0,0,0.08)]">
                   <th className="text-left py-4 px-4 font-medium text-gray-500 w-1/4">
                     Material
                   </th>
@@ -215,7 +215,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {project.materials.map((material) => (
                   <tr
                     key={material.id}
-                    className="border-b border-gray-100 hover:bg-white/[0.15]"
+                    className="border-b border-[rgba(0,0,0,0.08)] hover:bg-white/[0.15]"
                   >
                     <td className="py-4 px-4 capitalize">
                       {material.type.toLowerCase().replace("_", " ")}
@@ -258,7 +258,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="overflow-x-auto">
             <table className="w-full table-fixed">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-[rgba(0,0,0,0.08)]">
                   <th className="text-left py-4 px-4 font-medium text-gray-500 w-1/4">
                     Machinery
                   </th>
@@ -280,7 +280,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {project.machinery.map((usage) => (
                   <tr
                     key={usage.id}
-                    className="border-b border-gray-100 hover:bg-white/[0.15]"
+                    className="border-b border-[rgba(0,0,0,0.08)] hover:bg-white/[0.15]"
                   >
                     <td className="py-4 px-4 capitalize">
                       {usage.type.toLowerCase()}{" "}

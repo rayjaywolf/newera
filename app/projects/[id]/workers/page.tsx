@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { WorkersView } from "@/components/workers/workers-view";
@@ -79,10 +74,7 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
               <p className="text-gray-500">No workers found in this project</p>
             </div>
           ) : (
-            <WorkersView
-              workers={project.workers}
-              projectId={params.id}
-            />
+            <WorkersView workers={project.workers} projectId={params.id} />
           )}
         </CardContent>
       </Card>

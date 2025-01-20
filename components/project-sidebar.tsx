@@ -47,7 +47,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="w-64 bg-primary-text border-r border-gray-800">
+    <div className="w-64 bg-primary-text border-r border-[rgba(0,0,0,0.08)]">
       <nav className="flex flex-col h-full">
         <div className="space-y-1 p-4">
           {navigation.map((item) => {

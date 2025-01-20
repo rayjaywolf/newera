@@ -87,7 +87,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
             <Link
               key={projectWorker.workerId}
               href={`/projects/${projectId}/workers/${projectWorker.workerId}`}
-              className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+              className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
             >
               <div>
                 <p className="font-medium text-lg">{projectWorker.worker.name}</p>
@@ -118,8 +118,8 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white/[0.15]">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-white/[0.15]">
+          <table className="min-w-full divide-y divide-[rgba(0,0,0,0.08)]">
             <thead>
               <tr>
                 <th
@@ -154,7 +154,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
               {workers.map((projectWorker) => (
                 <tr
                   key={projectWorker.workerId}

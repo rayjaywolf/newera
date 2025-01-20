@@ -253,10 +253,10 @@ export default function AttendancePage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-border/80 overflow-hidden">
+          <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/40">
+                <tr className="border-b border-[rgba(0,0,0,0.08)]">
                   <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                     Name
                   </th>
@@ -277,7 +277,7 @@ export default function AttendancePage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
                 {workers.map((worker) => {
                   const record = attendance[worker.id];
                   return (
