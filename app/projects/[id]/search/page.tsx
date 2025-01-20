@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { Search, Users, Package2, Truck } from "lucide-react";
 import { Suspense } from "react";
-import { MaterialType, MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import {
+  MaterialType,
+  MachineryType,
+  JCBSubtype,
+  SLMSubtype,
+} from "@prisma/client";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,15 +19,29 @@ import {
 import { cn } from "@/lib/utils";
 
 // Helper function to check if a string is a valid enum value
-function isValidEnum<T extends { [key: string]: string }>(enumObj: T, value: string): value is T[keyof T] {
+function isValidEnum<T extends { [key: string]: string }>(
+  enumObj: T,
+  value: string
+): value is T[keyof T] {
   return Object.values(enumObj).includes(value as T[keyof T]);
 }
 
-async function SearchResults({ query, projectId }: { query: string; projectId: string }) {
+async function SearchResults({
+  query,
+  projectId,
+}: {
+  query: string;
+  projectId: string;
+}) {
   const upperQuery = query.toUpperCase();
 
   // Search across all entities
-  const [projectResults, workerResults, materialUsageResults, machineryUsageResults] = await Promise.all([
+  const [
+    projectResults,
+    workerResults,
+    materialUsageResults,
+    machineryUsageResults,
+  ] = await Promise.all([
     prisma.project.findMany({
       where: {
         OR: [
@@ -68,9 +87,9 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
         })
       : Promise.resolve([]),
     // Search machinery based on valid type/subtype matches
-    (isValidEnum(MachineryType, upperQuery) ||
-     isValidEnum(JCBSubtype, upperQuery) ||
-     isValidEnum(SLMSubtype, upperQuery))
+    isValidEnum(MachineryType, upperQuery) ||
+    isValidEnum(JCBSubtype, upperQuery) ||
+    isValidEnum(SLMSubtype, upperQuery)
       ? prisma.machineryUsage.findMany({
           where: {
             OR: [
@@ -92,11 +111,17 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
       : Promise.resolve([]),
   ]);
 
-  if (projectResults.length === 0 && workerResults.length === 0 && 
-      materialUsageResults.length === 0 && machineryUsageResults.length === 0) {
+  if (
+    projectResults.length === 0 &&
+    workerResults.length === 0 &&
+    materialUsageResults.length === 0 &&
+    machineryUsageResults.length === 0
+  ) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500">No results found for &quot;{query}&quot;</p>
+        <p className="text-gray-500">
+          No results found for &quot;{query}&quot;
+        </p>
       </div>
     );
   }
@@ -181,7 +206,10 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
                         Cost: ₹{usage.cost}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-700"
+                    >
                       {new Date(usage.date).toLocaleDateString()}
                     </Badge>
                   </div>
@@ -231,7 +259,10 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
                         Total: ₹{usage.totalCost}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-700"
+                    >
                       {new Date(usage.date).toLocaleDateString()}
                     </Badge>
                   </div>
@@ -263,7 +294,9 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-lg">{project.clientName}</p>
+                      <p className="font-medium text-lg">
+                        {project.clientName}
+                      </p>
                       <p className="text-sm text-gray-500 mt-1">
                         {project.location}
                       </p>
@@ -294,11 +327,15 @@ async function SearchResults({ query, projectId }: { query: string; projectId: s
                       </div>
                       <div>
                         <p>Materials</p>
-                        <p className="font-medium">{project.materials.length}</p>
+                        <p className="font-medium">
+                          {project.materials.length}
+                        </p>
                       </div>
                       <div>
                         <p>Machinery</p>
-                        <p className="font-medium">{project.machinery.length}</p>
+                        <p className="font-medium">
+                          {project.machinery.length}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -322,7 +359,7 @@ export default async function SearchPage({
   const query = searchParams.q || "";
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-8">
       <div className="flex items-center gap-2 mb-8">
         <Search className="h-5 w-5 text-gray-400" />
         <h1 className="text-2xl font-semibold">

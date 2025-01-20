@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Users, Package2, Truck, Plus } from "lucide-react";
 import Link from "next/link";
+import { checkRole } from "@/utils/roles";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
 interface ProjectPageProps {
   params: {
@@ -69,11 +72,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
+  const isAdmin = await checkRole("admin");
+
   return (
     <div className="p-8 space-y-8">
       {/* Project Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-3xl font-bold">
@@ -100,22 +105,78 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <dl className="grid gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <dt className="font-medium text-gray-500 mb-1">Location</dt>
-              <dd className="text-lg">{project.location}</dd>
+              <h3 className="text-sm font-medium text-gray-500">Location</h3>
+              <p className="mt-1 text-lg font-medium">{project.location}</p>
             </div>
             <div>
-              <dt className="font-medium text-gray-500 mb-1">Start Date</dt>
-              <dd className="text-lg">{formatDate(project.startDate)}</dd>
+              <h3 className="text-sm font-medium text-gray-500">Start Date</h3>
+              <p className="mt-1 text-lg font-medium">
+                {formatDate(project.startDate)}
+              </p>
             </div>
-            {project.endDate && (
-              <div>
-                <dt className="font-medium text-gray-500 mb-1">End Date</dt>
-                <dd className="text-lg">{formatDate(project.endDate)}</dd>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">End Date</h3>
+              <p className="mt-1 text-lg font-medium">
+                {project.endDate ? formatDate(project.endDate) : "Ongoing"}
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Duration</h3>
+              <p className="mt-1 text-lg font-medium">
+                {project.endDate
+                  ? `${Math.ceil(
+                      (new Date(project.endDate).getTime() -
+                        new Date(project.startDate).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )} days`
+                  : `${Math.ceil(
+                      (new Date().getTime() -
+                        new Date(project.startDate).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )} days`}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            <Link href={`/projects/${project.id}/workers`}>
+              <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
+                <Users className="h-8 w-8 text-[#E65F2B]" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Workers
+                  </p>
+                  <p className="text-2xl font-semibold">
+                    {project.workers.length}
+                  </p>
+                </div>
               </div>
-            )}
-          </dl>
+            </Link>
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Package2 className="h-8 w-8 text-[#E65F2B]" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Materials Used
+                </p>
+                <p className="text-2xl font-semibold">
+                  {project.materials.length}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Truck className="h-8 w-8 text-[#E65F2B]" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Machinery Used
+                </p>
+                <p className="text-2xl font-semibold">
+                  {project.machinery.length}
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -123,7 +184,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-xl">
+            <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Workers
             </CardTitle>

@@ -223,7 +223,7 @@ export default function AttendancePage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "justify-start text-left font-normal border-[#E65F2B] text-[#E65F2B]"
+                      "justify-start text-left font-normal border-none text-[#E65F2B]"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -242,7 +242,7 @@ export default function AttendancePage() {
               <Button
                 onClick={saveAttendance}
                 className={cn(
-                  "text-white bg-black hover:bg-white hover:text-[#E65F2B] border border-transparent hover:border-[#E65F2B] transition-colors",
+                  "text-white font-semibold bg-black hover:bg-white hover:text-[#E65F2B] border border-none hover:border-none transition-colors",
                   isSaving && "bg-white text-[#E65F2B] border-[#E65F2B]"
                 )}
                 disabled={isSaving}
