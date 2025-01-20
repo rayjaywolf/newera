@@ -2,9 +2,10 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { Search } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectHeader() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,10 +37,19 @@ export function ProjectHeader() {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </form>
         <div className="flex items-center gap-3 bg-white p-2 px-3 rounded-full">
-          <UserButton appearance={{}} />
-          <span className="text-sm font-medium text">
-            {user?.firstName} {user?.lastName}
-          </span>
+          {isLoaded ? (
+            <>
+              <UserButton appearance={{}} />
+              <span className="text-sm font-medium text">
+                {user?.firstName} {user?.lastName}
+              </span>
+            </>
+          ) : (
+            <>
+              <Skeleton className="h-8 w-8 rounded-full bg-black/[0.08]" />
+              <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+            </>
+          )}
         </div>
       </div>
     </div>

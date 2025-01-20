@@ -22,6 +22,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Worker {
   id: string;
@@ -201,7 +202,75 @@ export default function AttendancePage() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <div className="p-8 space-y-8">
+        <Card className="bg-white/[0.34] border-0 shadow-none">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-48 bg-black/[0.08]" />
+                <Skeleton className="h-4 w-64 bg-black/[0.08]" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-40 bg-black/[0.08]" />
+                <Skeleton className="h-10 w-32 bg-black/[0.08]" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mt-4 rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="w-full overflow-auto">
+                <table className="w-full">
+                  <thead className="bg-white/[0.15]">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-20 bg-black/[0.08]" />
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-28 bg-black/[0.08]" />
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
+                    {[...Array(5)].map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-32 bg-black/[0.08]" />
+                            <Skeleton className="h-4 w-16 bg-black/[0.08]" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Skeleton className="h-5 w-5 bg-black/[0.08]" />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Skeleton className="h-9 w-24 bg-black/[0.08]" />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Skeleton className="h-9 w-24 bg-black/[0.08]" />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Skeleton className="h-4 w-20 bg-black/[0.08]" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
