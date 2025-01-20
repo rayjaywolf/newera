@@ -3,14 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  Calendar,
-  Group,
-  Package,
-  Truck,
-} from "lucide-react";
+import { BarChart3, Calendar, Group, Package, Truck } from "lucide-react";
 import { ProjectSidebar } from "@/components/project-sidebar";
+import { ProjectHeader } from "@/components/header";
 
 interface ProjectLayoutProps {
   children: React.ReactNode;
@@ -58,7 +53,10 @@ export default function ProjectLayout({
     <div className="flex h-screen">
       <ProjectSidebar projectId={params.id} />
       <div className="flex-1 overflow-auto">
-        {children}
+        <div className="flex-col">
+          <ProjectHeader />
+          {children}
+        </div>
       </div>
     </div>
   );

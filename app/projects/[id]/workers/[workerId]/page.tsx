@@ -185,7 +185,9 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {currentMonthAttendance.map((record) => (
+                {currentMonthAttendance
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((record) => (
                   <tr key={record.id} className="border-b border-gray-100 hover:bg-white/[0.15]">
                     <td className="py-4 px-6">{formatDate(record.date)}</td>
                     <td className="py-4 px-6">{record.hoursWorked}</td>
