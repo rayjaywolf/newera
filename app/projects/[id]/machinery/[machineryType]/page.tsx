@@ -47,8 +47,8 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
       ...(type === "JCB" && subtype
         ? { jcbSubtype: subtype as JCBSubtype }
         : type === "SLM" && subtype
-        ? { slmSubtype: subtype as SLMSubtype }
-        : {}),
+          ? { slmSubtype: subtype as SLMSubtype }
+          : {}),
     },
     orderBy: {
       date: "desc",
@@ -66,8 +66,16 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
 
   // Calculate monthly usage
   const currentMonth = new Date();
-  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-  const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+  const monthStart = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1
+  );
+  const monthEnd = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0
+  );
 
   const monthlyUsage = machinery.filter(
     (m) => new Date(m.date) >= monthStart && new Date(m.date) <= monthEnd
@@ -76,7 +84,10 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
   const monthlyHours = monthlyUsage.reduce((acc, m) => acc + m.hoursUsed, 0);
   const monthlyCost = monthlyUsage.reduce((acc, m) => acc + m.totalCost, 0);
   const monthlyAverageRate = monthlyUsage.length
-    ? Math.round(monthlyUsage.reduce((acc, m) => acc + m.hourlyRate, 0) / monthlyUsage.length)
+    ? Math.round(
+        monthlyUsage.reduce((acc, m) => acc + m.hourlyRate, 0) /
+          monthlyUsage.length
+      )
     : 0;
 
   return {
@@ -148,7 +159,9 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
                 <TrendingUp className="h-4 w-4" />
                 Average Rate
               </dt>
-              <dd className="text-lg">{formatCurrency(machinery.averageRate)}/hr</dd>
+              <dd className="text-lg">
+                {formatCurrency(machinery.averageRate)}/hr
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500 mb-1 flex items-center gap-2">
@@ -221,17 +234,17 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                <tr className="border-b border-[rgba(0,0,0,0.08)]">
+                  <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/4">
                     Date
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
                     Hours Used
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
                     Rate
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/4">
                     Total Cost
                   </th>
                 </tr>
@@ -240,14 +253,16 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
                 {machinery.history.map((entry) => (
                   <tr
                     key={entry.id}
-                    className="border-b border-gray-100 hover:bg-white/[0.15]"
+                    className="border-b border-[rgba(0,0,0,0.08)] hover:bg-white/[0.15]"
                   >
-                    <td className="py-4 px-6">{formatDate(entry.date)}</td>
-                    <td className="py-4 px-6">{entry.hoursUsed} hrs</td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-6 text-left">{formatDate(entry.date)}</td>
+                    <td className="py-4 px-6 text-center">{entry.hoursUsed} hrs</td>
+                    <td className="py-4 px-6 text-center">
                       {formatCurrency(entry.hourlyRate)}/hr
                     </td>
-                    <td className="py-4 px-6">{formatCurrency(entry.totalCost)}</td>
+                    <td className="py-4 px-6 text-right">
+                      {formatCurrency(entry.totalCost)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -143,7 +143,7 @@ async function SearchResults({
                 <Link
                   key={worker.id}
                   href={`/projects/${projectId}/workers/${worker.id}`}
-                  className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+                  className="flex items-start justify-between rounded-lg border-[rgb(0,0,0,0.08)] bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
                 >
                   <div>
                     <p className="font-medium text-lg">{worker.name}</p>

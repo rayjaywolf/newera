@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistance } from "date-fns";
+import cn from "classnames";
 
 type Project = {
   id: string;
@@ -54,16 +55,16 @@ export default function ProjectsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Projects</h1>
+      <div className="p-8">
+        <h1 className="text-3xl font-bold mb-8">Projects</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="w-full">
-              <CardHeader>
+              <CardHeader className="pb-6">
                 <Skeleton className="h-6 w-3/4" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2" />
+              <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />
               </CardContent>
             </Card>
@@ -74,8 +75,8 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Projects</h1>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8">Projects</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
           <Card
@@ -83,18 +84,23 @@ export default function ProjectsPage() {
             className="w-full hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => router.push(`/projects/${project.id}`)}
           >
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold">
+            <CardHeader className="pb-6">
+              <div className="flex justify-between items-start gap-3">
+                <CardTitle className="text-xl font-semibold">
                   {project.projectId}
                 </CardTitle>
-                <Badge className={getStatusColor(project.status)}>
+                <Badge 
+                  className={cn(
+                    getStatusColor(project.status),
+                    "px-6 py-2"
+                  )}
+                >
                   {project.status}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm text-gray-500">
                   <span className="font-medium">Client:</span>{" "}
                   {project.clientName}

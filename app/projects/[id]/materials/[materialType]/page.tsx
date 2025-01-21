@@ -53,8 +53,16 @@ async function getMaterialDetails(projectId: string, materialType: string) {
 
   // Calculate monthly usage
   const currentMonth = new Date();
-  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-  const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+  const monthStart = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1
+  );
+  const monthEnd = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0
+  );
 
   const monthlyUsage = materials.filter(
     (mat) => new Date(mat.date) >= monthStart && new Date(mat.date) <= monthEnd
@@ -78,7 +86,10 @@ async function getMaterialDetails(projectId: string, materialType: string) {
 
 export default async function MaterialPage({ params }: MaterialPageProps) {
   const { id: projectId, materialType } = params;
-  const material = await getMaterialDetails(projectId, decodeURIComponent(materialType));
+  const material = await getMaterialDetails(
+    projectId,
+    decodeURIComponent(materialType)
+  );
 
   if (!material) {
     notFound();
@@ -178,7 +189,8 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 Monthly Rate
               </p>
               <p className="text-2xl font-semibold mt-2">
-                {formatCurrency(material.monthlyCost / material.monthlyVolume)}/unit
+                {formatCurrency(material.monthlyCost / material.monthlyVolume)}
+                /unit
               </p>
             </div>
           </div>
@@ -197,17 +209,17 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                <tr className="border-b border-[rgb(0,0,0,0.08)]">
+                  <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/5">
                     Date
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/5">
                     Volume
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/5">
                     Rate
                   </th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-500">
+                  <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/5">
                     Total Cost
                   </th>
                 </tr>
@@ -216,14 +228,15 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 {material.history.map((entry) => (
                   <tr
                     key={entry.id}
-                    className="border-b border-gray-100 hover:bg-white/[0.15]"
+                    className="border-b border-[rgb(0,0,0,0.08)] hover:bg-white/[0.15]"
                   >
-                    <td className="py-4 px-6">{formatDate(entry.date)}</td>
-                    <td className="py-4 px-6">{entry.volume} units</td>
-                    <td className="py-4 px-6">
-                      {formatCurrency(Math.round(entry.cost / entry.volume))}/unit
+                    <td className="py-4 px-6 text-left">{formatDate(entry.date)}</td>
+                    <td className="py-4 px-6 text-center">{entry.volume} units</td>
+                    <td className="py-4 px-6 text-center">
+                      {formatCurrency(Math.round(entry.cost / entry.volume))}
+                      /unit
                     </td>
-                    <td className="py-4 px-6">{formatCurrency(entry.cost)}</td>
+                    <td className="py-4 px-6 text-right">{formatCurrency(entry.cost)}</td>
                   </tr>
                 ))}
               </tbody>
