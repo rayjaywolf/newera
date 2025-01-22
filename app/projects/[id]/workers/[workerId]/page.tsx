@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Clock, Wallet, Calendar } from "lucide-react";
 import cn from "classnames";
 import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
+import dynamic from "next/dynamic";
 
 interface WorkerPageProps {
   params: {
@@ -61,6 +62,11 @@ async function getWorkerDetails(projectId: string, workerId: string) {
 
 export default async function WorkerPage({ params }: WorkerPageProps) {
   const { id: projectId, workerId } = params;
+
+  const AttendanceHistoryWithFilter = dynamic(() => import("./attendance-history"), {
+    ssr: false,
+  });
+
   const worker = await getWorkerDetails(projectId, workerId);
 
   if (!worker) {
@@ -223,58 +229,12 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
 
       {/* Attendance Records Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-6">
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <Calendar className="h-5 w-5" />
-            Attendance Records
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[rgb(0,0,0,0.08)]">
-                  <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Date
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Hours
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Overtime
-                  </th>
-                  <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Earnings
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentMonthAttendance
-                  .sort(
-                    (a, b) =>
-                      new Date(b.date).getTime() - new Date(a.date).getTime()
-                  )
-                  .map((record) => (
-                    <tr
-                      key={record.id}
-                      className="border-b border-[rgb(0,0,0,0.08)] hover:bg-white/[0.15]"
-                    >
-                      <td className="py-4 px-6 text-left">{formatDate(record.date)}</td>
-                      <td className="py-4 px-6 text-center">{record.hoursWorked}</td>
-                      <td className="py-4 px-6 text-center">{record.overtime}</td>
-                      <td className="py-4 px-6 text-right">
-                        ₹
-                        {(
-                          (record.hoursWorked + record.overtime) *
-                          worker.hourlyRate
-                        ).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+        <AttendanceHistoryWithFilter 
+          projectId={projectId}
+          workerId={workerId}
+          worker={worker}
+          initialData={currentMonthAttendance}
+        />
       </Card>
     </div>
   );

@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import cn from "classnames";
 import { MaterialType } from "@prisma/client";
+import dynamic from "next/dynamic";
+import { DateRangeFilter } from "@/components/date-range-filter";
 
 interface MaterialPageProps {
   params: {
@@ -33,11 +35,24 @@ export const metadata: Metadata = {
   description: "Details of the selected material",
 };
 
-async function getMaterialDetails(projectId: string, materialType: string) {
+async function getMaterialDetails(
+  projectId: string,
+  materialType: string,
+  fromDate?: Date,
+  toDate?: Date
+) {
+  const dateFilter = fromDate && toDate ? {
+    date: {
+      gte: fromDate,
+      lte: toDate,
+    },
+  } : {};
+
   const materials = await prisma.materialUsage.findMany({
     where: {
       projectId,
       type: materialType.toUpperCase().replace(/-/g, "_") as MaterialType,
+      ...dateFilter,
     },
     orderBy: {
       date: "desc",
@@ -86,6 +101,12 @@ async function getMaterialDetails(projectId: string, materialType: string) {
 
 export default async function MaterialPage({ params }: MaterialPageProps) {
   const { id: projectId, materialType } = params;
+  
+  // Create a client component wrapper for the date filter
+  const UsageHistoryWithFilter = dynamic(() => import("./usage-history"), {
+    ssr: false,
+  });
+
   const material = await getMaterialDetails(
     projectId,
     decodeURIComponent(materialType)
@@ -199,50 +220,11 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
 
       {/* Usage History Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <History className="h-5 w-5" />
-            Usage History
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[rgb(0,0,0,0.08)]">
-                  <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/5">
-                    Date
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/5">
-                    Volume
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/5">
-                    Rate
-                  </th>
-                  <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/5">
-                    Total Cost
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {material.history.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className="border-b border-[rgb(0,0,0,0.08)] hover:bg-white/[0.15]"
-                  >
-                    <td className="py-4 px-6 text-left">{formatDate(entry.date)}</td>
-                    <td className="py-4 px-6 text-center">{entry.volume} units</td>
-                    <td className="py-4 px-6 text-center">
-                      {formatCurrency(Math.round(entry.cost / entry.volume))}
-                      /unit
-                    </td>
-                    <td className="py-4 px-6 text-right">{formatCurrency(entry.cost)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+        <UsageHistoryWithFilter 
+          projectId={projectId}
+          materialType={decodeURIComponent(materialType)}
+          initialData={material}
+        />
       </Card>
     </div>
   );

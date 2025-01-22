@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import cn from "classnames";
 import { MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import dynamic from "next/dynamic";
 
 interface MachineryPageProps {
   params: {
@@ -107,6 +108,12 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
 
 export default async function MachineryPage({ params }: MachineryPageProps) {
   const { id: projectId, machineryType } = params;
+
+  // Create a client component wrapper for the date filter
+  const UsageHistoryWithFilter = dynamic(() => import("./usage-history"), {
+    ssr: false,
+  });
+
   const machinery = await getMachineryDetails(projectId, machineryType);
 
   if (!machinery) {
@@ -224,51 +231,11 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
 
       {/* Usage History Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <History className="h-5 w-5" />
-            Usage History
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[rgba(0,0,0,0.08)]">
-                  <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Date
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Hours Used
-                  </th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Rate
-                  </th>
-                  <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/4">
-                    Total Cost
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {machinery.history.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className="border-b border-[rgba(0,0,0,0.08)] hover:bg-white/[0.15]"
-                  >
-                    <td className="py-4 px-6 text-left">{formatDate(entry.date)}</td>
-                    <td className="py-4 px-6 text-center">{entry.hoursUsed} hrs</td>
-                    <td className="py-4 px-6 text-center">
-                      {formatCurrency(entry.hourlyRate)}/hr
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      {formatCurrency(entry.totalCost)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+        <UsageHistoryWithFilter 
+          projectId={projectId}
+          machineryType={machineryType}
+          initialData={machinery}
+        />
       </Card>
     </div>
   );
