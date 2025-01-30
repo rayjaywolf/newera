@@ -32,6 +32,7 @@ const workerSchema = z.object({
   type: z.nativeEnum(WorkerType),
   hourlyRate: z.string().min(1, "Hourly rate is required"),
   phoneNumber: z.string().optional(),
+  photo: z.instanceof(File).optional(),
 });
 
 interface AddWorkerFormProps {
@@ -46,6 +47,7 @@ export default function AddWorkerForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isExistingWorker, setIsExistingWorker] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof workerSchema>>({
     resolver: zodResolver(workerSchema),
@@ -59,6 +61,27 @@ export default function AddWorkerForm({
   async function onSubmit(values: z.infer<typeof workerSchema>) {
     try {
       setLoading(true);
+
+      let photoUrl: string | undefined;
+
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append('file', photoFile);
+        
+        const filename = `workers/${projectId}/${Date.now()}-${photoFile.name}`;
+        const uploadResponse = await fetch(`/api/uploadImage?filename=${encodeURIComponent(filename)}&id=${projectId}`, {
+          method: 'POST',
+          body: photoFile,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload photo');
+        }
+
+        const { url } = await uploadResponse.json();
+        photoUrl = url;
+      }
+
       const response = await fetch(`/api/projects/${projectId}/workers`, {
         method: "POST",
         headers: {
@@ -68,6 +91,7 @@ export default function AddWorkerForm({
           ...values,
           hourlyRate: parseFloat(values.hourlyRate),
           isExisting: isExistingWorker,
+          photoUrl,
         }),
       });
 
@@ -224,6 +248,22 @@ export default function AddWorkerForm({
                 </FormItem>
               )}
             />
+            <FormItem>
+              <FormLabel>Reference Photo (Optional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPhotoFile(file);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           </>
         )}
         <Button

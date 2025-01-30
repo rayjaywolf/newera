@@ -42,6 +42,11 @@ async function getProject(id: string) {
     where: { id },
     include: {
       workers: {
+        where: {
+          worker: {
+            isActive: true
+          }
+        },
         include: {
           worker: true,
         },

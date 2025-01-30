@@ -47,12 +47,14 @@ enum ProjectStatus {
 }
 
 model Worker {
-  id          String     @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   type        WorkerType
   hourlyRate  Float
   phoneNumber String?
-  isActive    Boolean    @default(true)
+  isActive    Boolean       @default(true)
+  photoUrl    String?       // Reference photo for facial recognition
+  photos      WorkerPhoto[] // All photos of the worker
 
   // Relations
   assignments WorkerAssignment[]
@@ -94,6 +96,8 @@ model Attendance {
   present     Boolean  @default(false)
   hoursWorked Float    @default(0)
   overtime    Float    @default(0)
+  photoUrl    String?  // Store the attendance verification photo
+  confidence  Float?   // Store the facial recognition confidence score
 
   createdAt DateTime @default(now())
 
@@ -189,5 +193,18 @@ model ProjectImage {
   projectId String
   createdAt DateTime @default(now())
 
+  @@index([projectId])
+}
+
+model WorkerPhoto {
+  id        String   @id @default(cuid())
+  url       String
+  worker    Worker   @relation(fields: [workerId], references: [id])
+  workerId  String
+  projectId String   // To associate with specific project
+  tag       String   // For categorizing different types of photos
+  createdAt DateTime @default(now())
+
+  @@index([workerId])
   @@index([projectId])
 }

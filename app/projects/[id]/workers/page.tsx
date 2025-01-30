@@ -32,6 +32,12 @@ async function getProject(id: string) {
     where: { id },
     include: {
       workers: {
+        where: {
+          worker: {
+            isActive: true
+          },
+          endDate: null // Only get currently assigned workers
+        },
         include: {
           worker: true,
         },

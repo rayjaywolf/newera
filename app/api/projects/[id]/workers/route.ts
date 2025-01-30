@@ -9,17 +9,26 @@ export async function GET(
         const workers = await prisma.workerAssignment.findMany({
             where: {
                 projectId: params.id,
-                endDate: null, // Only get currently assigned workers
+                endDate: null,
+                worker: {
+                    isActive: true
+                }
             },
             include: {
                 worker: true,
             },
         });
 
-        // Transform the data to return just the worker information
-        const activeWorkers = workers.map(assignment => ({
-            ...assignment.worker,
-        }));
+        // Transform and filter out any null worker data
+        const activeWorkers = workers
+            .filter(assignment => assignment.worker)
+            .map(assignment => ({
+                id: assignment.worker.id,
+                name: assignment.worker.name,
+                type: assignment.worker.type,
+                hourlyRate: assignment.worker.hourlyRate,
+                photoUrl: assignment.worker.photoUrl
+            }));
 
         return NextResponse.json(activeWorkers);
     } catch (error) {
@@ -37,7 +46,7 @@ export async function POST(
 ) {
     try {
         const body = await req.json()
-        const { workerId, name, type, hourlyRate, phoneNumber, isExisting } = body
+        const { workerId, name, type, hourlyRate, phoneNumber, isExisting, photoUrl } = body
 
         if (isExisting && workerId) {
             // Assign existing worker to project
@@ -56,6 +65,7 @@ export async function POST(
                     type,
                     hourlyRate,
                     phoneNumber,
+                    photoUrl,
                     assignments: {
                         create: {
                             projectId: params.id,
@@ -63,11 +73,24 @@ export async function POST(
                         },
                     },
                 },
-            })
+            });
+
+            // If photo was uploaded, create WorkerPhoto entry
+            if (photoUrl) {
+                await prisma.workerPhoto.create({
+                    data: {
+                        url: photoUrl,
+                        workerId: worker.id,
+                        projectId: params.id,
+                        tag: 'reference-photo'
+                    }
+                });
+            }
         }
 
         return NextResponse.json({ success: true })
     } catch (error) {
+        console.error('Error adding worker:', error);
         return NextResponse.json(
             { error: "Failed to add worker" },
             { status: 500 }
