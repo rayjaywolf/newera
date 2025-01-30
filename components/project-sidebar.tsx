@@ -9,6 +9,7 @@ import {
   Group,
   Package,
   Truck,
+  Image,
 } from "lucide-react";
 
 interface ProjectSidebarProps {
@@ -41,6 +42,11 @@ const navigation = [
     href: "/machinery",
     icon: Truck,
   },
+  {
+    name: "Gallery",
+    href: "/gallery",
+    icon: Image,
+  },
 ];
 
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
@@ -65,7 +71,12 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                     : "text-white hover:bg-gray-800"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", isActive ? "text-primary-accent" : "text-white")} />
+                <item.icon
+                  className={cn(
+                    "h-4 w-4",
+                    isActive ? "text-primary-accent" : "text-white"
+                  )}
+                />
                 {item.name}
               </Link>
             );

@@ -69,7 +69,7 @@ export function DateRangeFilter({ onRangeChange }: DateRangeFilterProps) {
       <Select onValueChange={handlePresetChange} defaultValue="all-time">
         <SelectTrigger
           className={cn(
-            "w-[140px] bg-[#060606] text-white border-0 font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
+            "w-[120px] bg-[#060606] text-white border-0 font-semibold text-xs hover:bg-white hover:text-[#E65F2B] transition-colors",
             "focus:ring-0 focus:ring-offset-0"
           )}
         >
