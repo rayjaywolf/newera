@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,9 +8,9 @@ import {
   Download,
   Image as ImageIcon,
   Trash2,
-} from 'lucide-react';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,11 +57,11 @@ export function ImageViewer({
   }, [currentImage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' && currentImage > 0) {
+    if (e.key === "ArrowLeft" && currentImage > 0) {
       onNavigate(currentImage - 1);
-    } else if (e.key === 'ArrowRight' && currentImage < images.length - 1) {
+    } else if (e.key === "ArrowRight" && currentImage < images.length - 1) {
       onNavigate(currentImage + 1);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       onClose();
     }
   };
@@ -71,7 +71,7 @@ export function ImageViewer({
       const response = await fetch(images[currentImage].url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = images[currentImage].filename;
       document.body.appendChild(link);
@@ -79,7 +79,7 @@ export function ImageViewer({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading image:', error);
+      console.error("Error downloading image:", error);
     }
   };
 
@@ -90,7 +90,7 @@ export function ImageViewer({
     try {
       await onDelete(images[currentImage].id);
       setShowDeleteDialog(false);
-      
+
       // If it's the last image, close the viewer
       if (images.length === 1) {
         onClose();
@@ -113,11 +113,12 @@ export function ImageViewer({
   return (
     <>
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#EBDFD7]">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the image.
+              This action cannot be undone. This will permanently delete the
+              image.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -210,8 +211,8 @@ export function ImageViewer({
                   alt={images[currentImage].filename}
                   fill
                   className={cn(
-                    'object-contain transition-opacity duration-300',
-                    isLoading ? 'opacity-0' : 'opacity-100'
+                    "object-contain transition-opacity duration-300",
+                    isLoading ? "opacity-0" : "opacity-100"
                   )}
                   onLoadingComplete={() => setIsLoading(false)}
                   sizes="95vw"
@@ -227,7 +228,8 @@ export function ImageViewer({
                   {images[currentImage].filename}
                 </p>
                 <p className="text-xs mt-1 text-white/70">
-                  Added {new Date(images[currentImage].createdAt).toLocaleString()}
+                  Added{" "}
+                  {new Date(images[currentImage].createdAt).toLocaleString()}
                 </p>
               </div>
             </div>

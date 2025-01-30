@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -9,7 +10,7 @@ import {
   Group,
   Package,
   Truck,
-  Image,
+  Image as ImageIcon,
   Users,
 } from "lucide-react";
 
@@ -46,7 +47,7 @@ const navigation = [
   {
     name: "Gallery",
     href: "/gallery",
-    icon: Image,
+    icon: ImageIcon,
   },
 ];
 
@@ -56,6 +57,17 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   return (
     <div className="w-64 bg-primary-text border-r border-[rgba(0,0,0,0.08)]">
       <nav className="flex flex-col h-full">
+        <div className="pt-4 flex" width={90} height={20}>
+          <Link href={`/projects`} className="mx-auto">
+            <Image
+              src="/logo-expanded-dark.png"
+              alt="New Era Construction"
+              width={90}
+              height={20}
+              priority
+            />
+          </Link>
+        </div>
         <div className="space-y-1 p-4">
           {navigation.map((item) => {
             const isActive = pathname === `/projects/${projectId}${item.href}`;

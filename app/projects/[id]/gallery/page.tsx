@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
-import { ImagePlus, Upload, Maximize2, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ImageViewer } from '@/components/gallery/image-viewer';
-import { ImageCardSkeleton } from '@/components/gallery/image-card-skeleton';
+} from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { ImagePlus, Upload, Maximize2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ImageViewer } from "@/components/gallery/image-viewer";
+import { ImageCardSkeleton } from "@/components/gallery/image-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -65,11 +65,11 @@ export default function GalleryPage() {
       const data = await response.json();
       setImages(data);
     } catch (error) {
-      console.error('Error fetching images:', error);
+      console.error("Error fetching images:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to fetch images',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to fetch images",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -87,28 +87,28 @@ export default function GalleryPage() {
       const response = await fetch(
         `/api/uploadImage?filename=${encodeURIComponent(filename)}&id=${id}`,
         {
-          method: 'POST',
+          method: "POST",
           body: file,
         }
       );
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        throw new Error("Upload failed");
       }
 
       const data = await response.json();
       setImages((prev) => [data.image, ...prev]);
-      
+
       toast({
-        title: 'Success',
-        description: 'Image uploaded successfully',
+        title: "Success",
+        description: "Image uploaded successfully",
       });
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error("Error uploading image:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to upload image',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive",
       });
     } finally {
       setIsUploading(false);
@@ -118,24 +118,24 @@ export default function GalleryPage() {
   const handleDelete = async (imageId: string) => {
     try {
       const response = await fetch(`/api/projects/${id}/images/${imageId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete image');
+        throw new Error("Failed to delete image");
       }
 
       setImages((prev) => prev.filter((img) => img.id !== imageId));
       toast({
-        title: 'Success',
-        description: 'Image deleted successfully',
+        title: "Success",
+        description: "Image deleted successfully",
       });
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error("Error deleting image:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete image',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete image",
+        variant: "destructive",
       });
       throw error;
     }
@@ -157,10 +157,10 @@ export default function GalleryPage() {
 
   const groupImagesByDate = (images: ProjectImage[]): GroupedImages => {
     return images.reduce((groups: GroupedImages, image) => {
-      const date = new Date(image.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      const date = new Date(image.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
       if (!groups[date]) {
         groups[date] = [];
@@ -196,7 +196,10 @@ export default function GalleryPage() {
         </Card>
 
         {[...Array(2)].map((_, groupIndex) => (
-          <Card key={groupIndex} className="bg-white/[0.34] border-0 shadow-none">
+          <Card
+            key={groupIndex}
+            className="bg-white/[0.34] border-0 shadow-none"
+          >
             <CardHeader className="pb-4">
               <Skeleton className="h-6 w-48 bg-black/[0.08]" />
             </CardHeader>
@@ -217,15 +220,16 @@ export default function GalleryPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <AlertDialog 
-        open={imageToDelete !== null} 
+      <AlertDialog
+        open={imageToDelete !== null}
         onOpenChange={(open) => !open && setImageToDelete(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#EBDFD7]">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the image.
+              This action cannot be undone. This will permanently delete the
+              image.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -263,15 +267,15 @@ export default function GalleryPage() {
                 id="image-upload"
               />
               <Button
-                onClick={() => document.getElementById('image-upload')?.click()}
+                onClick={() => document.getElementById("image-upload")?.click()}
                 className={cn(
-                  'inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors',
-                  isUploading && 'opacity-50 cursor-not-allowed'
+                  "inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors",
+                  isUploading && "opacity-50 cursor-not-allowed"
                 )}
                 disabled={isUploading}
               >
                 <Upload className="h-4 w-4" />
-                {isUploading ? 'Uploading...' : 'Upload Image'}
+                {isUploading ? "Uploading..." : "Upload Image"}
               </Button>
             </div>
           </div>
@@ -292,9 +296,11 @@ export default function GalleryPage() {
                   key={image.id}
                   className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
                 >
-                  <div 
+                  <div
                     className="relative aspect-video cursor-pointer"
-                    onClick={() => setSelectedImage(findImageIndexInAllImages(image))}
+                    onClick={() =>
+                      setSelectedImage(findImageIndexInAllImages(image))
+                    }
                   >
                     <Image
                       src={image.url}

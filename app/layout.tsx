@@ -24,6 +24,9 @@ const aeonikProRegular = localFont({
 
 export const metadata: Metadata = {
   title: "New Era Construction",
+  icons: {
+    icon: "/logo-dark.png",
+  },
 };
 
 export default function RootLayout({
@@ -34,6 +37,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <link rel="icon" href="/logo-dark.png" />
+        </head>
         <body
           className={`${aeonikProRegular.variable} antialiased bg-primary-bg`}
         >
