@@ -53,7 +53,8 @@ model Worker {
   hourlyRate  Float
   phoneNumber String?
   isActive    Boolean       @default(true)
-  photoUrl    String?       // Reference photo for facial recognition
+  photoUrl    String? // Reference photo for facial recognition
+  faceId      String? // AWS Rekognition Face ID
   photos      WorkerPhoto[] // All photos of the worker
 
   // Relations
@@ -96,8 +97,8 @@ model Attendance {
   present     Boolean  @default(false)
   hoursWorked Float    @default(0)
   overtime    Float    @default(0)
-  photoUrl    String?  // Store the attendance verification photo
-  confidence  Float?   // Store the facial recognition confidence score
+  photoUrl    String? // Store the attendance verification photo
+  confidence  Float? // Store the facial recognition confidence score
 
   createdAt DateTime @default(now())
 
@@ -189,6 +190,7 @@ model ProjectImage {
   id        String   @id @default(cuid())
   url       String
   filename  String
+  type      String   @default("gallery")
   project   Project  @relation(fields: [projectId], references: [id])
   projectId String
   createdAt DateTime @default(now())
@@ -201,8 +203,8 @@ model WorkerPhoto {
   url       String
   worker    Worker   @relation(fields: [workerId], references: [id])
   workerId  String
-  projectId String   // To associate with specific project
-  tag       String   // For categorizing different types of photos
+  projectId String // To associate with specific project
+  tag       String // For categorizing different types of photos
   createdAt DateTime @default(now())
 
   @@index([workerId])

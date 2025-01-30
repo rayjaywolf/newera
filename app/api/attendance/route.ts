@@ -5,22 +5,54 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const projectId = searchParams.get('projectId');
-        const date = searchParams.get('date');
+        const dateStr = searchParams.get('date');
 
-        if (!projectId || !date) {
+        if (!projectId || !dateStr) {
             return NextResponse.json(
                 { error: "Project ID and date are required" },
                 { status: 400 }
             );
         }
 
+        // Parse the date string in UTC to avoid timezone issues
+        const date = new Date(dateStr);
+        // Set to start of day in local timezone
+        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // Set to start of next day in local timezone
+        const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+        // First, ensure we only get attendance records for existing workers
+        const validWorkers = await prisma.worker.findMany({
+            select: { id: true }
+        });
+        const validWorkerIds = validWorkers.map(w => w.id);
+
         const attendanceRecords = await prisma.attendance.findMany({
             where: {
                 projectId,
-                date: new Date(date),
+                workerId: {
+                    in: validWorkerIds
+                },
+                date: {
+                    gte: startDate,
+                    lt: endDate,
+                },
             },
             include: {
-                worker: true,
+                worker: {
+                    select: {
+                        id: true,
+                        name: true,
+                        hourlyRate: true,
+                        photoUrl: true,
+                    }
+                },
+                project: {
+                    select: {
+                        id: true,
+                        projectId: true,
+                    }
+                }
             },
         });
 
@@ -38,7 +70,7 @@ export async function GET(req: Request) {
     } catch (error) {
         console.error('Error fetching attendance:', error);
         return NextResponse.json(
-            { error: "Failed to fetch attendance records" },
+            { error: "Failed to fetch attendance records", details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }
@@ -47,35 +79,36 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { date, records, projectId } = body
+        const { date: dateStr, records, projectId } = body
 
-        if (!date || !records || !projectId || !Array.isArray(records)) {
+        if (!dateStr || !records || !projectId || !Array.isArray(records)) {
             return NextResponse.json(
                 { error: "Invalid request data" },
                 { status: 400 }
             );
         }
 
-        console.log('Received attendance data:', {
-            date,
-            records,
-            projectId,
-            parsedDate: new Date(date)
-        })
+        // Parse the date string in UTC to avoid timezone issues
+        const date = new Date(dateStr);
+        // Set to start of day in local timezone
+        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        // First, ensure we only process records for existing workers
+        const validWorkers = await prisma.worker.findMany({
+            select: { id: true }
+        });
+        const validWorkerIds = new Set(validWorkers.map(w => w.id));
+        const validRecords = records.filter(r => validWorkerIds.has(r.workerId));
 
         // Use transaction to ensure all operations succeed or none do
         const results = await prisma.$transaction(
-            records.map(({ workerId, present, hoursWorked, overtime }) => {
-                if (!workerId) {
-                    throw new Error('Worker ID is required for attendance records');
-                }
-
+            validRecords.map(({ workerId, present, hoursWorked, overtime }) => {
                 return prisma.attendance.upsert({
                     where: {
                         workerId_projectId_date: {
                             workerId,
                             projectId,
-                            date: new Date(date),
+                            date: startDate,
                         },
                     },
                     update: {
@@ -86,7 +119,7 @@ export async function POST(req: Request) {
                     create: {
                         workerId,
                         projectId,
-                        date: new Date(date),
+                        date: startDate,
                         present,
                         hoursWorked: parseFloat(hoursWorked) || 0,
                         overtime: parseFloat(overtime) || 0,
@@ -99,10 +132,26 @@ export async function POST(req: Request) {
         const updatedRecords = await prisma.attendance.findMany({
             where: {
                 projectId,
-                date: new Date(date),
+                workerId: {
+                    in: Array.from(validWorkerIds)
+                },
+                date: startDate,
             },
             include: {
-                worker: true,
+                worker: {
+                    select: {
+                        id: true,
+                        name: true,
+                        hourlyRate: true,
+                        photoUrl: true,
+                    }
+                },
+                project: {
+                    select: {
+                        id: true,
+                        projectId: true,
+                    }
+                }
             },
         });
 

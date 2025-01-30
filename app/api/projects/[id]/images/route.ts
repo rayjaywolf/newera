@@ -6,10 +6,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get('type');
+
     const project = await prisma.project.findUnique({
       where: { id: params.id },
       include: {
         images: {
+          where: type ? { type } : undefined,
           orderBy: { createdAt: 'desc' },
         },
       },

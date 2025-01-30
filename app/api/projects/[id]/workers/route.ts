@@ -56,7 +56,8 @@ export async function POST(
                     projectId: params.id,
                     startDate: new Date(),
                 },
-            })
+            });
+            return NextResponse.json({ success: true, id: workerId });
         } else {
             // Create new worker and assign to project
             const worker = await prisma.worker.create({
@@ -86,9 +87,9 @@ export async function POST(
                     }
                 });
             }
-        }
 
-        return NextResponse.json({ success: true })
+            return NextResponse.json({ success: true, id: worker.id });
+        }
     } catch (error) {
         console.error('Error adding worker:', error);
         return NextResponse.json(

@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
-import { Calendar as CalendarIcon } from "lucide-react";
+import Link from "next/link";
+import { Calendar as CalendarIcon, Users, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,6 +24,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AttendanceCamera } from "@/components/attendance/attendance-camera";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Worker {
   id: string;
@@ -65,7 +68,7 @@ export default function AttendancePage() {
   const calculateDailyIncome = useCallback(
     (record: AttendanceRecord, workers: Worker[]) => {
       if (!record.present) return 0;
-      const worker = workers.find((w) => w.id === record.workerId);
+      const worker = workers.find((w: Worker) => w.id === record.workerId);
       const hourlyRate = worker?.hourlyRate || 0;
       const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
       return totalHours * hourlyRate;
@@ -88,8 +91,13 @@ export default function AttendancePage() {
 
       // Process attendance records on client
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
-      attendanceResponse.forEach((record: AttendanceRecord) => {
-        const worker = workersResponse.find((w) => w.id === record.workerId);
+      const attendanceRecords = Array.isArray(attendanceResponse)
+        ? attendanceResponse
+        : [];
+      attendanceRecords.forEach((record: AttendanceRecord) => {
+        const worker = workersResponse.find(
+          (w: Worker) => w.id === record.workerId
+        );
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
         record.dailyIncome = record.present
           ? totalHours * (worker?.hourlyRate || 0)
@@ -179,7 +187,10 @@ export default function AttendancePage() {
         `/api/attendance?projectId=${params.id}&date=${formattedDate}`
       ).then((res) => res.json());
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
-      attendanceResponse.forEach((record: AttendanceRecord) => {
+      const attendanceRecords = Array.isArray(attendanceResponse)
+        ? attendanceResponse
+        : [];
+      attendanceRecords.forEach((record: AttendanceRecord) => {
         const worker = workers.find((w) => w.id === record.workerId);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
         record.dailyIncome = record.present
@@ -199,6 +210,18 @@ export default function AttendancePage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleFaceRecognition = async (attendance: any) => {
+    // Update attendance state with the new record
+    setAttendance((prev) => ({
+      ...prev,
+      [attendance.workerId]: {
+        ...attendance,
+        dailyIncome:
+          attendance.hoursWorked * (attendance.worker?.hourlyRate || 0),
+      },
+    }));
   };
 
   if (loading) {
@@ -290,151 +313,214 @@ export default function AttendancePage() {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant={"outline"}
                     className={cn(
-                      "justify-start text-left font-normal border-none text-[#E65F2B]"
+                      "w-[240px] justify-start text-left font-normal border-black/20",
+                      "hover:border-black transition-colors bg-transparent",
+                      !selectedDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(selectedDate, "PPP")}
+                    {selectedDate ? (
+                      format(selectedDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
+                    onSelect={(date: Date | undefined) =>
+                      date && setSelectedDate(date)
+                    }
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
               <Button
                 onClick={saveAttendance}
-                className={cn(
-                  "text-white font-semibold bg-black hover:bg-white hover:text-[#E65F2B] border border-none hover:border-none transition-colors",
-                  isSaving && "bg-white text-[#E65F2B] border-[#E65F2B]"
-                )}
                 disabled={isSaving}
+                className={cn(
+                  "bg-[#060606] text-white font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
+                )}
               >
-                {isSaving ? "Saving Attendance..." : "Save Attendance"}
+                {isSaving ? "Saving..." : "Save Attendance"}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[rgba(0,0,0,0.08)]">
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Name
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Worker Type
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Present
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Hours Worked
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Overtime
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                    Daily Income
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
-                {workers.map((worker) => {
-                  const record = attendance[worker.id];
-                  return (
-                    <tr
-                      key={worker.id}
-                      className="hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
-                        {worker.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                          {worker.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Checkbox
-                          checked={record?.present || false}
-                          onCheckedChange={(checked) =>
-                            handleAttendanceChange(
-                              worker.id,
-                              "present",
-                              checked
-                            )
-                          }
-                          className={cn(
-                            "h-5 w-5 border border-black/20 rounded-sm shadow-none",
-                            "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
-                            "hover:border-black transition-colors"
-                          )}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Input
-                          type="number"
-                          value={record?.hoursWorked || ""}
-                          onChange={(e) =>
-                            handleAttendanceChange(
-                              worker.id,
-                              "hoursWorked",
-                              e.target.value
-                            )
-                          }
-                          disabled={!record?.present}
-                          className={cn(
-                            "w-24 bg-transparent border border-black/20 rounded-md shadow-none",
-                            "focus:border-black focus:ring-0 focus:ring-offset-0",
-                            !record?.present && "opacity-50 cursor-not-allowed"
-                          )}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Input
-                          type="number"
-                          value={record?.overtime || ""}
-                          onChange={(e) =>
-                            handleAttendanceChange(
-                              worker.id,
-                              "overtime",
-                              e.target.value
-                            )
-                          }
-                          disabled={!record?.present}
-                          className={cn(
-                            "w-24 bg-transparent border border-black/20 rounded-md shadow-none",
-                            "focus:border-black focus:ring-0 focus:ring-offset-0",
-                            !record?.present && "opacity-50 cursor-not-allowed"
-                          )}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span
-                          className={cn(
-                            "font-medium",
-                            record?.dailyIncome > 0
-                              ? "text-[#E65F2B]"
-                              : "text-muted-foreground"
-                          )}
-                        >
-                          ₹{record?.dailyIncome?.toFixed(2) || "0.00"}
-                        </span>
-                      </td>
+          <Tabs defaultValue="manual" className="w-full">
+            <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-fit">
+              <TabsTrigger
+                value="manual"
+                className={cn(
+                  "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                  "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Manual Entry
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="facial"
+                className={cn(
+                  "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                  "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  Facial Recognition
+                </span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="manual">
+              <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[rgba(0,0,0,0.08)]">
+                      <th className="w-[16.66%] px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Name
+                      </th>
+                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Worker Type
+                      </th>
+                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Present
+                      </th>
+                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Hours Worked
+                      </th>
+                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Overtime
+                      </th>
+                      <th className="w-[16.66%] px-6 py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        Daily Income
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
+                    {workers.map((worker) => {
+                      const record = attendance[worker.id];
+                      return (
+                        <tr
+                          key={worker.id}
+                          className="hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                            <Link
+                              href={`/projects/${params.id}/workers/${worker.id}`}
+                              className="hover:underline cursor-pointer"
+                            >
+                              {worker.name}
+                            </Link>
+                          </td>
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                              {worker.type}
+                            </span>
+                          </td>
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={record?.present || false}
+                                onCheckedChange={(checked) =>
+                                  handleAttendanceChange(
+                                    worker.id,
+                                    "present",
+                                    checked
+                                  )
+                                }
+                                className={cn(
+                                  "h-5 w-5 border border-black/20 rounded-sm shadow-none",
+                                  "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
+                                  "hover:border-black transition-colors"
+                                )}
+                              />
+                            </div>
+                          </td>
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap">
+                            <div className="flex justify-center">
+                              <Input
+                                type="number"
+                                value={record?.hoursWorked || ""}
+                                onChange={(e) =>
+                                  handleAttendanceChange(
+                                    worker.id,
+                                    "hoursWorked",
+                                    parseFloat(e.target.value)
+                                  )
+                                }
+                                className={cn(
+                                  "h-8 w-20 text-center",
+                                  "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                  "border-black/20 focus-visible:border-black"
+                                )}
+                              />
+                            </div>
+                          </td>
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap">
+                            <div className="flex justify-center">
+                              <Input
+                                type="number"
+                                value={record?.overtime || ""}
+                                onChange={(e) =>
+                                  handleAttendanceChange(
+                                    worker.id,
+                                    "overtime",
+                                    parseFloat(e.target.value)
+                                  )
+                                }
+                                className={cn(
+                                  "h-8 w-20 text-center",
+                                  "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                  "border-black/20 focus-visible:border-black"
+                                )}
+                              />
+                            </div>
+                          </td>
+                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-right">
+                            <span
+                              className={cn(
+                                "font-medium",
+                                record?.dailyIncome
+                                  ? "text-[#E65F2B]"
+                                  : "text-muted-foreground"
+                              )}
+                            >
+                              ₹{record?.dailyIncome?.toFixed(2) || "0.00"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="facial">
+              <div className="rounded-lg border border-[rgba(0,0,0,0.08)] p-6">
+                <div className="max-w-2xl mx-auto">
+                  <AttendanceCamera
+                    projectId={params.id as string}
+                    onSuccess={handleFaceRecognition}
+                  />
+                  <p className="text-sm text-muted-foreground mt-4 text-center">
+                    Position your face in front of the camera to mark your
+                    attendance
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

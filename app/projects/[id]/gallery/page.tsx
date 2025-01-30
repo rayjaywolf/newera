@@ -33,6 +33,7 @@ interface ProjectImage {
   id: string;
   url: string;
   filename: string;
+  type: string;
   createdAt: string;
 }
 
@@ -58,7 +59,7 @@ export default function GalleryPage() {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch(`/api/projects/${id}/images`);
+      const response = await fetch(`/api/projects/${id}/images?type=gallery`);
       if (!response.ok) {
         throw new Error(`Failed to fetch images: ${response.statusText}`);
       }
@@ -85,7 +86,7 @@ export default function GalleryPage() {
 
     try {
       const response = await fetch(
-        `/api/uploadImage?filename=${encodeURIComponent(filename)}&id=${id}`,
+        `/api/uploadImage?filename=${encodeURIComponent(filename)}&id=${id}&type=gallery`,
         {
           method: "POST",
           body: file,

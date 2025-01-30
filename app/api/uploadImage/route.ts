@@ -6,10 +6,18 @@ export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
   const filename = searchParams.get('filename');
   const id = searchParams.get('id');
+  const type = searchParams.get('type') || 'gallery';
 
   if (!filename || !id) {
     return NextResponse.json(
       { error: 'Filename and id are required' },
+      { status: 400 }
+    );
+  }
+
+  if (type !== 'gallery' && type !== 'worker') {
+    return NextResponse.json(
+      { error: 'Type must be either "gallery" or "worker"' },
       { status: 400 }
     );
   }
@@ -38,6 +46,7 @@ export async function POST(request: Request) {
         url: response.url,
         filename: filename.split('/').pop() || filename,
         projectId: project.id,
+        type,
       },
     });
 

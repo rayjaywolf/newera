@@ -65,20 +65,22 @@ export default function AddWorkerForm({
       let photoUrl: string | undefined;
 
       if (photoFile) {
-        const formData = new FormData();
-        formData.append('file', photoFile);
-        
-        const filename = `workers/${projectId}/${Date.now()}-${photoFile.name}`;
-        const uploadResponse = await fetch(`/api/uploadImage?filename=${encodeURIComponent(filename)}&id=${projectId}`, {
-          method: 'POST',
-          body: photoFile,
-        });
+        const filename = `${projectId}/${Date.now()}-${photoFile.name}`;
+        const response = await fetch(
+          `/api/uploadImage?filename=${encodeURIComponent(
+            filename
+          )}&id=${projectId}&type=worker`,
+          {
+            method: "POST",
+            body: photoFile,
+          }
+        );
 
-        if (!uploadResponse.ok) {
+        if (!response.ok) {
           throw new Error('Failed to upload photo');
         }
 
-        const { url } = await uploadResponse.json();
+        const { url } = await response.json();
         photoUrl = url;
       }
 
@@ -97,6 +99,43 @@ export default function AddWorkerForm({
 
       if (!response.ok) {
         throw new Error("Failed to add worker");
+      }
+
+      const { id: workerId } = await response.json();
+
+      // Index the worker's face if photo was uploaded
+      if (photoFile && workerId) {
+        const faceFormData = new FormData();
+        faceFormData.append('photo', photoFile);
+        faceFormData.append('workerId', workerId);
+
+        const faceResponse = await fetch('/api/workers/index-face', {
+          method: 'POST',
+          body: faceFormData,
+        });
+
+        if (!faceResponse.ok) {
+          console.error('Failed to index face:', await faceResponse.text());
+          toast.error('Worker added but face indexing failed');
+          return;
+        }
+
+        const { faceId } = await faceResponse.json();
+        
+        // Update worker with faceId
+        const updateResponse = await fetch(`/api/workers/${workerId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ faceId }),
+        });
+
+        if (!updateResponse.ok) {
+          console.error('Failed to update worker with faceId');
+          toast.error('Worker added but face ID update failed');
+          return;
+        }
       }
 
       toast.success("Worker added successfully");
