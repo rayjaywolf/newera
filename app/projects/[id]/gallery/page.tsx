@@ -16,6 +16,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { ImagePlus, Upload, Maximize2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImageViewer } from '@/components/gallery/image-viewer';
+import { ImageCardSkeleton } from '@/components/gallery/image-card-skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -174,12 +176,39 @@ export default function GalleryPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-8 space-y-8">
         <Card className="bg-white/[0.34] border-0 shadow-none">
-          <CardContent className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">Loading images...</p>
-          </CardContent>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded bg-black/[0.08]" />
+                  <Skeleton className="h-7 w-32 bg-black/[0.08]" />
+                </div>
+                <Skeleton className="h-4 w-48 bg-black/[0.08]" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-[300px] bg-black/[0.08]" />
+                <Skeleton className="h-10 w-32 bg-black/[0.08]" />
+              </div>
+            </div>
+          </CardHeader>
         </Card>
+
+        {[...Array(2)].map((_, groupIndex) => (
+          <Card key={groupIndex} className="bg-white/[0.34] border-0 shadow-none">
+            <CardHeader className="pb-4">
+              <Skeleton className="h-6 w-48 bg-black/[0.08]" />
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, index) => (
+                  <ImageCardSkeleton key={index} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }

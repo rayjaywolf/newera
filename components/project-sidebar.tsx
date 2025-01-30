@@ -10,6 +10,7 @@ import {
   Package,
   Truck,
   Image,
+  Users,
 } from "lucide-react";
 
 interface ProjectSidebarProps {
@@ -30,7 +31,7 @@ const navigation = [
   {
     name: "Workers",
     href: "/workers",
-    icon: Group,
+    icon: Users,
   },
   {
     name: "Materials",
