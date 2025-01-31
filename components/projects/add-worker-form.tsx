@@ -77,7 +77,7 @@ export default function AddWorkerForm({
         );
 
         if (!response.ok) {
-          throw new Error('Failed to upload photo');
+          throw new Error("Failed to upload photo");
         }
 
         const { url } = await response.json();
@@ -106,34 +106,34 @@ export default function AddWorkerForm({
       // Index the worker's face if photo was uploaded
       if (photoFile && workerId) {
         const faceFormData = new FormData();
-        faceFormData.append('photo', photoFile);
-        faceFormData.append('workerId', workerId);
+        faceFormData.append("photo", photoFile);
+        faceFormData.append("workerId", workerId);
 
-        const faceResponse = await fetch('/api/workers/index-face', {
-          method: 'POST',
+        const faceResponse = await fetch("/api/workers/index-face", {
+          method: "POST",
           body: faceFormData,
         });
 
         if (!faceResponse.ok) {
-          console.error('Failed to index face:', await faceResponse.text());
-          toast.error('Worker added but face indexing failed');
+          console.error("Failed to index face:", await faceResponse.text());
+          toast.error("Worker added but face indexing failed");
           return;
         }
 
         const { faceId } = await faceResponse.json();
-        
+
         // Update worker with faceId
         const updateResponse = await fetch(`/api/workers/${workerId}`, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ faceId }),
         });
 
         if (!updateResponse.ok) {
-          console.error('Failed to update worker with faceId');
-          toast.error('Worker added but face ID update failed');
+          console.error("Failed to update worker with faceId");
+          toast.error("Worker added but face ID update failed");
           return;
         }
       }
@@ -310,7 +310,7 @@ export default function AddWorkerForm({
           disabled={loading}
           size="lg"
           variant="ghost"
-          className="bg-black text-white hover:bg-white hover:text-primary-accent transition-colors"
+          className="bg-black text-white font-semibold hover:bg-white hover:text-primary-accent transition-colors"
         >
           {loading ? "Adding..." : "Add Worker"}
         </Button>

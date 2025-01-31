@@ -103,6 +103,18 @@ export async function POST(req: Request) {
         // Use transaction to ensure all operations succeed or none do
         const results = await prisma.$transaction(
             validRecords.map(({ workerId, present, hoursWorked, overtime }) => {
+                if (!present) {
+                    // For non-present workers, delete the record if it exists
+                    return prisma.attendance.deleteMany({
+                        where: {
+                            workerId,
+                            projectId,
+                            date: startDate,
+                        },
+                    });
+                }
+                
+                // For present workers, create or update the record
                 return prisma.attendance.upsert({
                     where: {
                         workerId_projectId_date: {
@@ -124,9 +136,9 @@ export async function POST(req: Request) {
                         hoursWorked: parseFloat(hoursWorked) || 0,
                         overtime: parseFloat(overtime) || 0,
                     },
-                })
+                });
             })
-        )
+        );
 
         // Fetch the updated records with worker information to calculate daily income
         const updatedRecords = await prisma.attendance.findMany({
