@@ -11,7 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Clock, Wallet, Calendar } from "lucide-react";
+import { User, Clock, Wallet, Calendar, UserCheck, UserX, Percent } from "lucide-react";
 import cn from "classnames";
 import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
 import dynamic from "next/dynamic";
@@ -60,6 +60,21 @@ async function getWorkerDetails(projectId: string, workerId: string) {
   });
 }
 
+function getWorkingDaysInMonth(year: number, month: number): number {
+  const date = new Date(year, month, 1);
+  let workingDays = 0;
+  
+  while (date.getMonth() === month) {
+    // Skip Sundays (0 is Sunday)
+    if (date.getDay() !== 0) {
+      workingDays++;
+    }
+    date.setDate(date.getDate() + 1);
+  }
+  
+  return workingDays;
+}
+
 export default async function WorkerPage({ params }: WorkerPageProps) {
   const { id: projectId, workerId } = params;
 
@@ -76,7 +91,17 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
   const currentMonthAttendance = worker.attendance;
   const currentMonthAdvances = worker.advances;
 
+  // Calculate attendance statistics
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+  
+  const totalWorkingDays = getWorkingDaysInMonth(currentYear, currentMonth);
   const daysPresent = currentMonthAttendance.length;
+  const allowedHolidays = 4; // 4 Sundays per month
+  const totalAbsents = Math.max(0, totalWorkingDays - daysPresent);
+  const attendancePercentage = (daysPresent / totalWorkingDays) * 100;
+
   const totalHours = currentMonthAttendance.reduce(
     (acc, record) => acc + record.hoursWorked,
     0
@@ -155,6 +180,55 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
         </CardContent>
       </Card>
 
+      {/* Attendance Statistics Card */}
+      <Card className="bg-white/[0.34] border-0 shadow-none">
+        <CardHeader className="pb-6">
+          <CardTitle className="flex items-center gap-3 text-xl">
+            <UserCheck className="h-5 w-5" />
+            Attendance Statistics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
+              <div className="flex items-center gap-3 text-gray-500">
+                <Calendar className="h-4 w-4" />
+                <span>Working Days</span>
+              </div>
+              <p className="text-2xl font-semibold">{totalWorkingDays}</p>
+              <p className="text-sm text-gray-500">This month</p>
+            </div>
+
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
+              <div className="flex items-center gap-3 text-gray-500">
+                <UserCheck className="h-4 w-4" />
+                <span>Days Present</span>
+              </div>
+              <p className="text-2xl font-semibold">{daysPresent}</p>
+              <p className="text-sm text-gray-500">Out of {totalWorkingDays}</p>
+            </div>
+
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
+              <div className="flex items-center gap-3 text-gray-500">
+                <UserX className="h-4 w-4" />
+                <span>Days Absent</span>
+              </div>
+              <p className="text-2xl font-semibold">{totalAbsents}</p>
+              <p className="text-sm text-gray-500">Excluding {allowedHolidays} holidays</p>
+            </div>
+
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
+              <div className="flex items-center gap-3 text-gray-500">
+                <Percent className="h-4 w-4" />
+                <span>Attendance Rate</span>
+              </div>
+              <p className="text-2xl font-semibold">{attendancePercentage.toFixed(1)}%</p>
+              <p className="text-sm text-gray-500">Monthly average</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Earnings and Advances Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-6">
@@ -171,8 +245,8 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3 text-gray-500">
                 <Clock className="h-4 w-4" />
                 <span>Hours Worked</span>
@@ -183,16 +257,7 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
               </p>
             </div>
 
-            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3">
-              <div className="flex items-center gap-3 text-gray-500">
-                <Calendar className="h-4 w-4" />
-                <span>Days Present</span>
-              </div>
-              <p className="text-2xl font-semibold">{daysPresent} days</p>
-              <p className="text-sm text-gray-500">This month</p>
-            </div>
-
-            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3">
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3 text-gray-500">
                 <Wallet className="h-4 w-4" />
                 <span>Monthly Earnings</span>
@@ -207,7 +272,7 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
               </p>
             </div>
 
-            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3">
+            <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3 text-gray-500">
                 <Wallet className="h-4 w-4" />
                 <span>Advances</span>

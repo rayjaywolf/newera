@@ -95,9 +95,32 @@ async function getProject(id: string) {
     averageHourlyRate: Math.round(machine.totalRate / machine.entries),
   }));
 
+  // Calculate total stats
+  const machineryStats = formattedMachinery.reduce(
+    (acc, curr) => ({
+      totalCost: acc.totalCost + curr.totalCost,
+      totalHours: acc.totalHours + curr.totalHoursUsed,
+      totalTypes: acc.totalTypes + 1,
+      totalEntries: acc.totalEntries + curr.entries,
+    }),
+    { totalCost: 0, totalHours: 0, totalTypes: 0, totalEntries: 0 }
+  );
+
+  // Calculate overall average hourly rate
+  machineryStats.averageHourlyRate =
+    machineryStats.totalEntries > 0
+      ? Math.round(
+          formattedMachinery.reduce(
+            (acc, curr) => acc + curr.averageHourlyRate * curr.entries,
+            0
+          ) / machineryStats.totalEntries
+        )
+      : 0;
+
   return {
     ...project,
     aggregatedMachinery: formattedMachinery,
+    machineryStats,
   };
 }
 
@@ -127,6 +150,62 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center text-2xl font-bold">₹</div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Total Cost</p>
+                <p className="text-2xl font-semibold">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0,
+                  }).format(project.machineryStats.totalCost)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Total Hours</p>
+                <p className="text-2xl font-semibold">{Math.round(project.machineryStats.totalHours)}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                  <line x1="4" y1="22" x2="4" y2="15" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Avg Rate/Hour</p>
+                <p className="text-2xl font-semibold">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0,
+                  }).format(project.machineryStats.averageHourlyRate)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Truck className="h-8 w-8 text-[#E65F2B]" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Types Used</p>
+                <p className="text-2xl font-semibold">{project.machineryStats.totalTypes}</p>
+              </div>
+            </div>
+          </div>
+
           {project.aggregatedMachinery.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500">No machinery found in this project</p>

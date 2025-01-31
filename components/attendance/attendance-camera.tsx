@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";

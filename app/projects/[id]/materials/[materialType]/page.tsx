@@ -35,6 +35,18 @@ export const metadata: Metadata = {
   description: "Details of the selected material",
 };
 
+const unitMapping = {
+  STEEL: 'kg',
+  CEMENT: 'kg',
+  SAND: 'cubic feet',
+  GRIT_10MM: 'cubic feet',
+  GRIT_20MM: 'cubic feet',
+  GRIT_40MM: 'cubic feet',
+  BRICK: 'number',
+  STONE: 'cubic feet',
+  WATER: 'litre',
+};
+
 async function getMaterialDetails(
   projectId: string,
   materialType: string,
@@ -124,6 +136,8 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
     }).format(amount);
   };
 
+  const materialTypeUpperCase = materialType.toUpperCase();
+
   return (
     <div className="p-8 space-y-8">
       {/* Material Details Card */}
@@ -133,7 +147,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
             <div>
               <CardTitle className="text-3xl font-bold flex items-center gap-2">
                 <Package2 className="h-7 w-7" />
-                {material.type.toLowerCase().replace("_", " ")}
+                {materialTypeUpperCase.toLowerCase().replace("_", " ")}
               </CardTitle>
               <CardDescription className="text-lg mt-1">
                 {material.entries} total entries
@@ -163,7 +177,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 <Clock className="h-4 w-4" />
                 Total Volume
               </dt>
-              <dd className="text-lg">{material.totalVolume} units</dd>
+              <dd className="text-lg">{material.totalVolume} {unitMapping[materialTypeUpperCase] || 'units'}</dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500 mb-1 flex items-center gap-2">
@@ -192,7 +206,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 Monthly Volume
               </p>
               <p className="text-2xl font-semibold mt-2">
-                {material.monthlyVolume} units
+                {material.monthlyVolume} {unitMapping[materialTypeUpperCase] || 'units'}
               </p>
             </div>
             <div className="rounded-lg bg-white/[0.15] p-4">
@@ -211,7 +225,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
               </p>
               <p className="text-2xl font-semibold mt-2">
                 {formatCurrency(material.monthlyCost / material.monthlyVolume)}
-                /unit
+                /{unitMapping[materialTypeUpperCase] || 'unit'}
               </p>
             </div>
           </div>

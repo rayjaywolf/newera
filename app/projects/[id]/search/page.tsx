@@ -75,40 +75,88 @@ async function SearchResults({
         },
       },
     }),
-    // Only search materials if query matches a MaterialType
-    isValidEnum(MaterialType, upperQuery)
-      ? prisma.materialUsage.findMany({
-          where: {
-            type: upperQuery as MaterialType,
+    // Enhanced material search to include partial matches
+    prisma.materialUsage.findMany({
+      where: {
+        OR: [
+          // Check if query matches any part of the material type
+          {
+            type: {
+              in: Object.values(MaterialType).filter((type) =>
+                type.toLowerCase().includes(query.toLowerCase())
+              ),
+            },
           },
-          include: {
-            project: true,
+          // Also check if the query exactly matches a MaterialType
+          ...(isValidEnum(MaterialType, upperQuery)
+            ? [
+                {
+                  type: upperQuery as MaterialType,
+                },
+              ]
+            : []),
+        ],
+      },
+      include: {
+        project: true,
+      },
+    }),
+    // Enhanced machinery search to include partial matches
+    prisma.machineryUsage.findMany({
+      where: {
+        OR: [
+          // Check if query matches any part of the machinery type
+          {
+            type: {
+              in: Object.values(MachineryType).filter((type) =>
+                type.toLowerCase().includes(query.toLowerCase())
+              ),
+            },
           },
-        })
-      : Promise.resolve([]),
-    // Search machinery based on valid type/subtype matches
-    isValidEnum(MachineryType, upperQuery) ||
-    isValidEnum(JCBSubtype, upperQuery) ||
-    isValidEnum(SLMSubtype, upperQuery)
-      ? prisma.machineryUsage.findMany({
-          where: {
-            OR: [
-              ...(isValidEnum(MachineryType, upperQuery)
-                ? [{ type: upperQuery as MachineryType }]
-                : []),
-              ...(isValidEnum(JCBSubtype, upperQuery)
-                ? [{ jcbSubtype: upperQuery as JCBSubtype }]
-                : []),
-              ...(isValidEnum(SLMSubtype, upperQuery)
-                ? [{ slmSubtype: upperQuery as SLMSubtype }]
-                : []),
-            ],
+          // Check if query matches any part of JCB subtype
+          {
+            jcbSubtype: {
+              in: Object.values(JCBSubtype).filter((type) =>
+                type.toLowerCase().includes(query.toLowerCase())
+              ),
+            },
           },
-          include: {
-            project: true,
+          // Check if query matches any part of SLM subtype
+          {
+            slmSubtype: {
+              in: Object.values(SLMSubtype).filter((type) =>
+                type.toLowerCase().includes(query.toLowerCase())
+              ),
+            },
           },
-        })
-      : Promise.resolve([]),
+          // Also check if the query exactly matches any type/subtype
+          ...(isValidEnum(MachineryType, upperQuery)
+            ? [
+                {
+                  type: upperQuery as MachineryType,
+                },
+              ]
+            : []),
+          ...(isValidEnum(JCBSubtype, upperQuery)
+            ? [
+                {
+                  jcbSubtype: upperQuery as JCBSubtype,
+                },
+              ]
+            : []),
+          ...(isValidEnum(SLMSubtype, upperQuery)
+            ? [
+                {
+                  slmSubtype: upperQuery as SLMSubtype,
+                },
+              ]
+            : []),
+        ],
+      },
+      include: {
+        project: true,
+      },
+    }),
   ]);
 
   if (
@@ -138,12 +186,12 @@ async function SearchResults({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ">
               {workerResults.map((worker) => (
                 <Link
                   key={worker.id}
                   href={`/projects/${projectId}/workers/${worker.id}`}
-                  className="flex items-start justify-between rounded-lg border-[rgb(0,0,0,0.08)] bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+                  className="flex items-start justify-between rounded-lg border border-[rgb(0,0,0,0.08)] bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
                 >
                   <div>
                     <p className="font-medium text-lg">{worker.name}</p>
@@ -191,8 +239,8 @@ async function SearchResults({
               {materialUsageResults.map((usage) => (
                 <Link
                   key={usage.id}
-                  href={`/projects/${projectId}/materials`}
-                  className="flex flex-col rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+                  href={`/projects/${projectId}/materials/${usage.type.toLowerCase()}`}
+                  className="flex flex-col rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgb(0,0,0,0.08)]"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -236,43 +284,59 @@ async function SearchResults({
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {machineryUsageResults.map((usage) => (
-                <Link
-                  key={usage.id}
-                  href={`/projects/${projectId}/machinery`}
-                  className="flex flex-col rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="font-medium text-lg">
-                        {usage.type}
-                        {usage.jcbSubtype && ` - ${usage.jcbSubtype}`}
-                        {usage.slmSubtype && ` - ${usage.slmSubtype}`}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Hours: {usage.hoursUsed}
-                      </p>
+              {machineryUsageResults.map((usage) => {
+                const machineryType = [
+                  usage.type.toLowerCase(),
+                  usage.jcbSubtype
+                    ? `subtype_${usage.jcbSubtype.toLowerCase()}`
+                    : null,
+                  usage.slmSubtype
+                    ? `subtype_${usage.slmSubtype.toLowerCase()}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join("_");
+
+                return (
+                  <Link
+                    key={usage.id}
+                    href={`/projects/${projectId}/machinery/${encodeURIComponent(
+                      machineryType
+                    )}`}
+                    className="flex flex-col rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgb(0,0,0,0.08)]"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-lg">
+                          {usage.type}
+                          {usage.jcbSubtype && ` - ${usage.jcbSubtype}`}
+                          {usage.slmSubtype && ` - ${usage.slmSubtype}`}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Hours: {usage.hoursUsed}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Rate: ₹{usage.hourlyRate}/hr
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Total: ₹{usage.totalCost}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-blue-100 text-blue-700"
+                      >
+                        {new Date(usage.date).toLocaleDateString()}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-[rgba(0,0,0,0.08)]">
                       <p className="text-sm text-gray-500">
-                        Rate: ₹{usage.hourlyRate}/hr
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Total: ₹{usage.totalCost}
+                        Project: {usage.project.clientName}
                       </p>
                     </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-blue-100 text-blue-700"
-                    >
-                      {new Date(usage.date).toLocaleDateString()}
-                    </Badge>
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-[rgba(0,0,0,0.08)]">
-                    <p className="text-sm text-gray-500">
-                      Project: {usage.project.clientName}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

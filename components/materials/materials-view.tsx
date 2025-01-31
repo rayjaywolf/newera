@@ -19,6 +19,7 @@ interface Material {
   totalCost: number;
   lastUpdated: string;
   entries: number;
+  costPerUnit: number;
 }
 
 interface MaterialsViewProps {
@@ -56,6 +57,23 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
     router.push(`?${params.toString()}`);
   };
 
+  console.log(
+    "Material Types:",
+    materials.map((material) => material.type)
+  );
+
+  const unitMapping = {
+    STEEL: "kg",
+    CEMENT: "kg",
+    SAND: "cubic ft",
+    GRIT_10MM: "cubic ft",
+    GRIT_20MM: "cubic ft",
+    GRIT_40MM: "cubic ft",
+    BRICK: "units",
+    STONE: "cubic ft",
+    WATER: "litre",
+  };
+
   return (
     <div>
       <div className="flex items-center gap-4 mb-4">
@@ -87,9 +105,11 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {materials.map((material) => (
             <Link
-              href={`/projects/${projectId}/materials/${encodeURIComponent(material.type.toLowerCase())}`}
+              href={`/projects/${projectId}/materials/${encodeURIComponent(
+                material.type.toLowerCase()
+              )}`}
               key={material.type}
-              className="rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
+              className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
             >
               <div className="flex flex-col">
                 <h3 className="font-medium text-lg capitalize">
@@ -97,7 +117,11 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
                 </h3>
                 <div className="mt-2 space-y-1">
                   <p className="text-sm text-gray-500">
-                    Total Volume: {material.totalVolume} units
+                    Total Volume: {material.totalVolume}{" "}
+                    {unitMapping[material.type] || "units"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Cost per Unit: {formatCurrency(material.costPerUnit)}
                   </p>
                   <p className="text-sm text-gray-500">
                     Total Cost: {formatCurrency(material.totalCost)}
@@ -140,7 +164,13 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
                 <tr
                   key={material.type}
                   className="hover:bg-white/[0.25] transition cursor-pointer"
-                  onClick={() => router.push(`/projects/${projectId}/materials/${encodeURIComponent(material.type.toLowerCase())}`)}
+                  onClick={() =>
+                    router.push(
+                      `/projects/${projectId}/materials/${encodeURIComponent(
+                        material.type.toLowerCase()
+                      )}`
+                    )
+                  }
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium capitalize">
@@ -148,7 +178,8 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                    {material.totalVolume} units
+                    {material.totalVolume}{" "}
+                    {unitMapping[material.type] || "units"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                     {formatCurrency(material.totalCost)}

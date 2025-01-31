@@ -25,7 +25,7 @@ const aeonikProRegular = localFont({
 export const metadata: Metadata = {
   title: "New Era Construction",
   icons: {
-    icon: "/logo-dark.png",
+    icon: "/favicon.ico",
   },
 };
 

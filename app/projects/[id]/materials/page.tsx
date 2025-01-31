@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Package2 } from "lucide-react";
 import Link from "next/link";
 import { MaterialsView } from "@/components/materials/materials-view";
@@ -23,6 +18,7 @@ interface AggregatedMaterial {
   totalCost: number;
   lastUpdated: string;
   entries: number;
+  costPerUnit?: number;
 }
 
 export async function generateMetadata({
@@ -65,22 +61,44 @@ async function getProject(id: string) {
         entries: 0,
       };
     }
-    
+
     acc[material.type].totalVolume += material.volume;
     acc[material.type].totalCost += material.cost;
     acc[material.type].entries += 1;
-    
+
     // Keep the most recent date
     if (new Date(material.date) > new Date(acc[material.type].lastUpdated)) {
       acc[material.type].lastUpdated = material.date;
     }
-    
+
     return acc;
   }, {} as Record<string, AggregatedMaterial>);
 
+  const materialsArray = Object.values(aggregatedMaterials).map((material) => ({
+    ...material,
+    costPerUnit:
+      material.totalVolume > 0 ? material.totalCost / material.totalVolume : 0,
+  }));
+
+  const totalStats = materialsArray.reduce(
+    (acc, curr) => ({
+      totalCost: acc.totalCost + curr.totalCost,
+      totalEntries: acc.totalEntries + curr.entries,
+      totalTypes: acc.totalTypes + 1,
+    }),
+    { totalCost: 0, totalEntries: 0, totalTypes: 0 }
+  );
+
+  const totalVolume = materialsArray.reduce(
+    (acc, curr) => acc + curr.totalVolume,
+    0
+  );
+
   return {
     ...project,
-    aggregatedMaterials: Object.values(aggregatedMaterials),
+    aggregatedMaterials: materialsArray,
+    materialStats: totalStats,
+    totalVolume,
   };
 }
 
@@ -110,9 +128,97 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center text-2xl font-bold">
+                ₹
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Total Cost</p>
+                <p className="text-2xl font-semibold">
+                  {new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  }).format(project.materialStats.totalCost)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Volume
+                </p>
+                <p className="text-2xl font-semibold">
+                  {project.totalVolume} units
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Package2 className="h-8 w-8 text-[#E65F2B]" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Material Types
+                </p>
+                <p className="text-2xl font-semibold">
+                  {project.materialStats.totalTypes}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z" />
+                  <path d="M12 11h4" />
+                  <path d="M12 16h4" />
+                  <path d="M8 11h.01" />
+                  <path d="M8 16h.01" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Entries
+                </p>
+                <p className="text-2xl font-semibold">
+                  {project.materialStats.totalEntries}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {project.aggregatedMaterials.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-gray-500">No materials found in this project</p>
+              <p className="text-gray-500">
+                No materials found in this project
+              </p>
             </div>
           ) : (
             <MaterialsView
