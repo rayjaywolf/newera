@@ -32,18 +32,18 @@ import React from "react";
 // Function to generate a worker ID from name
 function generateWorkerId(name: string, existingWorkers: Worker[]) {
   // Convert name to lowercase, remove spaces and special characters
-  const baseId = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-  
+  const baseId = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+
   // Check if this base ID already exists
   const similarIds = existingWorkers
-    .map(w => w.id)
-    .filter(id => id.startsWith(baseId));
-  
+    .map((w) => w.id)
+    .filter((id) => id.startsWith(baseId));
+
   // If no similar IDs exist, use the base ID
   if (similarIds.length === 0) {
     return baseId;
   }
-  
+
   // If similar IDs exist, add a number suffix
   return `${baseId}${similarIds.length + 1}`;
 }
@@ -75,7 +75,9 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
   const getCameras = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const videoDevices = devices.filter(
+        (device) => device.kind === "videoinput"
+      );
       setCameras(videoDevices);
       if (videoDevices.length > 0) {
         setSelectedCamera(videoDevices[0].deviceId);
@@ -89,15 +91,15 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
   const startCamera = async () => {
     try {
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
-      
-      const newStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: {
           deviceId: selectedCamera ? { exact: selectedCamera } : undefined,
           width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
+          height: { ideal: 720 },
+        },
       });
       setStream(newStream);
       if (videoRef.current) {
@@ -106,14 +108,16 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
       setError("");
       setCapturedImage(null);
     } catch (err) {
-      setError("Failed to access camera. Please ensure camera permissions are granted.");
+      setError(
+        "Failed to access camera. Please ensure camera permissions are granted."
+      );
       console.error("Error accessing camera:", err);
     }
   };
 
   const stopCamera = () => {
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       setStream(null);
     }
     setCapturedImage(null);
@@ -127,35 +131,41 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
   const capturePhoto = () => {
     if (!videoRef.current) return;
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Draw the video frame to the canvas
     ctx.drawImage(videoRef.current, 0, 0);
 
     // Set the captured image preview
-    const imageDataUrl = canvas.toDataURL('image/jpeg');
+    const imageDataUrl = canvas.toDataURL("image/jpeg");
     setCapturedImage(imageDataUrl);
 
     // Convert the canvas to a blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], "worker-photo.jpg", { type: "image/jpeg" });
-        onCapture(file);
-      }
-    }, 'image/jpeg', 0.8);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const file = new File([blob], "worker-photo.jpg", {
+            type: "image/jpeg",
+          });
+          onCapture(file);
+        }
+      },
+      "image/jpeg",
+      0.8
+    );
   };
 
   // Initialize camera list
   useEffect(() => {
     getCameras();
     // Listen for device changes
-    navigator.mediaDevices.addEventListener('devicechange', getCameras);
+    navigator.mediaDevices.addEventListener("devicechange", getCameras);
     return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', getCameras);
+      navigator.mediaDevices.removeEventListener("devicechange", getCameras);
       stopCamera();
     };
   }, []);
@@ -169,14 +179,12 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
 
   return (
     <div className="space-y-4">
-      {error && (
-        <p className="text-sm text-red-500 text-center">{error}</p>
-      )}
-      
+      {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+
       {/* Camera Selection */}
       {cameras.length > 1 && !capturedImage && (
         <Select value={selectedCamera} onValueChange={setSelectedCamera}>
-          <SelectTrigger className="bg-white/[0.15] border-0">
+          <SelectTrigger className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]">
             <SelectValue placeholder="Select a camera" />
           </SelectTrigger>
           <SelectContent>
@@ -192,9 +200,9 @@ function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
       {/* Camera Preview / Captured Image */}
       <div className="relative aspect-video rounded-lg overflow-hidden bg-black/[0.15] border border-[rgba(0,0,0,0.08)]">
         {capturedImage ? (
-          <img 
-            src={capturedImage} 
-            alt="Captured" 
+          <img
+            src={capturedImage}
+            alt="Captured"
             className="w-full h-full object-contain"
           />
         ) : (
@@ -298,7 +306,9 @@ export default function AddWorkerForm({
       }
 
       // Generate worker ID if it's a new worker
-      const generatedId = isExistingWorker ? values.workerId : generateWorkerId(values.name, existingWorkers);
+      const generatedId = isExistingWorker
+        ? values.workerId
+        : generateWorkerId(values.name, existingWorkers);
 
       const response = await fetch(`/api/projects/${projectId}/workers`, {
         method: "POST",
@@ -404,7 +414,7 @@ export default function AddWorkerForm({
                 </FormLabel>
                 <Select onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger className="bg-white/[0.15] border-0">
+                    <SelectTrigger className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]">
                       <SelectValue placeholder="Select a worker" />
                     </SelectTrigger>
                   </FormControl>
@@ -432,7 +442,7 @@ export default function AddWorkerForm({
                   <FormControl>
                     <Input
                       placeholder="Enter worker name"
-                      className="bg-white/[0.15] border-0"
+                      className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
                       {...field}
                     />
                   </FormControl>
@@ -448,7 +458,7 @@ export default function AddWorkerForm({
                   <FormLabel className="text-sm font-medium">Type</FormLabel>
                   <Select onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger className="bg-white/[0.15] border-0">
+                      <SelectTrigger className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]">
                         <SelectValue placeholder="Select worker type" />
                       </SelectTrigger>
                     </FormControl>
@@ -476,7 +486,7 @@ export default function AddWorkerForm({
                     <Input
                       type="number"
                       step="0.01"
-                      className="bg-white/[0.15] border-0"
+                      className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
                       placeholder="Enter hourly rate"
                       {...field}
                     />
@@ -495,7 +505,7 @@ export default function AddWorkerForm({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="bg-white/[0.15] border-0"
+                      className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
                       placeholder="Enter phone number"
                       {...field}
                     />
@@ -534,6 +544,7 @@ export default function AddWorkerForm({
                     <Input
                       type="file"
                       accept="image/*"
+                      className="w-[30%]"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
