@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { format } from "date-fns";
+import { format, parseISO, startOfDay } from "date-fns";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Calendar as CalendarIcon, Users, Camera } from "lucide-react";
@@ -39,7 +39,7 @@ interface Worker {
 
 interface AttendanceRecord {
   workerId: string;
-  date: string;
+  date: Date;
   present: boolean;
   hoursWorked: number;
   overtime: number;
@@ -49,7 +49,7 @@ interface AttendanceRecord {
 export default function AttendancePage() {
   const params = useParams();
   const [workers, setWorkers] = useState<Worker[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()));
   const [attendance, setAttendance] = useState<{
     [key: string]: AttendanceRecord;
   }>({});
@@ -82,9 +82,8 @@ export default function AttendancePage() {
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
-      // Make API calls in parallel
       const [workersResponse, attendanceResponse] = await Promise.all([
         fetchWorkers(),
         fetch(
@@ -92,20 +91,23 @@ export default function AttendancePage() {
         ).then((res) => res.json()),
       ]);
 
-      // Process attendance records on client
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
       const attendanceRecords = Array.isArray(attendanceResponse)
         ? attendanceResponse
         : [];
-      attendanceRecords.forEach((record: AttendanceRecord) => {
+      attendanceRecords.forEach((record: any) => {
         const worker = workersResponse.find(
           (w: Worker) => w.id === record.workerId
         );
+        const date = parseISO(record.date);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present
-          ? totalHours * (worker?.hourlyRate || 0)
-          : 0;
-        attendanceMap[record.workerId] = record;
+        attendanceMap[record.workerId] = {
+          ...record,
+          date,
+          dailyIncome: record.present
+            ? totalHours * (worker?.hourlyRate || 0)
+            : 0,
+        };
       });
 
       setWorkers(workersResponse);
@@ -124,7 +126,7 @@ export default function AttendancePage() {
     setAttendance((prev) => {
       const current = prev[workerId] || {
         workerId,
-        date: format(selectedDate, "yyyy-MM-dd"),
+        date: selectedDate,
         present: false,
         hoursWorked: 0,
         overtime: 0,
@@ -170,7 +172,7 @@ export default function AttendancePage() {
         },
         body: JSON.stringify({
           projectId: params.id,
-          date: format(selectedDate, "yyyy-MM-dd"),
+          date: format(selectedDate, 'yyyy-MM-dd'),
           records,
         }),
       });
@@ -184,22 +186,26 @@ export default function AttendancePage() {
         id: toastId,
       });
 
-      // Refresh attendance data to ensure we have the latest state
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
       const attendanceResponse = await fetch(
         `/api/attendance?projectId=${params.id}&date=${formattedDate}`
       ).then((res) => res.json());
+      
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
       const attendanceRecords = Array.isArray(attendanceResponse)
         ? attendanceResponse
         : [];
-      attendanceRecords.forEach((record: AttendanceRecord) => {
+      attendanceRecords.forEach((record: any) => {
         const worker = workers.find((w) => w.id === record.workerId);
+        const date = parseISO(record.date);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present
-          ? totalHours * (worker?.hourlyRate || 0)
-          : 0;
-        attendanceMap[record.workerId] = record;
+        attendanceMap[record.workerId] = {
+          ...record,
+          date,
+          dailyIncome: record.present
+            ? totalHours * (worker?.hourlyRate || 0)
+            : 0,
+        };
       });
       setAttendance(attendanceMap);
     } catch (error) {
@@ -216,7 +222,6 @@ export default function AttendancePage() {
   };
 
   const handleFaceRecognition = async (attendance: any) => {
-    // Update attendance state with the new record
     setAttendance((prev) => ({
       ...prev,
       [attendance.workerId]: {

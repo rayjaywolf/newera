@@ -14,12 +14,22 @@ export async function GET(req: Request) {
             );
         }
 
-        // Parse the date string in UTC to avoid timezone issues
+        // Create UTC date from the date string
         const date = new Date(dateStr);
-        // Set to start of day in local timezone
-        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        // Set to start of next day in local timezone
-        const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        // Set to start of day in UTC
+        const startDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            0, 0, 0
+        ));
+        // Set to end of day in UTC
+        const endDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate() + 1,
+            0, 0, 0
+        ));
 
         // First, ensure we only get attendance records for existing workers
         const validWorkers = await prisma.worker.findMany({
@@ -88,10 +98,15 @@ export async function POST(req: Request) {
             );
         }
 
-        // Parse the date string in UTC to avoid timezone issues
+        // Create UTC date from the date string
         const date = new Date(dateStr);
-        // Set to start of day in local timezone
-        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // Set to start of day in UTC
+        const startDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+            0, 0, 0
+        ));
 
         // First, ensure we only process records for existing workers
         const validWorkers = await prisma.worker.findMany({
@@ -113,7 +128,7 @@ export async function POST(req: Request) {
                         },
                     });
                 }
-                
+
                 // For present workers, create or update the record
                 return prisma.attendance.upsert({
                     where: {
