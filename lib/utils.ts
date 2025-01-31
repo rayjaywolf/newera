@@ -9,8 +9,7 @@ export function formatDate(date: Date) {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    day: 'numeric'
   }).format(new Date(date))
 }
 
