@@ -10,8 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface Worker {
@@ -19,9 +20,9 @@ interface Worker {
   worker: {
     id: string;
     name: string;
-    role: string;
     isActive: boolean;
     type: string;
+    photoUrl?: string | null;
   };
   startDate: string;
   endDate: string | null;
@@ -87,33 +88,49 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
             <Link
               key={projectWorker.workerId}
               href={`/projects/${projectId}/workers/${projectWorker.workerId}`}
-              className="flex items-start justify-between rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
+              className="flex items-start gap-4 rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
             >
-              <div>
-                <p className="font-medium text-lg">{projectWorker.worker.name}</p>
-                <p className="text-sm text-gray-500 capitalize mt-1">
-                  {projectWorker.worker.type.toLowerCase().replace("_", " ")}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Since {formatDate(projectWorker.startDate)}
-                </p>
-                {projectWorker.endDate && (
-                  <p className="text-sm text-gray-500">
-                    Until {formatDate(projectWorker.endDate)}
-                  </p>
+              <Avatar className="h-12 w-12">
+                {projectWorker.worker.photoUrl ? (
+                  <AvatarImage 
+                    src={projectWorker.worker.photoUrl} 
+                    alt={projectWorker.worker.name} 
+                  />
+                ) : (
+                  <AvatarFallback className="bg-black/[0.08] text-gray-500">
+                    {getInitials(projectWorker.worker.name)}
+                  </AvatarFallback>
                 )}
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium text-lg">{projectWorker.worker.name}</p>
+                    <p className="text-sm text-gray-500 capitalize mt-1">
+                      {projectWorker.worker.type.toLowerCase().replace("_", " ")}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Since {formatDate(projectWorker.startDate)}
+                    </p>
+                    {projectWorker.endDate && (
+                      <p className="text-sm text-gray-500">
+                        Until {formatDate(projectWorker.endDate)}
+                      </p>
+                    )}
+                  </div>
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "h-fit",
+                      projectWorker.worker.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-700"
+                    )}
+                  >
+                    {projectWorker.worker.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
               </div>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "h-fit",
-                  projectWorker.worker.isActive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                )}
-              >
-                {projectWorker.worker.isActive ? "Active" : "Inactive"}
-              </Badge>
             </Link>
           ))}
         </div>
@@ -166,8 +183,22 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                   }
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium">
-                      {projectWorker.worker.name}
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        {projectWorker.worker.photoUrl ? (
+                          <AvatarImage 
+                            src={projectWorker.worker.photoUrl} 
+                            alt={projectWorker.worker.name} 
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-black/[0.08] text-gray-500">
+                            {getInitials(projectWorker.worker.name)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="text-sm font-medium">
+                        {projectWorker.worker.name}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

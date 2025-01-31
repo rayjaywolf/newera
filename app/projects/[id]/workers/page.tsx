@@ -39,7 +39,15 @@ async function getProject(id: string) {
           endDate: null // Only get currently assigned workers
         },
         include: {
-          worker: true,
+          worker: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              isActive: true,
+              photoUrl: true,
+            }
+          },
         },
         orderBy: {
           startDate: "desc",

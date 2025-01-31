@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Camera } from "lucide-react";
+import React from "react";
 
 // Function to generate a worker ID from name
 function generateWorkerId(name: string, existingWorkers: Worker[]) {
@@ -57,6 +60,197 @@ const workerSchema = z.object({
 interface AddWorkerFormProps {
   projectId: string;
   existingWorkers: Worker[];
+}
+
+// Add this new component for camera capture
+function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState<string>("");
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string>("");
+
+  // Get list of available cameras
+  const getCameras = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setCameras(videoDevices);
+      if (videoDevices.length > 0) {
+        setSelectedCamera(videoDevices[0].deviceId);
+      }
+    } catch (err) {
+      console.error("Error getting cameras:", err);
+      setError("Failed to get list of cameras");
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      
+      const newStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          deviceId: selectedCamera ? { exact: selectedCamera } : undefined,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      setStream(newStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+      }
+      setError("");
+      setCapturedImage(null);
+    } catch (err) {
+      setError("Failed to access camera. Please ensure camera permissions are granted.");
+      console.error("Error accessing camera:", err);
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setCapturedImage(null);
+  };
+
+  const retakePhoto = () => {
+    setCapturedImage(null);
+    startCamera();
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Draw the video frame to the canvas
+    ctx.drawImage(videoRef.current, 0, 0);
+
+    // Set the captured image preview
+    const imageDataUrl = canvas.toDataURL('image/jpeg');
+    setCapturedImage(imageDataUrl);
+
+    // Convert the canvas to a blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], "worker-photo.jpg", { type: "image/jpeg" });
+        onCapture(file);
+      }
+    }, 'image/jpeg', 0.8);
+  };
+
+  // Initialize camera list
+  useEffect(() => {
+    getCameras();
+    // Listen for device changes
+    navigator.mediaDevices.addEventListener('devicechange', getCameras);
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', getCameras);
+      stopCamera();
+    };
+  }, []);
+
+  // Start camera when device is selected
+  useEffect(() => {
+    if (selectedCamera) {
+      startCamera();
+    }
+  }, [selectedCamera]);
+
+  return (
+    <div className="space-y-4">
+      {error && (
+        <p className="text-sm text-red-500 text-center">{error}</p>
+      )}
+      
+      {/* Camera Selection */}
+      {cameras.length > 1 && !capturedImage && (
+        <Select value={selectedCamera} onValueChange={setSelectedCamera}>
+          <SelectTrigger className="bg-white/[0.15] border-0">
+            <SelectValue placeholder="Select a camera" />
+          </SelectTrigger>
+          <SelectContent>
+            {cameras.map((camera) => (
+              <SelectItem key={camera.deviceId} value={camera.deviceId}>
+                {camera.label || `Camera ${camera.deviceId.slice(0, 5)}...`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
+      {/* Camera Preview / Captured Image */}
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-black/[0.15] border border-[rgba(0,0,0,0.08)]">
+        {capturedImage ? (
+          <img 
+            src={capturedImage} 
+            alt="Captured" 
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-center gap-4">
+        {!stream && !capturedImage ? (
+          <Button
+            type="button"
+            onClick={startCamera}
+            className="bg-black text-white hover:bg-white hover:text-[#E65F2B] transition-colors"
+          >
+            <Camera className="mr-2 h-4 w-4" />
+            Start Camera
+          </Button>
+        ) : capturedImage ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={retakePhoto}
+              className="border-black/20 hover:border-black transition-colors"
+            >
+              Retake Photo
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={stopCamera}
+              className="border-black/20 hover:border-black transition-colors"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={capturePhoto}
+              className="bg-black text-white hover:bg-white hover:text-[#E65F2B] transition-colors"
+            >
+              Take Photo
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function AddWorkerForm({
@@ -313,16 +507,46 @@ export default function AddWorkerForm({
             <FormItem>
               <FormLabel>Reference Photo (Optional)</FormLabel>
               <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setPhotoFile(file);
-                    }
-                  }}
-                />
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-fit">
+                    <TabsTrigger
+                      value="upload"
+                      className={cn(
+                        "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                        "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                      )}
+                    >
+                      Upload File
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="camera"
+                      className={cn(
+                        "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                        "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                      )}
+                    >
+                      <Camera className="mr-2 h-4 w-4" />
+                      Use Camera
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="upload">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPhotoFile(file);
+                        }
+                      }}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="camera">
+                    <CameraCapture onCapture={(file) => setPhotoFile(file)} />
+                  </TabsContent>
+                </Tabs>
               </FormControl>
               <FormMessage />
             </FormItem>
