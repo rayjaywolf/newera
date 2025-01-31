@@ -46,7 +46,7 @@ export async function POST(
 ) {
     try {
         const body = await req.json()
-        const { workerId, name, type, hourlyRate, phoneNumber, isExisting, photoUrl } = body
+        const { id, workerId, name, type, hourlyRate, phoneNumber, isExisting, photoUrl } = body
 
         if (isExisting && workerId) {
             // Assign existing worker to project
@@ -59,9 +59,10 @@ export async function POST(
             });
             return NextResponse.json({ success: true, id: workerId });
         } else {
-            // Create new worker and assign to project
+            // Create new worker with custom ID
             const worker = await prisma.worker.create({
                 data: {
+                    id, // Use the custom generated ID
                     name,
                     type,
                     hourlyRate,

@@ -26,6 +26,25 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Function to generate a worker ID from name
+function generateWorkerId(name: string, existingWorkers: Worker[]) {
+  // Convert name to lowercase, remove spaces and special characters
+  const baseId = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+  // Check if this base ID already exists
+  const similarIds = existingWorkers
+    .map(w => w.id)
+    .filter(id => id.startsWith(baseId));
+  
+  // If no similar IDs exist, use the base ID
+  if (similarIds.length === 0) {
+    return baseId;
+  }
+  
+  // If similar IDs exist, add a number suffix
+  return `${baseId}${similarIds.length + 1}`;
+}
+
 const workerSchema = z.object({
   workerId: z.string().optional(),
   name: z.string().min(1, "Name is required"),
@@ -84,6 +103,9 @@ export default function AddWorkerForm({
         photoUrl = url;
       }
 
+      // Generate worker ID if it's a new worker
+      const generatedId = isExistingWorker ? values.workerId : generateWorkerId(values.name, existingWorkers);
+
       const response = await fetch(`/api/projects/${projectId}/workers`, {
         method: "POST",
         headers: {
@@ -91,6 +113,7 @@ export default function AddWorkerForm({
         },
         body: JSON.stringify({
           ...values,
+          id: generatedId,
           hourlyRate: parseFloat(values.hourlyRate),
           isExisting: isExistingWorker,
           photoUrl,
@@ -101,13 +124,13 @@ export default function AddWorkerForm({
         throw new Error("Failed to add worker");
       }
 
-      const { id: workerId } = await response.json();
+      const { id: newWorkerId } = await response.json();
 
       // Index the worker's face if photo was uploaded
-      if (photoFile && workerId) {
+      if (photoFile && newWorkerId) {
         const faceFormData = new FormData();
         faceFormData.append("photo", photoFile);
-        faceFormData.append("workerId", workerId);
+        faceFormData.append("workerId", newWorkerId);
 
         const faceResponse = await fetch("/api/workers/index-face", {
           method: "POST",
@@ -123,7 +146,7 @@ export default function AddWorkerForm({
         const { faceId } = await faceResponse.json();
 
         // Update worker with faceId
-        const updateResponse = await fetch(`/api/workers/${workerId}`, {
+        const updateResponse = await fetch(`/api/workers/${newWorkerId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",

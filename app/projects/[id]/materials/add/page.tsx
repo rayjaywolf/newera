@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { MaterialType } from "@prisma/client";
+import { generateMaterialId } from "@/lib/id-generators";
 
 interface AddMaterialPageProps {
   params: {
@@ -41,6 +42,7 @@ async function addMaterial(formData: FormData) {
 
   await prisma.materialUsage.create({
     data: {
+      id: generateMaterialId(type),
       type,
       volume,
       cost,
@@ -49,7 +51,7 @@ async function addMaterial(formData: FormData) {
     },
   });
 
-  redirect(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}/materials`);
 }
 
 export default function AddMaterialPage({ params }: AddMaterialPageProps) {

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import { generateMachineryId } from "@/lib/id-generators";
 
 export async function addMachinery(formData: FormData) {
   const projectId = formData.get("projectId") as string;
@@ -18,6 +19,7 @@ export async function addMachinery(formData: FormData) {
 
   await prisma.machineryUsage.create({
     data: {
+      id: generateMachineryId(type, jcbSubtype, slmSubtype),
       type,
       jcbSubtype,
       slmSubtype,
@@ -29,5 +31,5 @@ export async function addMachinery(formData: FormData) {
     },
   });
 
-  redirect(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}/machinery`);
 }

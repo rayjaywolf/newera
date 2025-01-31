@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistance } from "date-fns";
 import cn from "classnames";
+import { Button } from "@/components/ui/button";
 
 type Project = {
   id: string;
@@ -76,7 +77,15 @@ export default function ProjectsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Projects</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Projects</h1>
+        <Button
+          onClick={() => router.push('/projects/create')}
+          className="bg-black text-white font-semibold hover:bg-white hover:text-primary-accent transition-colors"
+        >
+          Add Project
+        </Button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
           <Card

@@ -1,18 +1,56 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AttendanceCameraProps {
   projectId: string;
   onSuccess: (attendance: any) => void;
 }
 
+interface VideoDevice {
+  deviceId: string;
+  label: string;
+}
+
 export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps) {
   const webcamRef = useRef<Webcam>(null);
   const [capturing, setCapturing] = useState(false);
+  const [devices, setDevices] = useState<VideoDevice[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<string>("");
+
+  const handleDevices = useCallback((mediaDevices: MediaDeviceInfo[]) => {
+    const videoDevices = mediaDevices
+      .filter(({ kind }) => kind === "videoinput")
+      .map(({ deviceId, label }) => ({
+        deviceId,
+        label: label || `Camera ${devices.length + 1}`,
+      }));
+    setDevices(videoDevices);
+    // Set first device as default if no device is selected
+    if (videoDevices.length > 0 && !selectedDevice) {
+      setSelectedDevice(videoDevices[0].deviceId);
+    }
+  }, [devices.length, selectedDevice]);
+
+  useEffect(() => {
+    // Get list of video devices
+    navigator.mediaDevices.enumerateDevices()
+      .then(handleDevices)
+      .catch(error => {
+        console.error("Error getting devices:", error);
+        toast.error("Failed to get camera devices");
+      });
+  }, [handleDevices]);
 
   const captureAndVerify = useCallback(async () => {
     if (!webcamRef.current) return;
@@ -65,15 +103,40 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
 
   return (
     <div className="flex flex-col items-center gap-4">
+      {devices.length > 1 && (
+        <div className="w-full max-w-xs">
+          <Select
+            value={selectedDevice}
+            onValueChange={setSelectedDevice}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select camera" />
+            </SelectTrigger>
+            <SelectContent>
+              {devices.map(({ deviceId, label }) => (
+                <SelectItem key={deviceId} value={deviceId}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         className="rounded-lg border"
+        videoConstraints={{
+          deviceId: selectedDevice,
+          width: 1280,
+          height: 720,
+        }}
       />
       <Button 
         onClick={captureAndVerify} 
         disabled={capturing}
+        className="bg-black text-white font-semibold hover:bg-white hover:text-primary-accent transition-colors"
       >
         {capturing ? "Processing..." : "Capture & Verify"}
       </Button>
