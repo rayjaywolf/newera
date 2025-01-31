@@ -26,12 +26,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AttendanceCamera } from "@/components/attendance/attendance-camera";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 interface Worker {
   id: string;
   name: string;
   type: string;
   hourlyRate: number;
+  photoUrl?: string | null;
 }
 
 interface AttendanceRecord {
@@ -408,21 +411,38 @@ export default function AttendancePage() {
                   </thead>
                   <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
                     {workers.map((worker) => {
-                      const record = attendance[worker.id];
+                      const record = attendance[worker.id] || {
+                        present: false,
+                        hoursWorked: 0,
+                        overtime: 0,
+                        dailyIncome: 0,
+                      };
+
                       return (
                         <tr
                           key={worker.id}
-                          className="hover:bg-muted/30 transition-colors"
+                          className="border-b border-[rgba(0,0,0,0.08)]"
                         >
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
-                            <Link
-                              href={`/projects/${params.id}/workers/${worker.id}`}
-                              className="hover:underline cursor-pointer"
-                            >
-                              {worker.name}
-                            </Link>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                {worker.photoUrl ? (
+                                  <AvatarImage src={worker.photoUrl} alt={worker.name} />
+                                ) : (
+                                  <AvatarFallback className="bg-black/[0.08] text-gray-500">
+                                    {getInitials(worker.name)}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <Link
+                                href={`/projects/${params.id}/workers/${worker.id}`}
+                                className="font-medium hover:text-[#E65F2B] transition-colors"
+                              >
+                                {worker.name}
+                              </Link>
+                            </div>
                           </td>
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                               {worker.type}
                             </span>
@@ -430,7 +450,7 @@ export default function AttendancePage() {
                           <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex justify-center">
                               <Checkbox
-                                checked={record?.present || false}
+                                checked={record.present}
                                 onCheckedChange={(checked) =>
                                   handleAttendanceChange(
                                     worker.id,
@@ -450,7 +470,7 @@ export default function AttendancePage() {
                             <div className="flex justify-center">
                               <Input
                                 type="number"
-                                value={record?.hoursWorked || ""}
+                                value={record.hoursWorked || ""}
                                 onChange={(e) =>
                                   handleAttendanceChange(
                                     worker.id,
@@ -470,7 +490,7 @@ export default function AttendancePage() {
                             <div className="flex justify-center">
                               <Input
                                 type="number"
-                                value={record?.overtime || ""}
+                                value={record.overtime || ""}
                                 onChange={(e) =>
                                   handleAttendanceChange(
                                     worker.id,
@@ -490,12 +510,12 @@ export default function AttendancePage() {
                             <span
                               className={cn(
                                 "font-medium",
-                                record?.dailyIncome
+                                record.dailyIncome
                                   ? "text-[#E65F2B]"
                                   : "text-muted-foreground"
                               )}
                             >
-                              ₹{record?.dailyIncome?.toFixed(2) || "0.00"}
+                              ₹{record.dailyIncome?.toFixed(2) || "0.00"}
                             </span>
                           </td>
                         </tr>
