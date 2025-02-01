@@ -110,10 +110,10 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-8">
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-xl">
               <Package2 className="h-5 w-5" />
               Materials
@@ -218,7 +218,7 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
           <div className="sm:hidden mb-4">
             <Link
               href={`/projects/${params.id}/materials/add`}
-              className="w-full inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 -mt-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
+              className="w-full inline-flex items-center justify-center gap-1 rounded-md bg-[#060606] px-3 py-2 -mt-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
             >
               <Plus className="h-4 w-4" />
               Add Material

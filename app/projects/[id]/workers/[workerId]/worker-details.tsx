@@ -137,12 +137,12 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-8">
       {/* Worker Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-6">
               {worker.photoUrl ? (
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={worker.photoUrl} alt={worker.name} />
@@ -167,7 +167,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 </CardDescription>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-start sm:items-center gap-4">
               <Badge
                 variant="outline"
                 className={cn(

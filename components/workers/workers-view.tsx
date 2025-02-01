@@ -88,7 +88,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
             <Link
               key={projectWorker.workerId}
               href={`/projects/${projectId}/workers/${projectWorker.workerId}`}
-              className="flex items-start gap-4 rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
+              className="flex items-start sm:items-center gap-4 rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
             >
               <Avatar className="h-12 w-12">
                 {projectWorker.worker.photoUrl ? (
@@ -103,7 +103,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                 )}
               </Avatar>
               <div className="flex-1">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4">
                   <div>
                     <p className="font-medium text-lg">
                       {projectWorker.worker.name}
@@ -186,9 +186,9 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                     )
                   }
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <Avatar>
+                      <Avatar className="h-8 w-8 sm:h-12 sm:w-12">
                         {projectWorker.worker.photoUrl ? (
                           <AvatarImage
                             src={projectWorker.worker.photoUrl}
@@ -205,22 +205,22 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 sm:py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500 capitalize">
                       {projectWorker.worker.type
                         .toLowerCase()
                         .replace("_", " ")}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(projectWorker.startDate)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-500">
                     {projectWorker.endDate
                       ? formatDate(projectWorker.endDate)
                       : "-"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 sm:py-4 whitespace-nowrap">
                     <Badge
                       variant="secondary"
                       className={cn(

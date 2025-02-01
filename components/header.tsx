@@ -44,17 +44,17 @@ export function ProjectHeader() {
 
   return (
     <>
-      <div className="flex h-16 items-center justify-between border-b border-[rgba(0,0,0,0.08)] px-8 sm:px-8 px-6">
-        <div className="flex items-center gap-4">
+      <div className="flex h-16 items-center justify-between border-b border-[rgba(0,0,0,0.08)] px-4 sm:px-8 px-6">
+        <div className="flex items-center gap-3">
           {/* Mobile sidebar toggle: visible only on mobile */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
-            className="sm:hidden p-2"
+            className="sm:hidden p-0 "
           >
             <PanelRight className="h-6 w-6 text-[#060606]" />{" "}
             {/* updated color */}
           </button>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <h1 className="text-xl font-semibold">Dashboard</h1>
         </div>
         <div className="flex items-center gap-4">
           <form onSubmit={handleSearch} className="relative hidden sm:block">
@@ -89,9 +89,8 @@ export function ProjectHeader() {
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="w-64 bg-primary-text border-r border-[rgba(0,0,0,0.08)]">
-            {/* Updated header with logo and close icon */}
             <div className="p-4 flex items-center justify-between">
-              <Link href={`/projects`}>
+              <Link href={`/projects`} className="pl-3">
                 <Image
                   src="/logo-expanded-dark.png"
                   alt="New Era Construction"

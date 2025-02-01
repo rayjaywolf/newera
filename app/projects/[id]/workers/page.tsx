@@ -67,7 +67,7 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-8">
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">

@@ -44,8 +44,8 @@ async function getProject(id: string) {
       workers: {
         where: {
           worker: {
-            isActive: true
-          }
+            isActive: true,
+          },
         },
         include: {
           worker: true,
@@ -110,7 +110,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             <div>
               <h3 className="text-sm font-medium text-gray-500">Location</h3>
               <p className="mt-1 text-lg font-medium">{project.location}</p>
@@ -189,7 +189,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <Users className="h-5 w-5" />
               Workers
             </CardTitle>
