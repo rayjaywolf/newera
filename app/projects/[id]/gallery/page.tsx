@@ -458,7 +458,33 @@ export default function GalleryPage() {
       >
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 mb-4">
+              <TabsList className="flex p-1 bg-black/10 rounded-lg w-full sm:w-fit mb-4 sm:mb-0">
+                <TabsTrigger
+                  value="gallery"
+                  className={cn(
+                    "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                    "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <ImagePlus className="h-4 w-4" />
+                    Gallery
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="workers"
+                  className={cn(
+                    "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                    "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Workers
+                  </span>
+                </TabsTrigger>
+              </TabsList>
               <div>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   {activeTab === "gallery" ? (
@@ -476,122 +502,96 @@ export default function GalleryPage() {
                     : "View worker attendance photos"}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-4">
-                {activeTab === "gallery" && (
-                  <>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleUpload}
-                      disabled={isUploading}
-                      className="max-w-[500px]"
-                    />
-                    <Button disabled={isUploading}>
-                      {isUploading ? (
-                        <>
-                          <Upload className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <ImagePlus className="mr-2 h-4 w-4" />
-                          Upload Images
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
-                <TabsList className="flex p-1 bg-black/10 rounded-lg w-fit">
-                  <TabsTrigger
-                    value="gallery"
-                    className={cn(
-                      "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
-                      "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+              {activeTab === "gallery" && (
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleUpload}
+                    disabled={isUploading}
+                    className="w-full sm:max-w-[500px]"
+                  />
+                  <Button disabled={isUploading}>
+                    {isUploading ? (
+                      <>
+                        <Upload className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <ImagePlus className="mr-2 h-4 w-4" />
+                        Upload Images
+                      </>
                     )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <ImagePlus className="h-4 w-4" />
-                      Gallery
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="workers"
-                    className={cn(
-                      "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
-                      "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Workers
-                    </span>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
         </Card>
 
         <TabsContent value="gallery" className="mt-6">
-          {Object.entries(groupedImages).map(([date, dateImages]) => (
-            <Card
-              key={date}
-              className="bg-white/[0.34] border-0 shadow-none mb-6"
-            >
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-medium text-gray-700">
-                  {date}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {dateImages.map((image) => (
-                    <div
-                      key={image.id}
-                      className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
-                    >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Object.entries(groupedImages).map(([date, dateImages]) => (
+              <Card
+                key={date}
+                className="bg-white/[0.34] border-0 shadow-none mb-6"
+              >
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-medium text-gray-700">
+                    {date}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {dateImages.map((image) => (
                       <div
-                        className="relative aspect-video cursor-pointer"
-                        onClick={() =>
-                          setSelectedImage(findImageIndexInAllImages(image))
-                        }
+                        key={image.id}
+                        className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
                       >
-                        <Image
-                          src={image.url}
-                          alt={image.filename}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                          <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </div>
-                      <div className="p-3 flex justify-between items-start">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-gray-700 truncate">
-                            {image.filename}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(image.createdAt).toLocaleTimeString()}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => setImageToDelete(image)}
+                        <div
+                          className="relative aspect-video cursor-pointer"
+                          onClick={() =>
+                            setSelectedImage(findImageIndexInAllImages(image))
+                          }
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <Image
+                            src={image.url}
+                            alt={image.filename}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                            <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                        <div className="p-3 flex justify-between items-start">
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700 truncate">
+                              {image.filename}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(image.createdAt).toLocaleTimeString()}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => setImageToDelete(image)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="workers" className="mt-6">
@@ -754,54 +754,56 @@ export default function GalleryPage() {
             </CardContent>
           </Card>
 
-          {Object.entries(groupedAttendance).map(([date, records]) => (
-            <Card
-              key={date}
-              className="bg-white/[0.34] border-0 shadow-none mb-6"
-            >
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-medium text-gray-700">
-                  {date}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {records.map((record) => (
-                    <div
-                      key={record.id}
-                      className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
-                    >
-                      <div className="relative aspect-video">
-                        <Image
-                          src={record.photoUrl}
-                          alt={record.worker.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </div>
-                      <div className="p-3 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <p className="text-sm font-medium text-gray-700">
-                            {record.worker.name}
-                          </p>
-                          <div className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">
-                            {record.confidence > 99.99
-                              ? "100%"
-                              : `${record.confidence.toFixed(2)}%`}{" "}
-                            Match
-                          </div>
+          <div className="overflow-x-auto">
+            {Object.entries(groupedAttendance).map(([date, records]) => (
+              <Card
+                key={date}
+                className="bg-white/[0.34] border-0 shadow-none mb-6"
+              >
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-medium text-gray-700">
+                    {date}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {records.map((record) => (
+                      <div
+                        key={record.id}
+                        className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
+                      >
+                        <div className="relative aspect-video">
+                          <Image
+                            src={record.photoUrl}
+                            alt={record.worker.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
                         </div>
-                        <p className="text-xs text-gray-500">
-                          {new Date(record.createdAt).toLocaleTimeString()}
-                        </p>
+                        <div className="p-3 space-y-2">
+                          <div className="flex justify-between items-start">
+                            <p className="text-sm font-medium text-gray-700">
+                              {record.worker.name}
+                            </p>
+                            <div className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">
+                              {record.confidence > 99.99
+                                ? "100%"
+                                : `${record.confidence.toFixed(2)}%`}{" "}
+                              Match
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {new Date(record.createdAt).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 

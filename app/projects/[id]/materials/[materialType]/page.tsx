@@ -142,13 +142,15 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
   const materialTypeUpperCase = materialType.toUpperCase();
 
   return (
-    <div className="p-8 space-y-8">
+    // Updated container with responsive padding and spacing
+    <div className="p-4 sm:p-8 space-y-4 sm:space-y-8">
       {/* Material Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-3xl font-bold flex items-center gap-2">
+              {/* Adjusted title font size for mobile */}
+              <CardTitle className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Package2 className="h-7 w-7" />
                 {materialTypeUpperCase.toLowerCase().replace("_", " ")}
               </CardTitle>
@@ -158,14 +160,15 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
             </div>
             <Badge
               variant="outline"
-              className="px-4 py-1.5 border-gray-500 text-gray-500"
+              className="hidden sm:inline-block px-4 py-1.5 border-gray-500 text-gray-500"
             >
               Last Updated: {formatDate(material.lastUpdated)}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <dl className="grid gap-8 sm:grid-cols-3">
+          {/* Updated grid gap for responsive layout */}
+          <dl className="grid gap-4 sm:gap-8 sm:grid-cols-3">
             <div>
               <dt className="font-medium text-gray-500 mb-1 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
@@ -205,7 +208,8 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Adjusted grid gap for mobile responsiveness */}
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <Clock className="h-4 w-4" />

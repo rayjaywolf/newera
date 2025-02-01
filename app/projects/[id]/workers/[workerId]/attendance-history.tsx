@@ -1,14 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { DateRangeFilter } from '@/components/date-range-filter';
-import { formatDate } from '@/lib/utils';
-import { Calendar } from 'lucide-react';
-import {
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { DateRangeFilter } from "@/components/date-range-filter";
+import { formatDate } from "@/lib/utils";
+import { Calendar } from "lucide-react";
+import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface AttendanceHistoryProps {
   projectId: string;
@@ -28,9 +24,11 @@ export default function AttendanceHistory({
   useEffect(() => {
     const fetchAllAttendance = async () => {
       const params = new URLSearchParams();
-      params.append('projectId', projectId);
-      params.append('workerId', workerId);
-      const response = await fetch(`/api/workers/attendance?${params.toString()}`);
+      params.append("projectId", projectId);
+      params.append("workerId", workerId);
+      const response = await fetch(
+        `/api/workers/attendance?${params.toString()}`
+      );
       const allData = await response.json();
       setAttendance(allData);
     };
@@ -42,12 +40,14 @@ export default function AttendanceHistory({
     to: Date | undefined;
   }) => {
     const params = new URLSearchParams();
-    params.append('projectId', projectId);
-    params.append('workerId', workerId);
-    if (range.from) params.append('fromDate', range.from.toISOString());
-    if (range.to) params.append('toDate', range.to.toISOString());
+    params.append("projectId", projectId);
+    params.append("workerId", workerId);
+    if (range.from) params.append("fromDate", range.from.toISOString());
+    if (range.to) params.append("toDate", range.to.toISOString());
 
-    const response = await fetch(`/api/workers/attendance?${params.toString()}`);
+    const response = await fetch(
+      `/api/workers/attendance?${params.toString()}`
+    );
     const newData = await response.json();
     setAttendance(newData);
   };
@@ -57,7 +57,7 @@ export default function AttendanceHistory({
       <CardHeader className="pb-6">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-3 text-xl">
-            <Calendar className="h-5 w-5" />
+            <Calendar className="hidden sm:block h-5 w-5" />
             Attendance Records
           </CardTitle>
           <DateRangeFilter onRangeChange={handleDateRangeChange} />
@@ -93,8 +93,12 @@ export default function AttendanceHistory({
                     key={record.id}
                     className="border-b border-[rgb(0,0,0,0.08)] hover:bg-white/[0.15]"
                   >
-                    <td className="py-4 px-6 text-left">{formatDate(record.date)}</td>
-                    <td className="py-4 px-6 text-center">{record.hoursWorked}</td>
+                    <td className="py-4 px-6 text-left">
+                      {formatDate(record.date)}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {record.hoursWorked}
+                    </td>
                     <td className="py-4 px-6 text-center">{record.overtime}</td>
                     <td className="py-4 px-6 text-right">
                       ₹

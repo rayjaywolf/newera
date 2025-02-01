@@ -113,14 +113,15 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
     <div className="p-8 space-y-8">
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-xl">
               <Package2 className="h-5 w-5" />
               Materials
             </CardTitle>
+            {/* Hide button on mobile */}
             <Link
               href={`/projects/${params.id}/materials/add`}
-              className="inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
+              className="hidden sm:inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
             >
               <Plus className="h-4 w-4" />
               Add Material
@@ -128,7 +129,7 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <div className="h-8 w-8 text-[#E65F2B] flex items-center justify-center text-2xl font-bold">
                 ₹
@@ -213,7 +214,16 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
               </div>
             </div>
           </div>
-
+          {/* Mobile-only Add Material button */}
+          <div className="sm:hidden mb-4">
+            <Link
+              href={`/projects/${params.id}/materials/add`}
+              className="w-full inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 -mt-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
+            >
+              <Plus className="h-4 w-4" />
+              Add Material
+            </Link>
+          </div>
           {project.aggregatedMaterials.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500">

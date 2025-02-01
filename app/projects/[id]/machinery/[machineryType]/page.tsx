@@ -137,11 +137,12 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
   };
 
   return (
-    <div className="p-8 space-y-8">
+    // Updated container with responsive padding
+    <div className="p-4 sm:p-8 space-y-8">
       {/* Machinery Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
             <div>
               <CardTitle className="text-3xl font-bold flex items-center gap-2">
                 <Truck className="h-7 w-7" />
@@ -152,8 +153,9 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
               </CardDescription>
             </div>
             <Badge
+              // Updated Badge to hide on mobile
               variant="outline"
-              className="px-4 py-1.5 border-gray-500 text-gray-500"
+              className="hidden sm:inline-block px-4 py-1.5 border-gray-500 text-gray-500"
             >
               Last Used: {formatDate(machinery.lastUpdated)}
             </Badge>

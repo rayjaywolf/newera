@@ -56,7 +56,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
   };
 
   return (
-    <div>
+    <div className="p">
       <div className="flex items-center gap-4 mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -92,9 +92,9 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
             >
               <Avatar className="h-12 w-12">
                 {projectWorker.worker.photoUrl ? (
-                  <AvatarImage 
-                    src={projectWorker.worker.photoUrl} 
-                    alt={projectWorker.worker.name} 
+                  <AvatarImage
+                    src={projectWorker.worker.photoUrl}
+                    alt={projectWorker.worker.name}
                   />
                 ) : (
                   <AvatarFallback className="bg-black/[0.08] text-gray-500">
@@ -105,9 +105,13 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-lg">{projectWorker.worker.name}</p>
+                    <p className="font-medium text-lg">
+                      {projectWorker.worker.name}
+                    </p>
                     <p className="text-sm text-gray-500 capitalize mt-1">
-                      {projectWorker.worker.type.toLowerCase().replace("_", " ")}
+                      {projectWorker.worker.type
+                        .toLowerCase()
+                        .replace("_", " ")}
                     </p>
                     <p className="text-sm text-gray-500 mt-2">
                       Since {formatDate(projectWorker.startDate)}
@@ -135,7 +139,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-white/[0.15]">
+        <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-white/[0.15] overflow-x-auto">
           <table className="min-w-full divide-y divide-[rgba(0,0,0,0.08)]">
             <thead>
               <tr>
@@ -186,9 +190,9 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                     <div className="flex items-center gap-3">
                       <Avatar>
                         {projectWorker.worker.photoUrl ? (
-                          <AvatarImage 
-                            src={projectWorker.worker.photoUrl} 
-                            alt={projectWorker.worker.name} 
+                          <AvatarImage
+                            src={projectWorker.worker.photoUrl}
+                            alt={projectWorker.worker.name}
                           />
                         ) : (
                           <AvatarFallback className="bg-black/[0.08] text-gray-500">
@@ -203,14 +207,18 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500 capitalize">
-                      {projectWorker.worker.type.toLowerCase().replace("_", " ")}
+                      {projectWorker.worker.type
+                        .toLowerCase()
+                        .replace("_", " ")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(projectWorker.startDate)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {projectWorker.endDate ? formatDate(projectWorker.endDate) : "-"}
+                    {projectWorker.endDate
+                      ? formatDate(projectWorker.endDate)
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Badge

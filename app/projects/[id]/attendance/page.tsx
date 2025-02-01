@@ -239,63 +239,63 @@ export default function AttendancePage() {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-8">
+      <div className="p-4 md:p-8 space-y-4 md:space-y-8">
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
               <div className="space-y-2">
-                <Skeleton className="h-8 w-48 bg-black/[0.08]" />
-                <Skeleton className="h-4 w-64 bg-black/[0.08]" />
+                <Skeleton className="h-8 w-32 md:w-48 bg-black/[0.08]" />
+                <Skeleton className="h-4 w-48 md:w-64 bg-black/[0.08]" />
               </div>
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-40 bg-black/[0.08]" />
-                <Skeleton className="h-10 w-32 bg-black/[0.08]" />
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mt-4 md:mt-0">
+                <Skeleton className="h-10 w-32 md:w-40 bg-black/[0.08]" />
+                <Skeleton className="h-10 w-24 md:w-32 bg-black/[0.08]" />
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="mt-4 rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
               <div className="w-full overflow-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-white/[0.15]">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
-                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      <th className="px-4 md:px-6 py-2 md:py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-16 md:w-24 bg-black/[0.08]" />
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
-                        <Skeleton className="h-4 w-20 bg-black/[0.08]" />
+                      <th className="px-4 md:px-6 py-2 md:py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-16 md:w-20 bg-black/[0.08]" />
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
-                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      <th className="px-4 md:px-6 py-2 md:py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-16 md:w-24 bg-black/[0.08]" />
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
-                        <Skeleton className="h-4 w-28 bg-black/[0.08]" />
+                      <th className="px-4 md:px-6 py-2 md:py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-20 md:w-28 bg-black/[0.08]" />
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
-                        <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                      <th className="px-4 md:px-6 py-2 md:py-4 text-left text-sm font-medium text-gray-500">
+                        <Skeleton className="h-4 w-16 md:w-24 bg-black/[0.08]" />
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
                     {[...Array(5)].map((_, i) => (
                       <tr key={i}>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-32 bg-black/[0.08]" />
-                            <Skeleton className="h-4 w-16 bg-black/[0.08]" />
+                            <Skeleton className="h-4 w-24 md:w-32 bg-black/[0.08]" />
+                            <Skeleton className="h-4 w-12 md:w-16 bg-black/[0.08]" />
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
                           <Skeleton className="h-5 w-5 bg-black/[0.08]" />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Skeleton className="h-9 w-24 bg-black/[0.08]" />
+                        <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                          <Skeleton className="h-9 w-20 md:w-24 bg-black/[0.08]" />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Skeleton className="h-9 w-24 bg-black/[0.08]" />
+                        <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                          <Skeleton className="h-9 w-20 md:w-24 bg-black/[0.08]" />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Skeleton className="h-4 w-20 bg-black/[0.08]" />
+                        <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                          <Skeleton className="h-4 w-16 md:w-20 bg-black/[0.08]" />
                         </td>
                       </tr>
                     ))}
@@ -310,25 +310,25 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-8">
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-3xl font-bold">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
                 Daily Attendance
               </CardTitle>
               <CardDescription>
                 Manage worker attendance and hours
               </CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <Popover>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mt-4 md:mt-0 w-full md:w-auto">
+              <Popover className="w-full md:w-auto">
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-[240px] justify-start text-left font-normal border-black/20",
+                      "w-full md:w-auto justify-start text-left font-normal border-black/20",
                       "hover:border-black transition-colors bg-transparent",
                       !selectedDate && "text-muted-foreground"
                     )}
@@ -341,7 +341,7 @@ export default function AttendancePage() {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-full md:w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={selectedDate}
@@ -356,7 +356,7 @@ export default function AttendancePage() {
                 onClick={saveAttendance}
                 disabled={isSaving}
                 className={cn(
-                  "bg-[#060606] text-white font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
+                  "w-full md:w-auto bg-[#060606] text-white font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
                 )}
               >
@@ -367,11 +367,11 @@ export default function AttendancePage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manual" className="w-full">
-            <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-fit">
+            <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-full md:w-fit">
               <TabsTrigger
                 value="manual"
                 className={cn(
-                  "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                  "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                   "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
                 )}
               >
@@ -383,7 +383,7 @@ export default function AttendancePage() {
               <TabsTrigger
                 value="facial"
                 className={cn(
-                  "rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                  "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                   "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
                 )}
               >
@@ -396,152 +396,154 @@ export default function AttendancePage() {
 
             <TabsContent value="manual">
               <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[rgba(0,0,0,0.08)]">
-                      <th className="w-[16.66%] px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Name
-                      </th>
-                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Worker Type
-                      </th>
-                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Present
-                      </th>
-                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Hours Worked
-                      </th>
-                      <th className="w-[16.66%] px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Overtime
-                      </th>
-                      <th className="w-[16.66%] px-6 py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                        Daily Income
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
-                    {workers.map((worker) => {
-                      const record = attendance[worker.id] || {
-                        present: false,
-                        hoursWorked: 0,
-                        overtime: 0,
-                        dailyIncome: 0,
-                      };
+                <div className="w-full overflow-auto">
+                  <table className="w-full min-w-[600px]">
+                    <thead>
+                      <tr className="border-b border-[rgba(0,0,0,0.08)]">
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Name
+                        </th>
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Worker Type
+                        </th>
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Present
+                        </th>
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Hours Worked
+                        </th>
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Overtime
+                        </th>
+                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Daily Income
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
+                      {workers.map((worker) => {
+                        const record = attendance[worker.id] || {
+                          present: false,
+                          hoursWorked: 0,
+                          overtime: 0,
+                          dailyIncome: 0,
+                        };
 
-                      return (
-                        <tr
-                          key={worker.id}
-                          className="border-b border-[rgba(0,0,0,0.08)]"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar>
-                                {worker.photoUrl ? (
-                                  <AvatarImage
-                                    src={worker.photoUrl}
-                                    alt={worker.name}
-                                  />
-                                ) : (
-                                  <AvatarFallback className="bg-black/[0.08] text-gray-500">
-                                    {getInitials(worker.name)}
-                                  </AvatarFallback>
+                        return (
+                          <tr
+                            key={worker.id}
+                            className="border-b border-[rgba(0,0,0,0.08)]"
+                          >
+                            <td className="px-4 md:px-6 py-2 md:py-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  {worker.photoUrl ? (
+                                    <AvatarImage
+                                      src={worker.photoUrl}
+                                      alt={worker.name}
+                                    />
+                                  ) : (
+                                    <AvatarFallback className="bg-black/[0.08] text-gray-500">
+                                      {getInitials(worker.name)}
+                                    </AvatarFallback>
+                                  )}
+                                </Avatar>
+                                <Link
+                                  href={`/projects/${params.id}/workers/${worker.id}`}
+                                  className="font-medium hover:text-[#E65F2B] transition-colors"
+                                >
+                                  {worker.name}
+                                </Link>
+                              </div>
+                            </td>
+                            <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                                {worker.type}
+                              </span>
+                            </td>
+                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-center">
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={record.present}
+                                  onCheckedChange={(checked) =>
+                                    handleAttendanceChange(
+                                      worker.id,
+                                      "present",
+                                      checked
+                                    )
+                                  }
+                                  className={cn(
+                                    "h-5 w-5 border border-black/20 rounded-sm shadow-none",
+                                    "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
+                                    "hover:border-black transition-colors"
+                                  )}
+                                />
+                              </div>
+                            </td>
+                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                              <div className="flex justify-center">
+                                <Input
+                                  type="number"
+                                  value={record.hoursWorked || ""}
+                                  onChange={(e) =>
+                                    handleAttendanceChange(
+                                      worker.id,
+                                      "hoursWorked",
+                                      parseFloat(e.target.value)
+                                    )
+                                  }
+                                  className={cn(
+                                    "h-8 w-16 md:w-20 text-center",
+                                    "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                    "border-black/20 focus-visible:border-black"
+                                  )}
+                                />
+                              </div>
+                            </td>
+                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                              <div className="flex justify-center">
+                                <Input
+                                  type="number"
+                                  value={record.overtime || ""}
+                                  onChange={(e) =>
+                                    handleAttendanceChange(
+                                      worker.id,
+                                      "overtime",
+                                      parseFloat(e.target.value)
+                                    )
+                                  }
+                                  className={cn(
+                                    "h-8 w-16 md:w-20 text-center",
+                                    "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                    "border-black/20 focus-visible:border-black"
+                                  )}
+                                />
+                              </div>
+                            </td>
+                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-right">
+                              <span
+                                className={cn(
+                                  "font-medium",
+                                  record.dailyIncome
+                                    ? "text-[#E65F2B]"
+                                    : "text-muted-foreground"
                                 )}
-                              </Avatar>
-                              <Link
-                                href={`/projects/${params.id}/workers/${worker.id}`}
-                                className="font-medium hover:text-[#E65F2B] transition-colors"
                               >
-                                {worker.name}
-                              </Link>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                              {worker.type}
-                            </span>
-                          </td>
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-center">
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={record.present}
-                                onCheckedChange={(checked) =>
-                                  handleAttendanceChange(
-                                    worker.id,
-                                    "present",
-                                    checked
-                                  )
-                                }
-                                className={cn(
-                                  "h-5 w-5 border border-black/20 rounded-sm shadow-none",
-                                  "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
-                                  "hover:border-black transition-colors"
-                                )}
-                              />
-                            </div>
-                          </td>
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap">
-                            <div className="flex justify-center">
-                              <Input
-                                type="number"
-                                value={record.hoursWorked || ""}
-                                onChange={(e) =>
-                                  handleAttendanceChange(
-                                    worker.id,
-                                    "hoursWorked",
-                                    parseFloat(e.target.value)
-                                  )
-                                }
-                                className={cn(
-                                  "h-8 w-20 text-center",
-                                  "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                  "border-black/20 focus-visible:border-black"
-                                )}
-                              />
-                            </div>
-                          </td>
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap">
-                            <div className="flex justify-center">
-                              <Input
-                                type="number"
-                                value={record.overtime || ""}
-                                onChange={(e) =>
-                                  handleAttendanceChange(
-                                    worker.id,
-                                    "overtime",
-                                    parseFloat(e.target.value)
-                                  )
-                                }
-                                className={cn(
-                                  "h-8 w-20 text-center",
-                                  "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                  "border-black/20 focus-visible:border-black"
-                                )}
-                              />
-                            </div>
-                          </td>
-                          <td className="w-[16.66%] px-6 py-4 whitespace-nowrap text-right">
-                            <span
-                              className={cn(
-                                "font-medium",
-                                record.dailyIncome
-                                  ? "text-[#E65F2B]"
-                                  : "text-muted-foreground"
-                              )}
-                            >
-                              ₹{record.dailyIncome?.toFixed(2) || "0.00"}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                ₹{record.dailyIncome?.toFixed(2) || "0.00"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="facial">
-              <div className="rounded-lg border border-[rgba(0,0,0,0.08)] p-6">
-                <div className="max-w-2xl mx-auto">
+              <div className="rounded-lg border border-[rgba(0,0,0,0.08)] p-4 md:p-6">
+                <div className="max-w-full md:max-w-2xl mx-auto">
                   <AttendanceCamera
                     projectId={params.id as string}
                     onSuccess={handleFaceRecognition}

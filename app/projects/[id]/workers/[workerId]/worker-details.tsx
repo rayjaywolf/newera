@@ -141,7 +141,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
       {/* Worker Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               {worker.photoUrl ? (
                 <Avatar className="h-20 w-20">
@@ -227,7 +227,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-3 text-xl">
-            <UserCheck className="h-5 w-5" />
+            {/* Icon hidden on mobile */}
+            <UserCheck className="hidden sm:block h-5 w-5" />
             Attendance Statistics{" "}
             <span className="text-gray-500 text-sm font-medium">
               (this month)
@@ -238,7 +239,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
               <div className="flex items-center gap-3 text-gray-500">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4 w-4 " />
                 <span>Working Days</span>
               </div>
               <p className="text-2xl font-semibold">{fullMonthWorkingDays}</p>
@@ -284,7 +285,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
         <CardHeader className="pb-6">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-3 text-xl">
-              <Wallet className="h-5 w-5" />
+              {/* Icon hidden on mobile */}
+              <Wallet className="hidden sm:block h-5 w-5" />
               Earnings and Advances
             </CardTitle>
             <AddAdvanceDialog
