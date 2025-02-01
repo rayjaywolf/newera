@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 async function getWorkerDetails(projectId: string, workerId: string) {
-  return await prisma.worker.findUnique({
+  const worker = await prisma.worker.findUnique({
     where: { id: workerId },
     include: {
       assignments: {
@@ -47,6 +47,20 @@ async function getWorkerDetails(projectId: string, workerId: string) {
       },
     },
   });
+
+  if (worker) {
+    worker.attendance = worker.attendance.map((attendance) => ({
+      ...attendance,
+      date: new Date(attendance.date).toLocaleString(),
+    }));
+
+    worker.advances = worker.advances.map((advance) => ({
+      ...advance,
+      date: new Date(advance.date).toLocaleString(),
+    }));
+  }
+
+  return worker;
 }
 
 export default async function WorkerPage({ params }: WorkerPageProps) {

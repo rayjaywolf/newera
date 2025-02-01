@@ -10,7 +10,14 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Wallet, Calendar, UserCheck, UserX, Percent } from "lucide-react";
+import {
+  Clock,
+  Wallet,
+  Calendar,
+  UserCheck,
+  UserX,
+  Percent,
+} from "lucide-react";
 import cn from "classnames";
 import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
 import { UploadPhotoDialog } from "@/components/workers/upload-photo-dialog";
@@ -28,7 +35,7 @@ interface WorkerDetailsProps {
 function getWorkingDaysInMonth(year: number, month: number): number {
   const date = new Date(year, month, 1);
   let workingDays = 0;
-  
+
   while (date.getMonth() === month) {
     // Skip Sundays (0 is Sunday)
     if (date.getDay() !== 0) {
@@ -36,7 +43,7 @@ function getWorkingDaysInMonth(year: number, month: number): number {
     }
     date.setDate(date.getDate() + 1);
   }
-  
+
   return workingDays;
 }
 
@@ -44,9 +51,12 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   const router = useRouter();
   const { id: projectId, workerId } = params;
 
-  const AttendanceHistoryWithFilter = dynamic(() => import("./attendance-history"), {
-    ssr: false,
-  });
+  const AttendanceHistoryWithFilter = dynamic(
+    () => import("./attendance-history"),
+    {
+      ssr: false,
+    }
+  );
 
   const currentMonthAttendance = worker.attendance;
   const currentMonthAdvances = worker.advances;
@@ -55,7 +65,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
-  
+
   const totalWorkingDays = getWorkingDaysInMonth(currentYear, currentMonth);
   const daysPresent = currentMonthAttendance.length;
   const allowedHolidays = 4; // 4 Sundays per month
@@ -138,14 +148,14 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <div>
                   <dt className="font-medium text-gray-500 mb-1">Start Date</dt>
                   <dd className="text-lg">
-                    {formatDate(worker.assignments[0].startDate)}
+                    {new Date(worker.assignments[0].startDate).toLocaleString()}
                   </dd>
                 </div>
                 {worker.assignments[0].endDate && (
                   <div>
                     <dt className="font-medium text-gray-500 mb-1">End Date</dt>
                     <dd className="text-lg">
-                      {formatDate(worker.assignments[0].endDate)}
+                      {new Date(worker.assignments[0].endDate).toLocaleString()}
                     </dd>
                   </div>
                 )}
@@ -189,7 +199,9 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <span>Days Absent</span>
               </div>
               <p className="text-2xl font-semibold">{totalAbsents}</p>
-              <p className="text-sm text-gray-500">Excluding {allowedHolidays} holidays</p>
+              <p className="text-sm text-gray-500">
+                Excluding {allowedHolidays} holidays
+              </p>
             </div>
 
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
@@ -197,7 +209,9 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <Percent className="h-4 w-4" />
                 <span>Attendance Rate</span>
               </div>
-              <p className="text-2xl font-semibold">{attendancePercentage.toFixed(1)}%</p>
+              <p className="text-2xl font-semibold">
+                {attendancePercentage.toFixed(1)}%
+              </p>
               <p className="text-sm text-gray-500">Monthly average</p>
             </div>
           </div>
@@ -258,7 +272,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                   : `₹${monthlyAdvances.toFixed(2)}`}
               </p>
               <p className="text-sm text-gray-500">
-                Balance: {remainingBalance % 1 === 0
+                Balance:{" "}
+                {remainingBalance % 1 === 0
                   ? `₹${remainingBalance.toFixed(0)}`
                   : `₹${remainingBalance.toFixed(2)}`}
               </p>
@@ -269,7 +284,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
 
       {/* Attendance Records Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <AttendanceHistoryWithFilter 
+        <AttendanceHistoryWithFilter
           projectId={projectId}
           workerId={workerId}
           worker={worker}
@@ -278,4 +293,4 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
       </Card>
     </div>
   );
-} 
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DateRangeFilter } from '@/components/date-range-filter';
 import { formatDate } from '@/lib/utils';
 import { Calendar } from 'lucide-react';
@@ -24,6 +24,18 @@ export default function AttendanceHistory({
   initialData,
 }: AttendanceHistoryProps) {
   const [attendance, setAttendance] = useState(initialData);
+
+  useEffect(() => {
+    const fetchAllAttendance = async () => {
+      const params = new URLSearchParams();
+      params.append('projectId', projectId);
+      params.append('workerId', workerId);
+      const response = await fetch(`/api/workers/attendance?${params.toString()}`);
+      const allData = await response.json();
+      setAttendance(allData);
+    };
+    fetchAllAttendance();
+  }, [projectId, workerId]);
 
   const handleDateRangeChange = async (range: {
     from: Date | undefined;

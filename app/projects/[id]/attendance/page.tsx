@@ -99,6 +99,7 @@ export default function AttendancePage() {
         ? attendanceResponse
         : [];
       attendanceRecords.forEach((record: AttendanceRecord) => {
+        const localDate = new Date(record.date).toLocaleString();
         const worker = workersResponse.find(
           (w: Worker) => w.id === record.workerId
         );
@@ -106,7 +107,7 @@ export default function AttendancePage() {
         record.dailyIncome = record.present
           ? totalHours * (worker?.hourlyRate || 0)
           : 0;
-        attendanceMap[record.workerId] = record;
+        attendanceMap[record.workerId] = { ...record, date: localDate };
       });
 
       setWorkers(workersResponse);
@@ -202,12 +203,13 @@ export default function AttendancePage() {
         ? attendanceResponse
         : [];
       attendanceRecords.forEach((record: AttendanceRecord) => {
+        const localDate = new Date(record.date).toLocaleString();
         const worker = workers.find((w) => w.id === record.workerId);
         const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
         record.dailyIncome = record.present
           ? totalHours * (worker?.hourlyRate || 0)
           : 0;
-        attendanceMap[record.workerId] = record;
+        attendanceMap[record.workerId] = { ...record, date: localDate };
       });
       setAttendance(attendanceMap);
     } catch (error) {
