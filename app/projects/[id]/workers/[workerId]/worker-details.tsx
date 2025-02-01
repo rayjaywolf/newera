@@ -32,18 +32,20 @@ interface WorkerDetailsProps {
   };
 }
 
-function getWorkingDaysInMonth(year: number, month: number): number {
-  const date = new Date(year, month, 1);
+/**
+ * Returns the number of working days between two dates (inclusive)
+ * by skipping Sundays.
+ */
+function getWorkingDays(start: Date, end: Date): number {
   let workingDays = 0;
-
-  while (date.getMonth() === month) {
-    // Skip Sundays (0 is Sunday)
+  const date = new Date(start);
+  while (date <= end) {
+    // Exclude Sundays (0 represents Sunday)
     if (date.getDay() !== 0) {
       workingDays++;
     }
     date.setDate(date.getDate() + 1);
   }
-
   return workingDays;
 }
 
@@ -53,25 +55,48 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
 
   const AttendanceHistoryWithFilter = dynamic(
     () => import("./attendance-history"),
-    {
-      ssr: false,
-    }
+    { ssr: false }
   );
 
+  // Attendance and advances for the current month
   const currentMonthAttendance = worker.attendance;
   const currentMonthAdvances = worker.advances;
 
-  // Calculate attendance statistics
+  // Get current date info
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  const totalWorkingDays = getWorkingDaysInMonth(currentYear, currentMonth);
-  const daysPresent = currentMonthAttendance.length;
-  const allowedHolidays = 4; // 4 Sundays per month
-  const totalAbsents = Math.max(0, totalWorkingDays - daysPresent);
-  const attendancePercentage = (daysPresent / totalWorkingDays) * 100;
+  // Calculate full month details (for reference)
+  const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const fullMonthWorkingDays = totalDaysInMonth - 4; // as per your fixed holiday rule
 
+  // Define the effective period for calculating attendance so far.
+  // The effective start is the later of the 1st of the month or the worker's join date.
+  const startOfMonth = new Date(currentYear, currentMonth, 1);
+  const joinDate = new Date(worker.assignments[0].startDate);
+  const effectiveStart = joinDate > startOfMonth ? joinDate : startOfMonth;
+
+  // The effective end is the current date, so that only days that have passed are considered.
+  const effectiveEnd = currentDate;
+
+  // Calculate elapsed working days (up to today) by skipping Sundays.
+  const elapsedWorkingDays = getWorkingDays(effectiveStart, effectiveEnd);
+
+  // Count days present within the elapsed period.
+  const daysPresent = currentMonthAttendance.filter((record) => {
+    const recordDate = new Date(record.date);
+    return recordDate >= effectiveStart && recordDate <= effectiveEnd;
+  }).length;
+
+  // Calculate days absent as the elapsed working days minus the days present.
+  const daysAbsent = Math.max(0, elapsedWorkingDays - daysPresent);
+
+  // Attendance percentage based on days that have already passed.
+  const attendancePercentage =
+    elapsedWorkingDays > 0 ? (daysPresent / elapsedWorkingDays) * 100 : 0;
+
+  // Calculate hours, overtime, earnings, and advances (for the full month)
   const totalHours = currentMonthAttendance.reduce(
     (acc, record) => acc + record.hoursWorked,
     0
@@ -170,7 +195,10 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
         <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-3 text-xl">
             <UserCheck className="h-5 w-5" />
-            Attendance Statistics
+            Attendance Statistics{" "}
+            <span className="text-gray-500 text-sm font-regular">
+              (this month)
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -180,8 +208,10 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <Calendar className="h-4 w-4" />
                 <span>Working Days</span>
               </div>
-              <p className="text-2xl font-semibold">{totalWorkingDays}</p>
-              <p className="text-sm text-gray-500">This month</p>
+              <p className="text-2xl font-semibold">{fullMonthWorkingDays}</p>
+              <p className="text-sm text-gray-500">
+                Total working days in month
+              </p>
             </div>
 
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
@@ -190,7 +220,9 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <span>Days Present</span>
               </div>
               <p className="text-2xl font-semibold">{daysPresent}</p>
-              <p className="text-sm text-gray-500">Out of {totalWorkingDays}</p>
+              <p className="text-sm text-gray-500">
+                Attendance recorded up to today
+              </p>
             </div>
 
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
@@ -198,10 +230,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <UserX className="h-4 w-4" />
                 <span>Days Absent</span>
               </div>
-              <p className="text-2xl font-semibold">{totalAbsents}</p>
-              <p className="text-sm text-gray-500">
-                Excluding {allowedHolidays} holidays
-              </p>
+              <p className="text-2xl font-semibold">{daysAbsent}</p>
+              <p className="text-sm text-gray-500">Absences so far</p>
             </div>
 
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
@@ -212,7 +242,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
               <p className="text-2xl font-semibold">
                 {attendancePercentage.toFixed(1)}%
               </p>
-              <p className="text-sm text-gray-500">Monthly average</p>
+              <p className="text-sm text-gray-500">Based on days elapsed</p>
             </div>
           </div>
         </CardContent>

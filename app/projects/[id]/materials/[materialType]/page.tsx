@@ -36,15 +36,15 @@ export const metadata: Metadata = {
 };
 
 const unitMapping = {
-  STEEL: 'kg',
-  CEMENT: 'kg',
-  SAND: 'cubic feet',
-  GRIT_10MM: 'cubic feet',
-  GRIT_20MM: 'cubic feet',
-  GRIT_40MM: 'cubic feet',
-  BRICK: 'number',
-  STONE: 'cubic feet',
-  WATER: 'litre',
+  STEEL: "kg",
+  CEMENT: "kg",
+  SAND: "cubic feet",
+  GRIT_10MM: "cubic feet",
+  GRIT_20MM: "cubic feet",
+  GRIT_40MM: "cubic feet",
+  BRICK: "number",
+  STONE: "cubic feet",
+  WATER: "litre",
 };
 
 async function getMaterialDetails(
@@ -53,12 +53,15 @@ async function getMaterialDetails(
   fromDate?: Date,
   toDate?: Date
 ) {
-  const dateFilter = fromDate && toDate ? {
-    date: {
-      gte: fromDate,
-      lte: toDate,
-    },
-  } : {};
+  const dateFilter =
+    fromDate && toDate
+      ? {
+          date: {
+            gte: fromDate,
+            lte: toDate,
+          },
+        }
+      : {};
 
   const materials = await prisma.materialUsage.findMany({
     where: {
@@ -113,7 +116,7 @@ async function getMaterialDetails(
 
 export default async function MaterialPage({ params }: MaterialPageProps) {
   const { id: projectId, materialType } = params;
-  
+
   // Create a client component wrapper for the date filter
   const UsageHistoryWithFilter = dynamic(() => import("./usage-history"), {
     ssr: false,
@@ -177,7 +180,10 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 <Clock className="h-4 w-4" />
                 Total Volume
               </dt>
-              <dd className="text-lg">{material.totalVolume} {unitMapping[materialTypeUpperCase] || 'units'}</dd>
+              <dd className="text-lg">
+                {material.totalVolume}{" "}
+                {unitMapping[materialTypeUpperCase] || "units"}
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500 mb-1 flex items-center gap-2">
@@ -192,7 +198,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
 
       {/* Monthly Overview Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Calendar className="h-5 w-5" />
             Monthly Overview
@@ -200,16 +206,17 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Monthly Volume
               </p>
               <p className="text-2xl font-semibold mt-2">
-                {material.monthlyVolume} {unitMapping[materialTypeUpperCase] || 'units'}
+                {material.monthlyVolume}{" "}
+                {unitMapping[materialTypeUpperCase] || "units"}
               </p>
             </div>
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <IndianRupee className="h-4 w-4" />
                 Monthly Cost
@@ -218,14 +225,14 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
                 {formatCurrency(material.monthlyCost)}
               </p>
             </div>
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Monthly Rate
               </p>
               <p className="text-2xl font-semibold mt-2">
-                {formatCurrency(material.monthlyCost / material.monthlyVolume)}
-                /{unitMapping[materialTypeUpperCase] || 'unit'}
+                {formatCurrency(material.monthlyCost / material.monthlyVolume)}/
+                {unitMapping[materialTypeUpperCase] || "unit"}
               </p>
             </div>
           </div>
@@ -234,7 +241,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
 
       {/* Usage History Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <UsageHistoryWithFilter 
+        <UsageHistoryWithFilter
           projectId={projectId}
           materialType={decodeURIComponent(materialType)}
           initialData={material}

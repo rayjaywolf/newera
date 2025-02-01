@@ -48,8 +48,8 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
       ...(type === "JCB" && subtype
         ? { jcbSubtype: subtype as JCBSubtype }
         : type === "SLM" && subtype
-          ? { slmSubtype: subtype as SLMSubtype }
-          : {}),
+        ? { slmSubtype: subtype as SLMSubtype }
+        : {}),
     },
     orderBy: {
       date: "desc",
@@ -190,7 +190,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
 
       {/* Monthly Overview Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Calendar className="h-5 w-5" />
             Monthly Overview
@@ -198,7 +198,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Monthly Hours
@@ -207,7 +207,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
                 {machinery.monthlyHours} hrs
               </p>
             </div>
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <IndianRupee className="h-4 w-4" />
                 Monthly Cost
@@ -216,7 +216,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
                 {formatCurrency(machinery.monthlyCost)}
               </p>
             </div>
-            <div className="rounded-lg bg-white/[0.15] p-4">
+            <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Monthly Rate
@@ -231,7 +231,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
 
       {/* Usage History Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
-        <UsageHistoryWithFilter 
+        <UsageHistoryWithFilter
           projectId={projectId}
           machineryType={machineryType}
           initialData={machinery}
