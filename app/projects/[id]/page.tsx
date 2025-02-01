@@ -80,16 +80,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const isAdmin = await checkRole("admin");
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 lg:space-y-8">
       {/* Project Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-3xl font-bold">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
                 {project.projectId}
               </CardTitle>
-              <CardDescription className="text-lg mt-1">
+              <CardDescription className="text-base md:text-lg mt-1">
                 {project.clientName}
               </CardDescription>
             </div>
@@ -110,7 +110,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             <div>
               <h3 className="text-sm font-medium text-gray-500">Location</h3>
               <p className="mt-1 text-lg font-medium">{project.location}</p>
@@ -145,7 +145,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </div>
           </div>
 
-          <div className="mt-8 grid grid-cols-3 gap-4">
+          <div className="mt-6 md:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href={`/projects/${project.id}/workers`}>
               <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
                 <Users className="h-8 w-8 text-[#E65F2B]" />
@@ -259,8 +259,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <table className="w-full min-w-[640px] table-fixed">
               <thead>
                 <tr className="border-b border-[rgba(0,0,0,0.08)]">
                   <th className="text-left py-4 px-4 font-medium text-gray-500 w-1/4">
@@ -321,8 +321,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <table className="w-full min-w-[640px] table-fixed">
               <thead>
                 <tr className="border-b border-[rgba(0,0,0,0.08)]">
                   <th className="text-left py-4 px-4 font-medium text-gray-500 w-1/4">

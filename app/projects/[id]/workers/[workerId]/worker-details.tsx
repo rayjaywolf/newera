@@ -1,6 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { markWorkerInactive } from "./actions";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { formatDate, getInitials } from "@/lib/utils";
 import {
   Card,
@@ -23,6 +26,8 @@ import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
 import { UploadPhotoDialog } from "@/components/workers/upload-photo-dialog";
 import dynamic from "next/dynamic";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState } from "react";
+import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 
 interface WorkerDetailsProps {
   worker: any; // Replace with proper type
@@ -52,6 +57,21 @@ function getWorkingDays(start: Date, end: Date): number {
 export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   const router = useRouter();
   const { id: projectId, workerId } = params;
+  const [isDialogOpen, setDialogOpen] = useState(false);
+
+  const handleMarkInactive = async () => {
+    setDialogOpen(true);
+  };
+
+  const handleConfirmMarkInactive = async () => {
+    const result = await markWorkerInactive(workerId, projectId);
+    if (result.success) {
+      toast.success("Worker marked as inactive");
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to mark worker as inactive");
+    }
+  };
 
   const AttendanceHistoryWithFilter = dynamic(
     () => import("./attendance-history"),
@@ -147,17 +167,28 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 </CardDescription>
               </div>
             </div>
-            <Badge
-              variant="outline"
-              className={cn(
-                "px-6 py-2",
-                worker.assignments.length > 0
-                  ? "border-[#E65F2B] text-[#E65F2B]"
-                  : "border-gray-500 text-gray-500"
+            <div className="flex items-center gap-4">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "px-6 py-2",
+                  worker.isActive
+                    ? "border-[#E65F2B] text-[#E65F2B]"
+                    : "border-gray-500 text-gray-500"
+                )}
+              >
+                {worker.isActive ? "Active" : "Inactive"}
+              </Badge>
+              {worker.isActive && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleMarkInactive}
+                >
+                  Mark as Inactive
+                </Button>
               )}
-            >
-              {worker.assignments.length > 0 ? "Active" : "Inactive"}
-            </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -173,7 +204,9 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <div>
                   <dt className="font-medium text-gray-500 mb-1">Start Date</dt>
                   <dd className="text-lg">
-                    {new Date(worker.assignments[0].startDate).toLocaleDateString()}
+                    {new Date(
+                      worker.assignments[0].startDate
+                    ).toLocaleDateString()}
                   </dd>
                 </div>
                 {worker.assignments[0].endDate && (
@@ -319,6 +352,14 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
           initialData={currentMonthAttendance}
         />
       </Card>
+
+      <ConfirmationDialog
+        isOpen={isDialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={handleConfirmMarkInactive}
+        title="Confirm Mark as Inactive"
+        message="Are you sure you want to mark this worker as inactive?"
+      />
     </div>
   );
 }

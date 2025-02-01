@@ -21,12 +21,12 @@ export function ProjectHeader() {
   };
 
   return (
-    <div className="flex h-16 items-center justify-between border-b border-[rgba(0,0,0,0.08)] px-8">
+    <div className="flex h-16 items-center justify-between border-b border-[rgba(0,0,0,0.08)] px-8 sm:px-8 px-6">
       <div className="flex items-center gap-4">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
       </div>
       <div className="flex items-center gap-4">
-        <form onSubmit={handleSearch} className="relative">
+        <form onSubmit={handleSearch} className="relative hidden sm:block">
           <input
             type="text"
             placeholder="Search..."
@@ -36,18 +36,18 @@ export function ProjectHeader() {
           />
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </form>
-        <div className="flex items-center gap-3 bg-white p-2 px-3 rounded-full">
+        <div className="flex items-center gap-3 sm:bg-white sm:p-2 sm:px-3 sm:rounded-full">
           {isLoaded ? (
             <>
               <UserButton appearance={{}} />
-              <span className="text-sm font-medium text">
+              <span className="hidden sm:inline text-sm font-medium">
                 {user?.firstName} {user?.lastName}
               </span>
             </>
           ) : (
             <>
               <Skeleton className="h-8 w-8 rounded-full bg-black/[0.08]" />
-              <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+              <Skeleton className="hidden sm:block h-4 w-24 bg-black/[0.08]" />
             </>
           )}
         </div>

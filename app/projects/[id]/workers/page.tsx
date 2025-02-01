@@ -32,12 +32,7 @@ async function getProject(id: string) {
     where: { id },
     include: {
       workers: {
-        where: {
-          worker: {
-            isActive: true
-          },
-          endDate: null // Only get currently assigned workers
-        },
+        where: {},
         include: {
           worker: {
             select: {
@@ -46,12 +41,19 @@ async function getProject(id: string) {
               type: true,
               isActive: true,
               photoUrl: true,
-            }
+            },
           },
         },
-        orderBy: {
-          startDate: "desc",
-        },
+        orderBy: [
+          {
+            worker: {
+              isActive: "desc",
+            },
+          },
+          {
+            startDate: "desc",
+          },
+        ],
       },
     },
   });

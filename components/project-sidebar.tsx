@@ -55,7 +55,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="w-64 bg-primary-text border-r border-[rgba(0,0,0,0.08)]">
+    <div className="hidden md:block lg:w-64 bg-primary-text border-r border-[rgba(0,0,0,0.08)]">
       <nav className="flex flex-col h-full">
         <div className="pt-4 flex" width={90} height={20}>
           <Link href={`/projects`} className="mx-auto">
