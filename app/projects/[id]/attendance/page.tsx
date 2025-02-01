@@ -366,7 +366,6 @@ export default function AttendancePage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p>Current Local Time: {currentTime.toLocaleString()}</p>
           <Tabs defaultValue="manual" className="w-full">
             <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-fit">
               <TabsTrigger
@@ -438,7 +437,10 @@ export default function AttendancePage() {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 {worker.photoUrl ? (
-                                  <AvatarImage src={worker.photoUrl} alt={worker.name} />
+                                  <AvatarImage
+                                    src={worker.photoUrl}
+                                    alt={worker.name}
+                                  />
                                 ) : (
                                   <AvatarFallback className="bg-black/[0.08] text-gray-500">
                                     {getInitials(worker.name)}

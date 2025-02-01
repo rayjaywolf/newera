@@ -173,14 +173,14 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <div>
                   <dt className="font-medium text-gray-500 mb-1">Start Date</dt>
                   <dd className="text-lg">
-                    {new Date(worker.assignments[0].startDate).toLocaleString()}
+                    {new Date(worker.assignments[0].startDate).toLocaleDateString()}
                   </dd>
                 </div>
                 {worker.assignments[0].endDate && (
                   <div>
                     <dt className="font-medium text-gray-500 mb-1">End Date</dt>
                     <dd className="text-lg">
-                      {new Date(worker.assignments[0].endDate).toLocaleString()}
+                      {formatDate(worker.assignments[0].endDate)}
                     </dd>
                   </div>
                 )}
@@ -196,7 +196,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
           <CardTitle className="flex items-center gap-3 text-xl">
             <UserCheck className="h-5 w-5" />
             Attendance Statistics{" "}
-            <span className="text-gray-500 text-sm font-regular">
+            <span className="text-gray-500 text-sm font-medium">
               (this month)
             </span>
           </CardTitle>
@@ -220,9 +220,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 <span>Days Present</span>
               </div>
               <p className="text-2xl font-semibold">{daysPresent}</p>
-              <p className="text-sm text-gray-500">
-                Attendance recorded up to today
-              </p>
+              <p className="text-sm text-gray-500">Recorded up to today</p>
             </div>
 
             <div className="p-6 rounded-lg bg-white/[0.15] space-y-3 border border-[rgba(0,0,0,0.08)]">
