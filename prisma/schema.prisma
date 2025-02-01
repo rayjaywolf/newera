@@ -93,7 +93,7 @@ model Attendance {
   workerId    String
   project     Project  @relation(fields: [projectId], references: [id])
   projectId   String
-  date        DateTime
+  date        DateTime @default(now())
   present     Boolean  @default(false)
   hoursWorked Float    @default(0)
   overtime    Float    @default(0)

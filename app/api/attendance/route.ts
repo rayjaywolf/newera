@@ -14,19 +14,12 @@ export async function GET(req: Request) {
             );
         }
 
-        // Parse the date string as UTC
+        // Parse the date string in UTC to avoid timezone issues
         const date = new Date(dateStr);
-        // Create UTC date range for the specified day
-        const startDate = new Date(Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate()
-        ));
-        const endDate = new Date(Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate() + 1
-        ));
+        // Set to start of day in local timezone
+        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // Set to start of next day in local timezone
+        const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
         // First, ensure we only get attendance records for existing workers
         const validWorkers = await prisma.worker.findMany({
@@ -95,14 +88,10 @@ export async function POST(req: Request) {
             );
         }
 
-        // Parse the date string as UTC
+        // Parse the date string in UTC to avoid timezone issues
         const date = new Date(dateStr);
-        // Create UTC date for the specified day
-        const startDate = new Date(Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate()
-        ));
+        // Set to start of day in local timezone
+        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
         // First, ensure we only process records for existing workers
         const validWorkers = await prisma.worker.findMany({
@@ -120,7 +109,7 @@ export async function POST(req: Request) {
                         where: {
                             workerId,
                             projectId,
-                            date: startDate,
+                            date: new Date(), // Use current timestamp to match createdAt
                         },
                     });
                 }
@@ -131,7 +120,7 @@ export async function POST(req: Request) {
                         workerId_projectId_date: {
                             workerId,
                             projectId,
-                            date: startDate,
+                            date: new Date(), // Use current timestamp to match createdAt
                         },
                     },
                     update: {
@@ -142,7 +131,7 @@ export async function POST(req: Request) {
                     create: {
                         workerId,
                         projectId,
-                        date: startDate,
+                        date: new Date(), // Use current timestamp to match createdAt
                         present,
                         hoursWorked: parseFloat(hoursWorked) || 0,
                         overtime: parseFloat(overtime) || 0,

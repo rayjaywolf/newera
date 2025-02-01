@@ -127,7 +127,7 @@ export async function POST(req: Request) {
       data: {
         workerId,
         projectId,
-        date: today,
+        date: new Date(),
         present: true,
         photoUrl: url,
         confidence,
