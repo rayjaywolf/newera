@@ -456,7 +456,7 @@ export default function GalleryPage() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        {/* New: Place the tabs switcher on top */}
+        {}
         <div className="flex justify-center mb-4">
           <TabsList className="flex p-1 bg-black/10 rounded-lg w-fit">
             <TabsTrigger

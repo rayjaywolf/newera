@@ -58,14 +58,12 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
 
   if (!machinery.length) return null;
 
-  // Calculate aggregated data
   const totalHours = machinery.reduce((acc, m) => acc + m.hoursUsed, 0);
   const totalCost = machinery.reduce((acc, m) => acc + m.totalCost, 0);
   const averageRate = Math.round(
     machinery.reduce((acc, m) => acc + m.hourlyRate, 0) / machinery.length
   );
 
-  // Calculate monthly usage
   const currentMonth = new Date();
   const monthStart = new Date(
     currentMonth.getFullYear(),
@@ -109,7 +107,6 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
 export default async function MachineryPage({ params }: MachineryPageProps) {
   const { id: projectId, machineryType } = params;
 
-  // Create a client component wrapper for the date filter
   const UsageHistoryWithFilter = dynamic(() => import("./usage-history"), {
     ssr: false,
   });
@@ -137,9 +134,8 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
   };
 
   return (
-    // Updated container with responsive padding
     <div className="p-4 sm:p-8 space-y-8">
-      {/* Machinery Details Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-2">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
@@ -153,7 +149,6 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
               </CardDescription>
             </div>
             <Badge
-              // Updated Badge to hide on mobile
               variant="outline"
               className="hidden sm:inline-block px-4 py-1.5 border-gray-500 text-gray-500"
             >
@@ -190,7 +185,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
         </CardContent>
       </Card>
 
-      {/* Monthly Overview Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-xl">
@@ -231,7 +226,7 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
         </CardContent>
       </Card>
 
-      {/* Usage History Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <UsageHistoryWithFilter
           projectId={projectId}

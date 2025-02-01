@@ -76,12 +76,10 @@ async function getMaterialDetails(
 
   if (!materials.length) return null;
 
-  // Calculate aggregated data
   const totalVolume = materials.reduce((acc, mat) => acc + mat.volume, 0);
   const totalCost = materials.reduce((acc, mat) => acc + mat.cost, 0);
   const averageRate = Math.round(totalCost / totalVolume);
 
-  // Calculate monthly usage
   const currentMonth = new Date();
   const monthStart = new Date(
     currentMonth.getFullYear(),
@@ -117,7 +115,6 @@ async function getMaterialDetails(
 export default async function MaterialPage({ params }: MaterialPageProps) {
   const { id: projectId, materialType } = params;
 
-  // Create a client component wrapper for the date filter
   const UsageHistoryWithFilter = dynamic(() => import("./usage-history"), {
     ssr: false,
   });
@@ -142,14 +139,13 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
   const materialTypeUpperCase = materialType.toUpperCase();
 
   return (
-    // Updated container with responsive padding and spacing
     <div className="p-4 sm:p-8 space-y-4 sm:space-y-8">
-      {/* Material Details Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              {/* Adjusted title font size for mobile */}
+              {}
               <CardTitle className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Package2 className="h-7 w-7" />
                 {materialTypeUpperCase.toLowerCase().replace("_", " ")}
@@ -167,7 +163,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Updated grid gap for responsive layout */}
+          {}
           <dl className="grid gap-4 sm:gap-8 sm:grid-cols-3">
             <div>
               <dt className="font-medium text-gray-500 mb-1 flex items-center gap-2">
@@ -199,7 +195,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
         </CardContent>
       </Card>
 
-      {/* Monthly Overview Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-xl">
@@ -208,7 +204,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Adjusted grid gap for mobile responsiveness */}
+          {}
           <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
               <p className="font-medium text-gray-500 flex items-center gap-2">
@@ -243,7 +239,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
         </CardContent>
       </Card>
 
-      {/* Usage History Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <UsageHistoryWithFilter
           projectId={projectId}

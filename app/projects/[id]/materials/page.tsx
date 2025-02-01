@@ -50,7 +50,6 @@ async function getProject(id: string) {
 
   if (!project) return null;
 
-  // Aggregate materials by type
   const aggregatedMaterials = project.materials.reduce((acc, material) => {
     if (!acc[material.type]) {
       acc[material.type] = {
@@ -66,7 +65,6 @@ async function getProject(id: string) {
     acc[material.type].totalCost += material.cost;
     acc[material.type].entries += 1;
 
-    // Keep the most recent date
     if (new Date(material.date) > new Date(acc[material.type].lastUpdated)) {
       acc[material.type].lastUpdated = material.date;
     }
@@ -118,7 +116,7 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
               <Package2 className="h-5 w-5" />
               Materials
             </CardTitle>
-            {/* Hide button on mobile */}
+            {}
             <Link
               href={`/projects/${params.id}/materials/add`}
               className="hidden sm:inline-flex items-center gap-1 rounded-md bg-[#060606] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white hover:text-[#E65F2B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
@@ -214,7 +212,7 @@ export default async function MaterialsPage({ params }: MaterialsPageProps) {
               </div>
             </div>
           </div>
-          {/* Mobile-only Add Material button */}
+          {}
           <div className="sm:hidden mb-4">
             <Link
               href={`/projects/${params.id}/materials/add`}

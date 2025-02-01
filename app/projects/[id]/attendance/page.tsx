@@ -85,7 +85,6 @@ export default function AttendancePage() {
       setLoading(true);
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
 
-      // Make API calls in parallel
       const [workersResponse, attendanceResponse] = await Promise.all([
         fetchWorkers(),
         fetch(
@@ -93,7 +92,6 @@ export default function AttendancePage() {
         ).then((res) => res.json()),
       ]);
 
-      // Process attendance records on client
       const attendanceMap: { [key: string]: AttendanceRecord } = {};
       const attendanceRecords = Array.isArray(attendanceResponse)
         ? attendanceResponse
@@ -193,7 +191,6 @@ export default function AttendancePage() {
         id: toastId,
       });
 
-      // Refresh attendance data to ensure we have the latest state
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
       const attendanceResponse = await fetch(
         `/api/attendance?projectId=${params.id}&date=${formattedDate}`
@@ -226,7 +223,6 @@ export default function AttendancePage() {
   };
 
   const handleFaceRecognition = async (attendance: any) => {
-    // Update attendance state with the new record
     setAttendance((prev) => ({
       ...prev,
       [attendance.workerId]: {

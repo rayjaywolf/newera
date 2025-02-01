@@ -81,7 +81,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 lg:space-y-8">
-      {/* Project Details Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {/* Workers Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -241,7 +241,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {/* Materials Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -303,7 +303,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {/* Machinery Card */}
+      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
