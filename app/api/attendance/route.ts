@@ -14,12 +14,19 @@ export async function GET(req: Request) {
             );
         }
 
-        // Parse the date string in UTC to avoid timezone issues
+        // Parse the date string as UTC
         const date = new Date(dateStr);
-        // Set to start of day in local timezone
-        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        // Set to start of next day in local timezone
-        const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        // Create UTC date range for the specified day
+        const startDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate()
+        ));
+        const endDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate() + 1
+        ));
 
         // First, ensure we only get attendance records for existing workers
         const validWorkers = await prisma.worker.findMany({
@@ -88,10 +95,14 @@ export async function POST(req: Request) {
             );
         }
 
-        // Parse the date string in UTC to avoid timezone issues
+        // Parse the date string as UTC
         const date = new Date(dateStr);
-        // Set to start of day in local timezone
-        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // Create UTC date for the specified day
+        const startDate = new Date(Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate()
+        ));
 
         // First, ensure we only process records for existing workers
         const validWorkers = await prisma.worker.findMany({

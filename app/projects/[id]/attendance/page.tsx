@@ -82,7 +82,13 @@ export default function AttendancePage() {
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true);
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      // Convert local date to UTC for API request
+      const utcDate = new Date(Date.UTC(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate()
+      ));
+      const formattedDate = format(utcDate, "yyyy-MM-dd");
 
       // Make API calls in parallel
       const [workersResponse, attendanceResponse] = await Promise.all([
