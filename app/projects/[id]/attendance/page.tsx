@@ -55,6 +55,7 @@ export default function AttendancePage() {
   }>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const fetchWorkers = async () => {
     try {
@@ -115,6 +116,13 @@ export default function AttendancePage() {
 
     initializeData();
   }, [selectedDate, params.id]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleAttendanceChange = (
     workerId: string,
@@ -356,6 +364,7 @@ export default function AttendancePage() {
           </div>
         </CardHeader>
         <CardContent>
+          <p>Current Local Time: 2025-02-01 12:58</p>
           <Tabs defaultValue="manual" className="w-full">
             <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-fit">
               <TabsTrigger
