@@ -361,15 +361,17 @@ export default function GalleryPage() {
     records: AttendanceRecord[]
   ): GroupedAttendance => {
     return records.reduce((groups: GroupedAttendance, record) => {
-      const date = new Date(record.date).toLocaleDateString("en-US", {
+      const date = new Date(record.date);
+      date.setHours(date.getHours() + 5, date.getMinutes() + 30);
+      const formattedDate = date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       });
-      if (!groups[date]) {
-        groups[date] = [];
+      if (!groups[formattedDate]) {
+        groups[formattedDate] = [];
       }
-      groups[date].push(record);
+      groups[formattedDate].push(record);
       return groups;
     }, {});
   };
