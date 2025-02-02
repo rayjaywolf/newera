@@ -33,204 +33,157 @@ interface Worker {
   id: string;
   name: string;
   type: string;
+  photoUrl: string | null;
   hourlyRate: number;
-  photoUrl?: string | null;
 }
 
 interface AttendanceRecord {
-  workerId: string;
-  date: string;
   present: boolean;
   hoursWorked: number;
   overtime: number;
   dailyIncome: number;
 }
 
+interface AttendanceState {
+  [workerId: string]: AttendanceRecord;
+}
+
 export default function AttendancePage() {
   const params = useParams();
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceState>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [attendance, setAttendance] = useState<{
-    [key: string]: AttendanceRecord;
-  }>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const fetchWorkers = async () => {
+  const fetchWorkers = useCallback(async () => {
     try {
       const response = await fetch(`/api/projects/${params.id}/workers`);
+      if (!response.ok) throw new Error("Failed to fetch workers");
       const data = await response.json();
-      return data;
+      setWorkers(data);
     } catch (error) {
       console.error("Error fetching workers:", error);
-      toast.error("Failed to fetch workers");
-      return [];
+      toast.error("Failed to load workers");
     }
-  };
+  }, [params.id]);
 
-  const calculateDailyIncome = useCallback(
-    (record: AttendanceRecord, workers: Worker[]) => {
-      if (!record.present) return 0;
-      const worker = workers.find((w: Worker) => w.id === record.workerId);
-      const hourlyRate = worker?.hourlyRate || 0;
-      const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-      return totalHours * hourlyRate;
-    },
-    []
-  );
+  const fetchAttendance = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/attendance?projectId=${
+          params.id
+        }&date=${selectedDate.toISOString()}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch attendance");
+      const data = await response.json();
 
-  useEffect(() => {
-    const initializeData = async () => {
-      setLoading(true);
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
-
-      const [workersResponse, attendanceResponse] = await Promise.all([
-        fetchWorkers(),
-        fetch(
-          `/api/attendance?projectId=${params.id}&date=${formattedDate}`
-        ).then((res) => res.json()),
-      ]);
-
-      const attendanceMap: { [key: string]: AttendanceRecord } = {};
-      const attendanceRecords = Array.isArray(attendanceResponse)
-        ? attendanceResponse
-        : [];
-      attendanceRecords.forEach((record: AttendanceRecord) => {
-        const localDate = new Date(record.date).toLocaleString();
-        const worker = workersResponse.find(
-          (w: Worker) => w.id === record.workerId
-        );
-        const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present
-          ? totalHours * (worker?.hourlyRate || 0)
-          : 0;
-        attendanceMap[record.workerId] = { ...record, date: localDate };
+      const attendanceState: AttendanceState = {};
+      data.forEach((record: any) => {
+        attendanceState[record.workerId] = {
+          present: record.present,
+          hoursWorked: record.hoursWorked,
+          overtime: record.overtime,
+          dailyIncome: calculateDailyIncome(
+            record.hoursWorked,
+            record.overtime,
+            record.worker.hourlyRate
+          ),
+        };
       });
 
-      setWorkers(workersResponse);
-      setAttendance(attendanceMap);
-      setLoading(false);
-    };
-
-    initializeData();
-  }, [selectedDate, params.id]);
+      setAttendance(attendanceState);
+    } catch (error) {
+      console.error("Error fetching attendance:", error);
+      toast.error("Failed to load attendance records");
+    }
+  }, [params.id, selectedDate]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+    setLoading(true);
+    Promise.all([fetchWorkers(), fetchAttendance()]).finally(() =>
+      setLoading(false)
+    );
+  }, [fetchWorkers, fetchAttendance]);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [selectedDate, fetchAttendance]);
+
+  const calculateDailyIncome = (
+    hours: number,
+    overtime: number,
+    rate: number
+  ) => {
+    return (hours + overtime * 1.5) * rate;
+  };
 
   const handleAttendanceChange = (
     workerId: string,
-    field: string,
+    field: keyof AttendanceRecord,
     value: any
   ) => {
     setAttendance((prev) => {
-      const current = prev[workerId] || {
-        workerId,
-        date: format(selectedDate, "yyyy-MM-dd"),
+      const workerRecord = prev[workerId] || {
         present: false,
         hoursWorked: 0,
         overtime: 0,
         dailyIncome: 0,
       };
 
-      const updated = {
-        ...current,
+      const worker = workers.find((w) => w.id === workerId);
+      const updatedRecord = {
+        ...workerRecord,
         [field]: value,
       };
 
-      if (updated.present) {
-        const worker = workers.find((w) => w.id === workerId);
-        const hourlyRate = worker?.hourlyRate || 0;
-        const regularHours = Number(updated.hoursWorked) || 0;
-        const overtimeHours = Number(updated.overtime) || 0;
-        updated.dailyIncome = (regularHours + overtimeHours) * hourlyRate;
-      } else {
-        updated.hoursWorked = 0;
-        updated.overtime = 0;
-        updated.dailyIncome = 0;
+      if (worker && (field === "hoursWorked" || field === "overtime")) {
+        updatedRecord.dailyIncome = calculateDailyIncome(
+          updatedRecord.hoursWorked,
+          updatedRecord.overtime,
+          worker.hourlyRate
+        );
       }
 
-      return { ...prev, [workerId]: updated };
+      return {
+        ...prev,
+        [workerId]: updatedRecord,
+      };
     });
   };
 
   const saveAttendance = async () => {
-    const toastId = toast.loading("Saving attendance...");
     setIsSaving(true);
     try {
-      const records = Object.values(attendance).map((record) => ({
-        workerId: record.workerId,
-        present: record.present,
-        hoursWorked: record.hoursWorked || 0,
-        overtime: record.overtime || 0,
+      const records = Object.entries(attendance).map(([workerId, record]) => ({
+        workerId,
+        ...record,
       }));
 
       const response = await fetch("/api/attendance", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId: params.id,
-          date: format(selectedDate, "yyyy-MM-dd"),
+          date: selectedDate.toISOString(),
           records,
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || "Failed to save attendance");
-      }
+      if (!response.ok) throw new Error("Failed to save attendance");
 
-      toast.success("Attendance saved successfully", {
-        id: toastId,
-      });
-
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      const attendanceResponse = await fetch(
-        `/api/attendance?projectId=${params.id}&date=${formattedDate}`
-      ).then((res) => res.json());
-      const attendanceMap: { [key: string]: AttendanceRecord } = {};
-      const attendanceRecords = Array.isArray(attendanceResponse)
-        ? attendanceResponse
-        : [];
-      attendanceRecords.forEach((record: AttendanceRecord) => {
-        const localDate = new Date(record.date).toLocaleString();
-        const worker = workers.find((w) => w.id === record.workerId);
-        const totalHours = (record.hoursWorked || 0) + (record.overtime || 0);
-        record.dailyIncome = record.present
-          ? totalHours * (worker?.hourlyRate || 0)
-          : 0;
-        attendanceMap[record.workerId] = { ...record, date: localDate };
-      });
-      setAttendance(attendanceMap);
+      toast.success("Attendance saved successfully");
+      await fetchAttendance();
     } catch (error) {
       console.error("Error saving attendance:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to save attendance",
-        {
-          id: toastId,
-        }
-      );
+      toast.error("Failed to save attendance");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleFaceRecognition = async (attendance: any) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [attendance.workerId]: {
-        ...attendance,
-        dailyIncome:
-          attendance.hoursWorked * (attendance.worker?.hourlyRate || 0),
-      },
-    }));
+  const handleFaceRecognition = (attendanceRecord: any) => {
+    fetchAttendance();
   };
 
   if (loading) {
@@ -557,3 +510,5 @@ export default function AttendancePage() {
     </div>
   );
 }
+
+
