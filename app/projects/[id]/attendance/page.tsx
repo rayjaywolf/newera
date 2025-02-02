@@ -35,7 +35,7 @@ interface Worker {
   type: string;
   photoUrl: string | null;
   hourlyRate: number;
-  startDate: string; // Add this field
+  startDate: string;
 }
 
 interface AttendanceRecord {
@@ -53,7 +53,11 @@ export default function AttendancePage() {
   const params = useParams();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const now = new Date();
+    now.setHours(now.getHours() + 5, now.getMinutes() + 30);
+    return now;
+  });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -199,6 +203,7 @@ export default function AttendancePage() {
 
   const isToday = useCallback((date: Date) => {
     const today = new Date();
+    today.setHours(today.getHours() + 5, today.getMinutes() + 30);
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
