@@ -18,8 +18,10 @@ export async function GET(request: NextRequest) {
     }
 
     const date = new Date(dateStr);
-    const startOfDay = new Date(date.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const attendance = await prisma.attendance.findMany({
       where: {
@@ -56,11 +58,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const attendanceDate = new Date(date);
-    const startOfDay = new Date(attendanceDate.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(attendanceDate.setHours(23, 59, 59, 999));
+    const attendanceDate = new Date(new Date(date).getTime() + 19800000);
+    const startOfDay = new Date(attendanceDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(attendanceDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
-    
     const existingAttendance = await prisma.attendance.findMany({
       where: {
         projectId,
@@ -72,35 +75,34 @@ export async function POST(request: NextRequest) {
     });
 
     const existingAttendanceMap = new Map(
-      existingAttendance.map(record => [record.workerId, record])
+      existingAttendance.map((record) => [record.workerId, record])
     );
 
-    
     const workersToDelete = records
-      .filter(record => !record.present && existingAttendanceMap.has(record.workerId))
-      .map(record => existingAttendanceMap.get(record.workerId)?.id)
+      .filter(
+        (record) =>
+          !record.present && existingAttendanceMap.has(record.workerId)
+      )
+      .map((record) => existingAttendanceMap.get(record.workerId)?.id)
       .filter(Boolean) as string[];
 
-    
     if (workersToDelete.length > 0) {
       await prisma.attendance.deleteMany({
         where: {
           id: {
-            in: workersToDelete
-          }
-        }
+            in: workersToDelete,
+          },
+        },
       });
     }
 
-    
     const attendanceRecords = await Promise.all(
       records
-        .filter(record => record.present)
+        .filter((record) => record.present)
         .map(async (record) => {
           const existing = existingAttendanceMap.get(record.workerId);
 
           if (existing) {
-            
             return prisma.attendance.update({
               where: { id: existing.id },
               data: {
@@ -109,12 +111,11 @@ export async function POST(request: NextRequest) {
               },
             });
           } else {
-            
             return prisma.attendance.create({
               data: {
                 projectId,
                 workerId: record.workerId,
-                date: new Date(),
+                date: new Date(Date.now() + 19800000),
                 present: true,
                 hoursWorked: record.hoursWorked || 0,
                 overtime: record.overtime || 0,
