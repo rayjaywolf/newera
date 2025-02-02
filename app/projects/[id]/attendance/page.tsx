@@ -35,6 +35,7 @@ interface Worker {
   type: string;
   photoUrl: string | null;
   hourlyRate: number;
+  startDate: string; // Add this field
 }
 
 interface AttendanceRecord {
@@ -186,6 +187,25 @@ export default function AttendancePage() {
     fetchAttendance();
   };
 
+  const getActiveWorkers = () => {
+    return workers.filter((worker) => {
+      const workerStartDate = new Date(worker.startDate);
+      workerStartDate.setHours(0, 0, 0, 0);
+      const selectedDateCopy = new Date(selectedDate);
+      selectedDateCopy.setHours(0, 0, 0, 0);
+      return workerStartDate <= selectedDateCopy;
+    });
+  };
+
+  const isToday = useCallback((date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  }, []);
+
   if (loading) {
     return (
       <div className="p-4 md:p-8 space-y-4 md:space-y-8">
@@ -303,10 +323,11 @@ export default function AttendancePage() {
               </Popover>
               <Button
                 onClick={saveAttendance}
-                disabled={isSaving}
+                disabled={isSaving || !isToday(selectedDate)}
                 className={cn(
                   "w-full md:w-auto bg-[#060606] text-white font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]"
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]",
+                  !isToday(selectedDate) && "opacity-50 cursor-not-allowed"
                 )}
               >
                 {isSaving ? "Saving..." : "Save Attendance"}
@@ -319,6 +340,7 @@ export default function AttendancePage() {
             <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-full md:w-fit">
               <TabsTrigger
                 value="manual"
+                disabled={!isToday(selectedDate)}
                 className={cn(
                   "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                   "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
@@ -331,6 +353,7 @@ export default function AttendancePage() {
               </TabsTrigger>
               <TabsTrigger
                 value="facial"
+                disabled={!isToday(selectedDate)}
                 className={cn(
                   "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                   "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
@@ -370,7 +393,7 @@ export default function AttendancePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
-                      {workers.map((worker) => {
+                      {getActiveWorkers().map((worker) => {
                         const record = attendance[worker.id] || {
                           present: false,
                           hoursWorked: 0,
@@ -414,6 +437,7 @@ export default function AttendancePage() {
                               <div className="flex justify-center">
                                 <Checkbox
                                   checked={record.present}
+                                  disabled={!isToday(selectedDate)}
                                   onCheckedChange={(checked) =>
                                     handleAttendanceChange(
                                       worker.id,
@@ -424,7 +448,9 @@ export default function AttendancePage() {
                                   className={cn(
                                     "h-5 w-5 border border-black/20 rounded-sm shadow-none",
                                     "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
-                                    "hover:border-black transition-colors"
+                                    "hover:border-black transition-colors",
+                                    !isToday(selectedDate) &&
+                                      "opacity-50 cursor-not-allowed"
                                   )}
                                 />
                               </div>
@@ -434,6 +460,9 @@ export default function AttendancePage() {
                                 <Input
                                   type="number"
                                   value={record.hoursWorked || ""}
+                                  disabled={
+                                    !isToday(selectedDate) || !record.present
+                                  }
                                   onChange={(e) =>
                                     handleAttendanceChange(
                                       worker.id,
@@ -444,7 +473,10 @@ export default function AttendancePage() {
                                   className={cn(
                                     "h-8 w-16 md:w-20 text-center",
                                     "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                    "border-black/20 focus-visible:border-black"
+                                    "border-black/20 focus-visible:border-black",
+                                    (!isToday(selectedDate) ||
+                                      !record.present) &&
+                                      "opacity-50 cursor-not-allowed"
                                   )}
                                 />
                               </div>
@@ -454,6 +486,9 @@ export default function AttendancePage() {
                                 <Input
                                   type="number"
                                   value={record.overtime || ""}
+                                  disabled={
+                                    !isToday(selectedDate) || !record.present
+                                  }
                                   onChange={(e) =>
                                     handleAttendanceChange(
                                       worker.id,
@@ -464,7 +499,10 @@ export default function AttendancePage() {
                                   className={cn(
                                     "h-8 w-16 md:w-20 text-center",
                                     "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                    "border-black/20 focus-visible:border-black"
+                                    "border-black/20 focus-visible:border-black",
+                                    (!isToday(selectedDate) ||
+                                      !record.present) &&
+                                      "opacity-50 cursor-not-allowed"
                                   )}
                                 />
                               </div>
@@ -493,10 +531,17 @@ export default function AttendancePage() {
             <TabsContent value="facial">
               <div className="rounded-lg border border-[rgba(0,0,0,0.08)] p-4 md:p-6">
                 <div className="max-w-full md:max-w-2xl mx-auto">
-                  <AttendanceCamera
-                    projectId={params.id as string}
-                    onSuccess={handleFaceRecognition}
-                  />
+                  {isToday(selectedDate) ? (
+                    <AttendanceCamera
+                      projectId={params.id as string}
+                      onSuccess={handleFaceRecognition}
+                    />
+                  ) : (
+                    <div className="text-center p-8 text-muted-foreground">
+                      Facial recognition is only available for today's
+                      attendance
+                    </div>
+                  )}
                   <p className="text-sm text-muted-foreground mt-4 text-center">
                     Position your face in front of the camera to mark your
                     attendance
@@ -510,5 +555,3 @@ export default function AttendancePage() {
     </div>
   );
 }
-
-

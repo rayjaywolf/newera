@@ -15,6 +15,11 @@ import Link from "next/link";
 import { checkRole } from "@/utils/roles";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
+
+const StatsSection = dynamic(() => import("@/components/stats-section"), {
+  ssr: false,
+});
 
 interface ProjectPageProps {
   params: {
@@ -81,7 +86,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 lg:space-y-8">
-      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -185,7 +189,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {}
+      <Card className="bg-white/[0.34] border-0 shadow-none">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Stats</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StatsSection projectId={params.id} />
+        </CardContent>
+      </Card>
+
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -241,7 +253,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -303,7 +314,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </CardContent>
       </Card>
 
-      {}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
