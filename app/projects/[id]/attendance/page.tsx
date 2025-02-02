@@ -319,9 +319,16 @@ export default function AttendancePage() {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={(date: Date | undefined) =>
-                      date && setSelectedDate(date)
-                    }
+                    onSelect={(date: Date | undefined) => {
+                      if (date) {
+                        const adjustedDate = new Date(date);
+                        adjustedDate.setHours(
+                          adjustedDate.getHours() + 5,
+                          adjustedDate.getMinutes() + 30
+                        );
+                        setSelectedDate(adjustedDate);
+                      }
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
