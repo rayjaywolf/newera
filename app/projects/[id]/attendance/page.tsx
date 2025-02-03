@@ -203,7 +203,10 @@ export default function AttendancePage() {
 
   const isToday = useCallback((date: Date) => {
     const today = new Date();
-    today.setHours(today.getHours() + 5, today.getMinutes() + 30);
+    console.log(`Date: ${today}`);
+    const localToday = new Date(today.toLocaleString());
+    console.log(`Local Date: ${localToday}`);
+
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
@@ -384,22 +387,22 @@ export default function AttendancePage() {
                   <table className="w-full min-w-[600px]">
                     <thead>
                       <tr className="border-b border-[rgba(0,0,0,0.08)]">
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Name
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Worker Type
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Present
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Hours Worked
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Overtime
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Daily Income
                         </th>
                       </tr>
@@ -418,7 +421,7 @@ export default function AttendancePage() {
                             key={worker.id}
                             className="border-b border-[rgba(0,0,0,0.08)]"
                           >
-                            <td className="px-4 md:px-6 py-2 md:py-4">
+                            <td className="px-4 md:px-4 py-1.5 md:py-2">
                               <div className="flex items-center gap-3">
                                 <Avatar>
                                   {worker.photoUrl ? (
@@ -440,12 +443,12 @@ export default function AttendancePage() {
                                 </Link>
                               </div>
                             </td>
-                            <td className="px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-sm text-muted-foreground text-center">
+                            <td className="px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-sm text-muted-foreground text-center">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                                 {worker.type}
                               </span>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-center">
+                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-center">
                               <div className="flex justify-center">
                                 <Checkbox
                                   checked={record.present}
@@ -467,7 +470,7 @@ export default function AttendancePage() {
                                 />
                               </div>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
                               <div className="flex justify-center">
                                 <Input
                                   type="number"
@@ -493,7 +496,7 @@ export default function AttendancePage() {
                                 />
                               </div>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap">
+                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
                               <div className="flex justify-center">
                                 <Input
                                   type="number"
@@ -519,7 +522,7 @@ export default function AttendancePage() {
                                 />
                               </div>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-6 py-2 md:py-4 whitespace-nowrap text-right">
+                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-right">
                               <span
                                 className={cn(
                                   "font-medium",

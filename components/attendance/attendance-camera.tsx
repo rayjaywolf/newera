@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
@@ -22,31 +22,36 @@ interface VideoDevice {
   label: string;
 }
 
-export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps) {
+export function AttendanceCamera({
+  projectId,
+  onSuccess,
+}: AttendanceCameraProps) {
   const webcamRef = useRef<Webcam>(null);
   const [capturing, setCapturing] = useState(false);
   const [devices, setDevices] = useState<VideoDevice[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>("");
 
-  const handleDevices = useCallback((mediaDevices: MediaDeviceInfo[]) => {
-    const videoDevices = mediaDevices
-      .filter(({ kind }) => kind === "videoinput")
-      .map(({ deviceId, label }) => ({
-        deviceId,
-        label: label || `Camera ${devices.length + 1}`,
-      }));
-    setDevices(videoDevices);
-    // Set first device as default if no device is selected
-    if (videoDevices.length > 0 && !selectedDevice) {
-      setSelectedDevice(videoDevices[0].deviceId);
-    }
-  }, [devices.length, selectedDevice]);
+  const handleDevices = useCallback(
+    (mediaDevices: MediaDeviceInfo[]) => {
+      const videoDevices = mediaDevices
+        .filter(({ kind }) => kind === "videoinput")
+        .map(({ deviceId, label }) => ({
+          deviceId,
+          label: label || `Camera ${devices.length + 1}`,
+        }));
+      setDevices(videoDevices);
+      if (videoDevices.length > 0 && !selectedDevice) {
+        setSelectedDevice(videoDevices[0].deviceId);
+      }
+    },
+    [devices.length, selectedDevice]
+  );
 
   useEffect(() => {
-    // Get list of video devices
-    navigator.mediaDevices.enumerateDevices()
+    navigator.mediaDevices
+      .enumerateDevices()
       .then(handleDevices)
-      .catch(error => {
+      .catch((error) => {
         console.error("Error getting devices:", error);
         toast.error("Failed to get camera devices");
       });
@@ -62,16 +67,13 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
         throw new Error("Failed to capture photo");
       }
 
-      // Convert base64 to blob
       const response = await fetch(imageSrc);
       const blob = await response.blob();
 
-      // Create form data
       const formData = new FormData();
       formData.append("photo", blob);
       formData.append("projectId", projectId);
 
-      // Send to API
       const attendanceResponse = await fetch("/api/attendance/verify", {
         method: "POST",
         body: formData,
@@ -81,7 +83,9 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
 
       if (!attendanceResponse.ok) {
         if (attendanceResponse.status === 409 && data.alreadyPresent) {
-          toast.warning(`${data.attendance.worker.name} is already marked present for today`);
+          toast.warning(
+            `${data.attendance.worker.name} is already marked present for today`
+          );
           onSuccess(data.attendance);
           return;
         }
@@ -95,7 +99,9 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
       onSuccess(data.attendance);
     } catch (error) {
       console.error("Error saving attendance:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save attendance");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save attendance"
+      );
     } finally {
       setCapturing(false);
     }
@@ -105,10 +111,7 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
     <div className="flex flex-col items-center gap-4">
       {devices.length > 1 && (
         <div className="w-full max-w-xs">
-          <Select
-            value={selectedDevice}
-            onValueChange={setSelectedDevice}
-          >
+          <Select value={selectedDevice} onValueChange={setSelectedDevice}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select camera" />
             </SelectTrigger>
@@ -133,8 +136,8 @@ export function AttendanceCamera({ projectId, onSuccess }: AttendanceCameraProps
           height: 720,
         }}
       />
-      <Button 
-        onClick={captureAndVerify} 
+      <Button
+        onClick={captureAndVerify}
         disabled={capturing}
         className="bg-black text-white font-semibold hover:bg-white hover:text-primary-accent transition-colors"
       >

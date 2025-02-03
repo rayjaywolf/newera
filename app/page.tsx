@@ -53,7 +53,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer Call-to-Action */}
       <footer className="py-8 text-center">
         <p>
           Ready to take the next step?{" "}
