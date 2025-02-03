@@ -146,83 +146,81 @@ export function MachineryView({ machinery, projectId }: MachineryViewProps) {
           })}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <div className="rounded-lg border border-[rgba(0,0,0,0.08)] bg-white/[0.15]">
-            <table className="min-w-full divide-y divide-[rgba(0,0,0,0.08)]">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Machinery
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
-                    Total Hours
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
-                    Avg. Rate
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
-                    Total Cost
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
-                    Uses
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-right">
-                    Last Used
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
-                {machinery.map((machine) => {
-                  const machineryType = [
-                    machine.type.toLowerCase(),
-                    machine.jcbSubtype
-                      ? `subtype_${machine.jcbSubtype.toLowerCase()}`
-                      : null,
-                    machine.slmSubtype
-                      ? `subtype_${machine.slmSubtype.toLowerCase()}`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join("_");
+        <div className="overflow-x-auto rounded-lg border border-[rgba(0,0,0,0.08)] bg-white/[0.15]">
+          <table className="w-full divide-y divide-[rgba(0,0,0,0.08)]">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Machinery
+                </th>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
+                  Total Hours
+                </th>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
+                  Avg. Rate
+                </th>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
+                  Total Cost
+                </th>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
+                  Uses
+                </th>
+                <th className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-right">
+                  Last Used
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
+              {machinery.map((machine) => {
+                const machineryType = [
+                  machine.type.toLowerCase(),
+                  machine.jcbSubtype
+                    ? `subtype_${machine.jcbSubtype.toLowerCase()}`
+                    : null,
+                  machine.slmSubtype
+                    ? `subtype_${machine.slmSubtype.toLowerCase()}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join("_");
 
-                  return (
-                    <tr
-                      key={`${machine.type}-${machine.jcbSubtype}-${machine.slmSubtype}`}
-                      className="hover:bg-white/[0.25] transition cursor-pointer"
-                      onClick={() =>
-                        router.push(
-                          `/projects/${projectId}/machinery/${encodeURIComponent(
-                            machineryType
-                          )}`
-                        )
-                      }
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium capitalize">
-                          {getMachineryName(machine)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {machine.totalHoursUsed} hrs
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {formatCurrency(machine.averageHourlyRate)}/hr
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {formatCurrency(machine.totalCost)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {machine.entries}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                        {formatDate(machine.lastUpdated)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                return (
+                  <tr
+                    key={`${machine.type}-${machine.jcbSubtype}-${machine.slmSubtype}`}
+                    className="hover:bg-white/[0.25] transition cursor-pointer"
+                    onClick={() =>
+                      router.push(
+                        `/projects/${projectId}/machinery/${encodeURIComponent(
+                          machineryType
+                        )}`
+                      )
+                    }
+                  >
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium capitalize">
+                        {getMachineryName(machine)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                      {machine.totalHoursUsed} hrs
+                    </td>
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                      {formatCurrency(machine.averageHourlyRate)}/hr
+                    </td>
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                      {formatCurrency(machine.totalCost)}
+                    </td>
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                      {machine.entries}
+                    </td>
+                    <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                      {formatDate(machine.lastUpdated)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
