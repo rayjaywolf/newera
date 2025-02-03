@@ -6,6 +6,25 @@ body {
   font-family: var(--font-aeonik-pro-regular), Arial, Helvetica, sans-serif;
 }
 
+.cl-signIn-start {
+  box-shadow: none !important;
+  border: 1px solid rgb(0,0,0,0.08) !important;
+}
+
+.cl-signUp-start {
+  box-shadow: none !important;
+  border: 1px solid rgb(0,0,0,0.08) !important;
+}
+
+.cl-internal-1dauvpw {
+  display: none !important;
+}
+
+.cl-internal-1p733cp {
+  border: 0 !important;
+  border-bottom: 1px solid rgb(0,0,0,0.08) !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
