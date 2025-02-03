@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, Package2, Truck, Plus } from "lucide-react";
+import { Users, Package2, Truck, Plus, ChartColumn } from "lucide-react";
 import Link from "next/link";
 import { checkRole } from "@/utils/roles";
 import { redirect } from "next/navigation";
@@ -191,7 +191,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Stats</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <ChartColumn className="h-5 w-5" />
+            Stats
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <StatsSection projectId={params.id} />

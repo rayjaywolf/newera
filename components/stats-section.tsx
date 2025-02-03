@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, act } from "react";
+import { useState, useEffect } from "react";
 import { ChartContainer } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AreaChart,
   Area,
@@ -20,8 +21,10 @@ interface StatsProps {
 
 export default function StatsSection({ projectId }: StatsProps) {
   const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/projects/${projectId}/stats`)
       .then((res) => res.json())
       .then((data) => {
@@ -36,11 +39,28 @@ export default function StatsSection({ projectId }: StatsProps) {
           );
         });
         setStats(data);
+        setLoading(false);
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
   }, [projectId]);
 
-  if (!stats) return <p>Loading stats...</p>;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i}>
+            <Skeleton className="h-5 w-32 mb-2 bg-black/[0.08]" />
+            <Skeleton className="h-[200px] w-full bg-black/[0.08]" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!stats) return <p>Failed to load stats.</p>;
 
   const attendanceData = stats.attendance.map((item: any) => ({
     date: new Date(item.date).toLocaleDateString(),
@@ -88,7 +108,7 @@ export default function StatsSection({ projectId }: StatsProps) {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
       <div>
         <h3 className="text-lg font-bold mb-2">
           Attendance Rate (Last 30 Days)
