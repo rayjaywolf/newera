@@ -168,6 +168,9 @@ export default function GalleryPage() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const { id } = useParams();
   const { toast } = useToast();
+  const [selectedWorkerImage, setSelectedWorkerImage] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     if (id) {
@@ -378,12 +381,27 @@ export default function GalleryPage() {
     return images.findIndex((img) => img.id === image.id);
   };
 
+  const findWorkerPhotoIndexInAllRecords = (
+    record: AttendanceRecord
+  ): number => {
+    return attendanceRecords.findIndex((rec) => rec.id === record.id);
+  };
+
   if (isLoading) {
     return (
       <div className="p-4 sm:p-8 space-y-8">
+        {/* Tabs Skeleton */}
+        <div className="flex justify-center mb-4">
+          <div className="flex p-1 bg-black/10 rounded-lg w-fit gap-1">
+            <Skeleton className="h-9 w-28 bg-white" />
+            <Skeleton className="h-9 w-28 bg-black/[0.08]" />
+          </div>
+        </div>
+
+        {/* Header Card Skeleton */}
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-5 w-5 rounded bg-black/[0.08]" />
@@ -391,14 +409,36 @@ export default function GalleryPage() {
                 </div>
                 <Skeleton className="h-4 w-48 bg-black/[0.08]" />
               </div>
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-[300px] bg-black/[0.08]" />
-                <Skeleton className="h-10 w-32 bg-black/[0.08]" />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <Skeleton className="h-10 w-full sm:w-[500px] bg-black/[0.08]" />
+                <Skeleton className="h-10 w-full sm:w-32 bg-black/[0.08]" />
               </div>
             </div>
           </CardHeader>
         </Card>
 
+        {/* Stats Card Skeleton */}
+        <Card className="bg-white/[0.34] border-0 shadow-none">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]"
+                >
+                  <Skeleton className="h-10 w-10 rounded-full bg-black/[0.08]" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24 bg-black/[0.08]" />
+                    <Skeleton className="h-8 w-16 bg-black/[0.08]" />
+                    <Skeleton className="h-3 w-20 bg-black/[0.08]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Image Grid Skeleton */}
         {[...Array(2)].map((_, groupIndex) => (
           <Card
             key={groupIndex}
@@ -775,7 +815,14 @@ export default function GalleryPage() {
                       key={record.id}
                       className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
                     >
-                      <div className="relative aspect-video">
+                      <div
+                        className="relative aspect-video cursor-pointer"
+                        onClick={() =>
+                          setSelectedWorkerImage(
+                            findWorkerPhotoIndexInAllRecords(record)
+                          )
+                        }
+                      >
                         <Image
                           src={record.photoUrl}
                           alt={record.worker.name}
@@ -783,6 +830,9 @@ export default function GalleryPage() {
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                          <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
                       </div>
                       <div className="p-3 space-y-2">
                         <div className="flex justify-between items-start">
@@ -808,6 +858,23 @@ export default function GalleryPage() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {selectedWorkerImage !== null && (
+        <ImageViewer
+          images={attendanceRecords.map((record) => ({
+            id: record.id,
+            url: record.photoUrl,
+            filename: record.worker.name,
+            createdAt: record.createdAt,
+          }))}
+          currentImage={selectedWorkerImage}
+          isOpen={selectedWorkerImage !== null}
+          onClose={() => setSelectedWorkerImage(null)}
+          onNavigate={(index: number) => setSelectedWorkerImage(index)}
+          onDelete={() => {}} // Attendance photos cannot be deleted
+          projectId={id as string}
+        />
+      )}
 
       {selectedImage !== null && (
         <ImageViewer

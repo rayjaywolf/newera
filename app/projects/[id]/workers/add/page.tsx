@@ -33,7 +33,7 @@ export default async function AddWorkerPage({ params }: AddWorkerPageProps) {
   const existingWorkers = await getExistingWorkers();
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-8">
       <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
         <CardHeader>
           <div className="flex items-center gap-2">

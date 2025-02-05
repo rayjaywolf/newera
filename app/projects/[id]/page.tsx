@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { formatDate, cn } from "@/lib/utils";
+import { formatDate, formatDateNumeric, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -42,6 +42,7 @@ export async function generateMetadata({
   };
 }
 
+// Update the getProject function to include payment records
 async function getProject(id: string) {
   return await prisma.project.findUnique({
     where: { id },
@@ -59,18 +60,22 @@ async function getProject(id: string) {
           startDate: "desc",
         },
       },
+      attendance: {
+        include: {
+          worker: true,
+        },
+      },
       materials: {
         orderBy: {
           date: "desc",
         },
-        take: 5,
       },
       machinery: {
         orderBy: {
           date: "desc",
         },
-        take: 5,
       },
+      advances: true,
     },
   });
 }
@@ -83,6 +88,42 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const isAdmin = await checkRole("admin");
+
+  // Update the labor cost calculation to use project.attendance
+  const totalLaborCost = project.attendance.reduce((total, record) => {
+    const worker = project.workers.find(
+      (w) => w.worker.id === record.workerId
+    )?.worker;
+
+    if (!worker) return total;
+
+    const regularHoursCost = record.hoursWorked * worker.hourlyRate;
+    const overtimeCost = record.overtime * (worker.hourlyRate * 1.5); // Overtime at 1.5x rate
+
+    return total + regularHoursCost + overtimeCost;
+  }, 0);
+
+  // Calculate total advances
+  const totalAdvances = project.advances.reduce((total, advance) => {
+    return total + advance.amount;
+  }, 0);
+
+  // Final labor cost is total worked hours minus advances
+  const finalLaborCost = totalLaborCost - totalAdvances;
+
+  const totalMaterialCost = project.materials.reduce(
+    (total, material) => total + material.cost,
+    0
+  );
+
+  const totalMachineryCost = project.machinery.reduce(
+    (total, machine) => total + machine.totalCost,
+    0
+  );
+
+  // Update the total project cost calculation
+  const totalProjectCost =
+    finalLaborCost + totalMaterialCost + totalMachineryCost;
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 lg:space-y-8">
@@ -122,13 +163,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div>
               <h3 className="text-sm font-medium text-gray-500">Start Date</h3>
               <p className="mt-1 text-lg font-medium">
-                {formatDate(project.startDate)}
+                {formatDateNumeric(project.startDate)}
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">End Date</h3>
               <p className="mt-1 text-lg font-medium">
-                {project.endDate ? formatDate(project.endDate) : "Ongoing"}
+                {project.endDate ? formatDate(project.endDate) : "-"}
               </p>
             </div>
             <div>
@@ -150,39 +191,112 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="mt-6 md:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link href={`/projects/${project.id}/workers`}>
-              <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                <Users className="h-8 w-8 text-[#E65F2B]" />
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Total Workers
-                  </p>
-                  <p className="text-2xl font-semibold">
-                    {project.workers.length}
-                  </p>
-                </div>
-              </div>
-            </Link>
             <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
-              <Package2 className="h-8 w-8 text-[#E65F2B]" />
+              <svg
+                className="h-8 w-8 text-[#E65F2B]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
               <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Materials Used
-                </p>
+                <p className="text-sm font-medium text-gray-500">Total Cost</p>
                 <p className="text-2xl font-semibold">
-                  {project.materials.length}
+                  ₹{totalProjectCost.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Project expenses</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Labor Cost</p>
+                <p className="text-2xl font-semibold">
+                  ₹{finalLaborCost.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {totalLaborCost > 0 &&
+                    `${Math.round(
+                      (finalLaborCost / totalProjectCost) * 100
+                    )}% of total`}
                 </p>
               </div>
             </div>
+
             <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
-              <Truck className="h-8 w-8 text-[#E65F2B]" />
+              <Package2 className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Machinery Used
+                  Materials Cost
                 </p>
                 <p className="text-2xl font-semibold">
-                  {project.machinery.length}
+                  ₹{totalMaterialCost.toLocaleString()}
                 </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {totalMaterialCost > 0 &&
+                    `${Math.round(
+                      (totalMaterialCost / totalProjectCost) * 100
+                    )}% of total`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Truck className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Machinery Cost
+                </p>
+                <p className="text-2xl font-semibold">
+                  ₹{totalMachineryCost.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {totalMachineryCost > 0 &&
+                    `${Math.round(
+                      (totalMachineryCost / totalProjectCost) * 100
+                    )}% of total`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <Users className="h-8 w-8 text-[#E65F2B]" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Workers</p>
+                <p className="text-2xl font-semibold">
+                  {project.workers.length}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Currently assigned</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)]">
+              <svg
+                className="h-8 w-8 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Advances</p>
+                <p className="text-2xl font-semibold">
+                  ₹{totalAdvances.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Total paid out</p>
               </div>
             </div>
           </div>

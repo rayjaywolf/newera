@@ -54,7 +54,7 @@ export default function AddMachineryPage({ params }: AddMachineryPageProps) {
   const [selectedType, setSelectedType] = useState<MachineryType | null>(null);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <Card className="bg-white/[0.34] border-0 shadow-none max-w-2xl mx-auto">
         <CardHeader className="pb-4">
           <CardTitle className="text-2xl font-bold">
