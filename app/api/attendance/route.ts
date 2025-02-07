@@ -23,16 +23,18 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get today's attendance records
+    // Get today's attendance records - using start and end of current day
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const attendance = await prisma.attendance.findMany({
       where: {
         projectId: projectId,
         date: {
           gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+          lt: tomorrow,
         },
       },
     });
@@ -57,5 +59,54 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching workers:", error);
     return Response.json({ error: "Failed to fetch workers" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { projectId, attendance } = body;
+
+    if (!projectId || !attendance) {
+      return Response.json(
+        { error: "Project ID and attendance data are required" },
+        { status: 400 }
+      );
+    }
+
+    // Process each attendance record with current timestamp
+    const promises = attendance.map(async (record: any) => {
+      const now = new Date(); // Get current timestamp for each record
+
+      return prisma.attendance.upsert({
+        where: {
+          workerId_projectId_date: {
+            workerId: record.id,
+            projectId: projectId,
+            date: now, // Use exact timestamp
+          },
+        },
+        create: {
+          workerId: record.id,
+          projectId: projectId,
+          date: now, // Use exact timestamp
+          present: record.present,
+          hoursWorked: record.hoursWorked,
+        },
+        update: {
+          present: record.present,
+          hoursWorked: record.hoursWorked,
+        },
+      });
+    });
+
+    await Promise.all(promises);
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error("Error saving attendance:", error);
+    return Response.json(
+      { error: "Failed to save attendance" },
+      { status: 500 }
+    );
   }
 }
