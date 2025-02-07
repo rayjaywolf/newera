@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
               data: {
                 projectId,
                 workerId: record.workerId,
-                date: new Date(Date.now() + 19800000),
+                date: new Date(Date.now()),
                 present: true,
                 hoursWorked: record.hoursWorked || 0,
                 overtime: record.overtime || 0,
