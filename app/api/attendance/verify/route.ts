@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       data: {
         workerId,
         projectId,
-        date: new Date(Date.now() + 19800000),
+        date: new Date(),
         present: true,
         photoUrl: url,
         confidence,

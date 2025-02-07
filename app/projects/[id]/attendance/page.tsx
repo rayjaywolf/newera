@@ -353,34 +353,36 @@ export default function AttendancePage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="manual" className="w-full">
-            <TabsList className="flex p-1 bg-black/10 rounded-lg mb-4 w-full md:w-fit">
-              <TabsTrigger
-                value="manual"
-                disabled={!isToday(selectedDate)}
-                className={cn(
-                  "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
-                  "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Manual Entry
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="facial"
-                disabled={!isToday(selectedDate)}
-                className={cn(
-                  "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
-                  "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  <Camera className="h-4 w-4" />
-                  Facial Recognition
-                </span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex justify-center mb-4">
+              <TabsList className="flex p-1 bg-black/10 rounded-lg w-fit">
+                <TabsTrigger
+                  value="manual"
+                  disabled={!isToday(selectedDate)}
+                  className={cn(
+                    "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                    "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Manual Entry
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="facial"
+                  disabled={!isToday(selectedDate)}
+                  className={cn(
+                    "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
+                    "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Facial Recognition
+                  </span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="manual">
               <div className="rounded-lg border border-[rgba(0,0,0,0.08)] overflow-hidden">
