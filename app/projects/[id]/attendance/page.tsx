@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
+import { format as formatTZ, toZonedTime } from "date-fns-tz";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Calendar as CalendarIcon, Users, Camera } from "lucide-react";
@@ -54,12 +55,15 @@ export default function AttendancePage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    const now = new Date();
-    now.setHours(now.getHours() + 5, now.getMinutes() + 30);
-    return now;
+    return new Date();
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [timeZone, setTimeZone] = useState<string>("UTC");
+
+  useEffect(() => {
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, []);
 
   const fetchWorkers = useCallback(async () => {
     try {
@@ -76,9 +80,10 @@ export default function AttendancePage() {
   const fetchAttendance = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/attendance?projectId=${
-          params.id
-        }&date=${selectedDate.toISOString()}`
+        `/api/attendance?projectId=${params.id}&date=${format(
+          selectedDate,
+          "yyyy-MM-dd"
+        )}&timeZone=${timeZone}`
       );
       if (!response.ok) throw new Error("Failed to fetch attendance");
       const data = await response.json();
@@ -102,7 +107,7 @@ export default function AttendancePage() {
       console.error("Error fetching attendance:", error);
       toast.error("Failed to load attendance records");
     }
-  }, [params.id, selectedDate]);
+  }, [params.id, selectedDate, timeZone]);
 
   useEffect(() => {
     setLoading(true);
@@ -170,8 +175,9 @@ export default function AttendancePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId: params.id,
-          date: selectedDate.toISOString(),
+          date: format(selectedDate, "yyyy-MM-dd"),
           records,
+          timeZone,
         }),
       });
 
@@ -324,12 +330,7 @@ export default function AttendancePage() {
                     selected={selectedDate}
                     onSelect={(date: Date | undefined) => {
                       if (date) {
-                        const adjustedDate = new Date(date);
-                        adjustedDate.setHours(
-                          adjustedDate.getHours() + 5,
-                          adjustedDate.getMinutes() + 30
-                        );
-                        setSelectedDate(adjustedDate);
+                        setSelectedDate(date);
                       }
                     }}
                     initialFocus
