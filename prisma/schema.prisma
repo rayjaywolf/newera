@@ -97,8 +97,8 @@ model Attendance {
   present     Boolean  @default(false)
   hoursWorked Float    @default(0)
   overtime    Float    @default(0)
-  photoUrl    String? // Store the attendance verification photo
-  confidence  Float? // Store the facial recognition confidence score
+  photoUrl    String?
+  confidence  Float?
 
   createdAt DateTime @default(now())
 
