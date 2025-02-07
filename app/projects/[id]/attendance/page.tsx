@@ -65,31 +65,29 @@ export default function AttendancePage() {
     setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   }, []);
 
-  const fetchWorkers = useCallback(async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`/api/projects/${params.id}/workers`);
-      if (!response.ok) throw new Error("Failed to fetch workers");
-      const data = await response.json();
-      setWorkers(data);
-    } catch (error) {
-      console.error("Error fetching workers:", error);
-      toast.error("Failed to load workers");
-    }
-  }, [params.id]);
+      const [workersResponse, attendanceResponse] = await Promise.all([
+        fetch(`/api/projects/${params.id}/workers`),
+        fetch(
+          `/api/attendance?projectId=${params.id}&date=${format(
+            selectedDate,
+            "yyyy-MM-dd"
+          )}&timeZone=${timeZone}`
+        ),
+      ]);
 
-  const fetchAttendance = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/attendance?projectId=${params.id}&date=${format(
-          selectedDate,
-          "yyyy-MM-dd"
-        )}&timeZone=${timeZone}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch attendance");
-      const data = await response.json();
+      if (!workersResponse.ok) throw new Error("Failed to fetch workers");
+      if (!attendanceResponse.ok) throw new Error("Failed to fetch attendance");
+
+      const workersData = await workersResponse.json();
+      const attendanceData = await attendanceResponse.json();
+
+      setWorkers(workersData);
 
       const attendanceState: AttendanceState = {};
-      data.forEach((record: any) => {
+      attendanceData.forEach((record: any) => {
         attendanceState[record.workerId] = {
           present: record.present,
           hoursWorked: record.hoursWorked,
@@ -101,24 +99,18 @@ export default function AttendancePage() {
           ),
         };
       });
-
       setAttendance(attendanceState);
     } catch (error) {
-      console.error("Error fetching attendance:", error);
-      toast.error("Failed to load attendance records");
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setLoading(false);
     }
   }, [params.id, selectedDate, timeZone]);
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([fetchWorkers(), fetchAttendance()]).finally(() =>
-      setLoading(false)
-    );
-  }, [fetchWorkers, fetchAttendance]);
-
-  useEffect(() => {
-    fetchAttendance();
-  }, [selectedDate, fetchAttendance]);
+    fetchData();
+  }, [fetchData]);
 
   const calculateDailyIncome = (
     hours: number,
@@ -184,7 +176,7 @@ export default function AttendancePage() {
       if (!response.ok) throw new Error("Failed to save attendance");
 
       toast.success("Attendance saved successfully");
-      await fetchAttendance();
+      await fetchData(); // Use fetchData to refresh both workers and attendance
     } catch (error) {
       console.error("Error saving attendance:", error);
       toast.error("Failed to save attendance");
@@ -194,7 +186,7 @@ export default function AttendancePage() {
   };
 
   const handleFaceRecognition = (attendanceRecord: any) => {
-    fetchAttendance();
+    fetchData(); // Use fetchData
   };
 
   const getActiveWorkers = () => {
