@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const attendanceDate = new Date(new Date(date).getTime() + 19800000);
+    const attendanceDate = new Date(date);
     const startOfDay = new Date(attendanceDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(attendanceDate);
