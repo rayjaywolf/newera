@@ -15,6 +15,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+function formatDate(utcDateString?: string) {
+  if (!utcDateString) return "";
+  const localDate = new Date(utcDateString);
+  return localDate.toLocaleDateString("en-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 interface Worker {
   id: string;
   name: string;
@@ -24,6 +35,7 @@ interface Worker {
   present: boolean;
   hoursWorked: number;
   isModified?: boolean; // Add this new field
+  date?: string;
 }
 
 export default function AttendancePage({ params }: { params: { id: string } }) {
@@ -135,6 +147,7 @@ export default function AttendancePage({ params }: { params: { id: string } }) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Worker Type</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead>Present</TableHead>
               <TableHead>Working Hours</TableHead>
               <TableHead>Daily Income</TableHead>
@@ -158,6 +171,7 @@ export default function AttendancePage({ params }: { params: { id: string } }) {
                 <TableCell>
                   <Badge variant="secondary">{worker.type}</Badge>
                 </TableCell>
+                <TableCell>{formatDate(worker.date)}</TableCell>
                 <TableCell>
                   <Checkbox
                     checked={worker.present}

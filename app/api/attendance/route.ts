@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
         hourlyRate: assignment.worker.hourlyRate,
         present: todayAttendance?.present || false,
         hoursWorked: todayAttendance?.hoursWorked || 0,
+        date: todayAttendance?.date.toISOString() || new Date().toISOString(),
       };
     });
 
