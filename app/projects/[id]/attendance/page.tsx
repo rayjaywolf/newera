@@ -54,9 +54,7 @@ export default function AttendancePage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    const now = new Date();
-    now.setHours(now.getHours() + 5, now.getMinutes() + 30);
-    return now;
+    return new Date();
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -324,12 +322,7 @@ export default function AttendancePage() {
                     selected={selectedDate}
                     onSelect={(date: Date | undefined) => {
                       if (date) {
-                        const adjustedDate = new Date(date);
-                        adjustedDate.setHours(
-                          adjustedDate.getHours() + 5,
-                          adjustedDate.getMinutes() + 30
-                        );
-                        setSelectedDate(adjustedDate);
+                        setSelectedDate(date);
                       }
                     }}
                     initialFocus
