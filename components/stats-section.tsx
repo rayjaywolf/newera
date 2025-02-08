@@ -28,8 +28,6 @@ export default function StatsSection({ projectId }: StatsProps) {
     fetch(`/api/projects/${projectId}/stats`)
       .then((res) => res.json())
       .then((data) => {
-        // Log daily stats for past 30 days
-        console.log("Daily attendance stats for past 30 days:");
         data.dailyStats.forEach((stat: any) => {
           const percentage = stat.assigned
             ? ((stat.present / stat.assigned) * 100).toFixed(1)
