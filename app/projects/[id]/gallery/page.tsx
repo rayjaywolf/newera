@@ -222,7 +222,12 @@ export default function GalleryPage() {
 
   const fetchAttendanceStats = async () => {
     try {
-      const response = await fetch(`/api/projects/${id}/attendance/stats`);
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await fetch(
+        `/api/projects/${id}/attendance/stats?timeZone=${encodeURIComponent(
+          timeZone
+        )}`
+      );
       if (!response.ok) {
         throw new Error(
           `Failed to fetch attendance stats: ${response.statusText}`
