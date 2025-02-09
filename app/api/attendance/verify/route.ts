@@ -92,8 +92,6 @@ export async function POST(req: Request) {
         present: true,
         photoUrl: url,
         confidence,
-        hoursWorked: 8,
-        overtime: 0,
       },
       include: {
         worker: {
