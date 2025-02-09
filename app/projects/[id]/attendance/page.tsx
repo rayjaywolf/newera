@@ -154,6 +154,40 @@ export default function AttendancePage() {
     });
   };
 
+  const handleTotalHoursChange = (workerId: string, totalHours: number) => {
+    const hoursWorked = Math.min(8, totalHours);
+    const overtime = Math.max(0, totalHours - 8);
+
+    setAttendance((prev) => {
+      const workerRecord = prev[workerId] || {
+        present: false,
+        hoursWorked: 0,
+        overtime: 0,
+        dailyIncome: 0,
+      };
+
+      const worker = workers.find((w) => w.id === workerId);
+      const updatedRecord = {
+        ...workerRecord,
+        hoursWorked,
+        overtime,
+      };
+
+      if (worker) {
+        updatedRecord.dailyIncome = calculateDailyIncome(
+          updatedRecord.hoursWorked,
+          updatedRecord.overtime,
+          worker.hourlyRate
+        );
+      }
+
+      return {
+        ...prev,
+        [workerId]: updatedRecord,
+      };
+    });
+  };
+
   const saveAttendance = async () => {
     setIsSaving(true);
     try {
@@ -382,22 +416,19 @@ export default function AttendancePage() {
                   <table className="w-full min-w-[600px]">
                     <thead>
                       <tr className="border-b border-[rgba(0,0,0,0.08)]">
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Name
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Worker Type
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Present
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                          Hours Worked
+                        <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                          Total Hours
                         </th>
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                          Overtime
-                        </th>
-                        <th className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
+                        <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Daily Income
                         </th>
                       </tr>
@@ -465,18 +496,19 @@ export default function AttendancePage() {
                                 />
                               </div>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
+                            <td className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
                               <div className="flex justify-center">
                                 <Input
                                   type="number"
-                                  value={record.hoursWorked || ""}
+                                  value={
+                                    record.hoursWorked + record.overtime || ""
+                                  }
                                   disabled={
                                     !isToday(selectedDate) || !record.present
                                   }
                                   onChange={(e) =>
-                                    handleAttendanceChange(
+                                    handleTotalHoursChange(
                                       worker.id,
-                                      "hoursWorked",
                                       parseFloat(e.target.value)
                                     )
                                   }
@@ -491,33 +523,7 @@ export default function AttendancePage() {
                                 />
                               </div>
                             </td>
-                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
-                              <div className="flex justify-center">
-                                <Input
-                                  type="number"
-                                  value={record.overtime || ""}
-                                  disabled={
-                                    !isToday(selectedDate) || !record.present
-                                  }
-                                  onChange={(e) =>
-                                    handleAttendanceChange(
-                                      worker.id,
-                                      "overtime",
-                                      parseFloat(e.target.value)
-                                    )
-                                  }
-                                  className={cn(
-                                    "h-8 w-16 md:w-20 text-center",
-                                    "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                    "border-black/20 focus-visible:border-black",
-                                    (!isToday(selectedDate) ||
-                                      !record.present) &&
-                                      "opacity-50 cursor-not-allowed"
-                                  )}
-                                />
-                              </div>
-                            </td>
-                            <td className="w-[16.66%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-right">
+                            <td className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-right">
                               <span
                                 className={cn(
                                   "font-medium",
