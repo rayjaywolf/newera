@@ -38,20 +38,11 @@ interface WorkerDetailsProps {
 }
 
 /**
- * Returns the number of working days between two dates (inclusive)
- * by skipping Sundays.
+ * Returns the number of days between two dates (inclusive)
  */
 function getWorkingDays(start: Date, end: Date): number {
-  let workingDays = 0;
-  const date = new Date(start);
-  while (date <= end) {
-    // Exclude Sundays (0 represents Sunday)
-    if (date.getDay() !== 0) {
-      workingDays++;
-    }
-    date.setDate(date.getDate() + 1);
-  }
-  return workingDays;
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return Math.floor((end.getTime() - start.getTime()) / millisecondsPerDay) + 1;
 }
 
 export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
@@ -89,7 +80,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
 
   // Calculate full month details (for reference)
   const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const fullMonthWorkingDays = totalDaysInMonth - 4; // as per your fixed holiday rule
+  const fullMonthWorkingDays = totalDaysInMonth; // Changed: count all days
 
   // Define the effective period for calculating attendance so far.
   // The effective start is the later of the 1st of the month or the worker's join date.
@@ -100,7 +91,7 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   // The effective end is the current date, so that only days that have passed are considered.
   const effectiveEnd = currentDate;
 
-  // Calculate elapsed working days (up to today) by skipping Sundays.
+  // Calculate elapsed working days (up to today), counting all days
   const elapsedWorkingDays = getWorkingDays(effectiveStart, effectiveEnd);
 
   // Count days present within the elapsed period.
