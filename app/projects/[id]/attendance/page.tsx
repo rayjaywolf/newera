@@ -117,7 +117,7 @@ export default function AttendancePage() {
     overtime: number,
     rate: number
   ) => {
-    return (hours + overtime * 1.5) * rate;
+    return (hours + overtime) * rate;
   };
 
   const handleAttendanceChange = (
