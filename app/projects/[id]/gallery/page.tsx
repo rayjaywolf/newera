@@ -135,11 +135,12 @@ const TooltipWorkerList = ({
           className="text-sm text-gray-700 py-1 px-2 rounded hover:bg-gray-50"
         >
           {worker.name}
-          {worker.confidence !== undefined && (
-            <span className="ml-2 text-xs text-blue-600 font-medium">
-              {worker.confidence.toFixed(2)}%
-            </span>
-          )}
+          {title !== "Partially Verified Workers" &&
+            worker.confidence !== undefined && (
+              <span className="ml-2 text-xs text-blue-600 font-medium">
+                {worker.confidence.toFixed(2)}%
+              </span>
+            )}
         </li>
       ))}
     </ul>
@@ -725,7 +726,7 @@ export default function GalleryPage() {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {/* Total Workers */}
-                <Card className="bg-white/[0.34] border-0 shadow-none">
+                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -748,7 +749,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Present Workers */}
-                <Card className="bg-white/[0.34] border-0 shadow-none">
+                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -771,7 +772,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Partially Verified Workers */}
-                <Card className="bg-white/[0.34] border-0 shadow-none">
+                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -796,7 +797,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Verified Workers */}
-                <Card className="bg-white/[0.34] border-0 shadow-none">
+                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -819,7 +820,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Absent Workers */}
-                <Card className="bg-white/[0.34] border-0 shadow-none">
+                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
