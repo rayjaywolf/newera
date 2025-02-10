@@ -135,12 +135,11 @@ const TooltipWorkerList = ({
           className="text-sm text-gray-700 py-1 px-2 rounded hover:bg-gray-50"
         >
           {worker.name}
-          {title !== "Partially Verified Workers" &&
-            worker.confidence !== undefined && (
-              <span className="ml-2 text-xs text-blue-600 font-medium">
-                {worker.confidence.toFixed(2)}%
-              </span>
-            )}
+          {worker.confidence !== undefined && (
+            <span className="ml-2 text-xs text-blue-600 font-medium">
+              {worker.confidence.toFixed(2)}%
+            </span>
+          )}
         </li>
       ))}
     </ul>
@@ -713,20 +712,10 @@ export default function GalleryPage() {
 
         <TabsContent value="workers" className="mt-6">
           <Card className="bg-white/[0.34] border-0 shadow-none mb-8">
-            <CardHeader>
-              <span className="text-base text-gray-500 -mb-6">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {/* Total Workers */}
-                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
+                <Card className="bg-white/[0.34] border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -749,7 +738,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Present Workers */}
-                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
+                <Card className="bg-white/[0.34] border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -772,7 +761,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Partially Verified Workers */}
-                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
+                <Card className="bg-white/[0.34] border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -797,7 +786,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Verified Workers */}
-                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
+                <Card className="bg-white/[0.34] border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -820,7 +809,7 @@ export default function GalleryPage() {
                 </Card>
 
                 {/* Absent Workers */}
-                <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
+                <Card className="bg-white/[0.34] border-0 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-gray-500">
@@ -846,97 +835,82 @@ export default function GalleryPage() {
           </Card>
 
           <TabsContent value="workers" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(groupAttendanceByWorker(attendanceRecords)).map(
                 ([workerId, data]) => (
-                  <Card
-                    key={workerId}
-                    className="bg-white/[0.15] border border-[rgba(0,0,0,0.08)] overflow-hidden hover:bg-white/[0.25] transition-colors"
-                  >
+                  <Card key={workerId} className="overflow-hidden">
                     <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-medium">
-                          {data.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
+                      <CardTitle className="text-lg">{data.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Check-in Photo */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 flex items-center justify-between">
+                          Check-in Photo
                           {data.checkIn.confidence && (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                              Match:{" "}
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
                               {data.checkIn.confidence > 99.99
                                 ? "100%"
-                                : `${data.checkIn.confidence.toFixed(1)}%`}
+                                : `${data.checkIn.confidence.toFixed(2)}%`}
                             </span>
                           )}
-                        </div>
+                        </h4>
+                        {data.checkIn.photo ? (
+                          <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
+                            <Image
+                              src={data.checkIn.photo}
+                              alt={`${data.name} check-in`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="aspect-[4/3] rounded-lg bg-gray-100 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">
+                              No check-in photo
+                            </p>
+                          </div>
+                        )}
+                        {data.checkIn.time && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(data.checkIn.time).toLocaleTimeString()}
+                          </p>
+                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Check-in Photo */}
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-medium text-gray-500">
-                            Check-in
-                          </h4>
-                          <div className="relative aspect-[4/5] rounded-lg overflow-hidden group">
-                            {data.checkIn.photo ? (
-                              <>
-                                <Image
-                                  src={data.checkIn.photo}
-                                  alt={`${data.name} check-in`}
-                                  fill
-                                  className="object-cover transition-transform group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                {data.checkIn.time && (
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {new Date(
-                                      data.checkIn.time
-                                    ).toLocaleTimeString()}
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div className="w-full h-full bg-black/[0.08] flex items-center justify-center">
-                                <p className="text-sm text-gray-500">
-                                  No photo
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
 
-                        {/* Check-out Photo */}
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-medium text-gray-500">
-                            Check-out
-                          </h4>
-                          <div className="relative aspect-[4/5] rounded-lg overflow-hidden group">
-                            {data.checkOut.photo ? (
-                              <>
-                                <Image
-                                  src={data.checkOut.photo}
-                                  alt={`${data.name} check-out`}
-                                  fill
-                                  className="object-cover transition-transform group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                {data.checkOut.time && (
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {new Date(
-                                      data.checkOut.time
-                                    ).toLocaleTimeString()}
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div className="w-full h-full bg-black/[0.08] flex items-center justify-center">
-                                <p className="text-sm text-gray-500">
-                                  No photo
-                                </p>
-                              </div>
-                            )}
+                      {/* Check-out Photo */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 flex items-center justify-between">
+                          Check-out Photo
+                          {data.checkOut.confidence && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                              {data.checkOut.confidence > 99.99
+                                ? "100%"
+                                : `${data.checkOut.confidence.toFixed(2)}%`}
+                            </span>
+                          )}
+                        </h4>
+                        {data.checkOut.photo ? (
+                          <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
+                            <Image
+                              src={data.checkOut.photo}
+                              alt={`${data.name} check-out`}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
-                        </div>
+                        ) : (
+                          <div className="aspect-[4/3] rounded-lg bg-gray-100 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">
+                              No check-out photo
+                            </p>
+                          </div>
+                        )}
+                        {data.checkOut.time && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(data.checkOut.time).toLocaleTimeString()}
+                          </p>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

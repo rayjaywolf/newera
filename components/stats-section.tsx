@@ -115,13 +115,10 @@ export default function StatsSection({ projectId }: StatsProps) {
           config={{ dailyStats: { color: "#E65F2B", label: "Attendance %" } }}
         >
           <AreaChart
-            // Sort order: oldest on left, latest on right
-            data={[...stats.dailyStats]
-              .filter((stat) => new Date(stat.date).getDay() !== 0) // Filter out Sundays (0 = Sunday)
-              .sort(
-                (a, b) =>
-                  new Date(a.date).getTime() - new Date(b.date).getTime()
-              )}
+            // Sorted data including Sundays now (filter removed)
+            data={[...stats.dailyStats].sort(
+              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+            )}
             width={300}
             height={200}
           >
