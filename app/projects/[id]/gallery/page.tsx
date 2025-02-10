@@ -56,10 +56,15 @@ interface ProjectImage {
 
 interface AttendanceRecord {
   id: string;
-  photoUrl: string;
-  confidence: number;
+  photoUrl: string | null;
+  workerInPhoto: string | null;
+  workerOutPhoto: string | null;
+  confidence: number | null;
+  inConfidence: number | null;
+  outConfidence: number | null;
   date: string;
   createdAt: string;
+  isPartiallyMarked: boolean;
   worker: {
     id: string;
     name: string;
@@ -68,6 +73,22 @@ interface AttendanceRecord {
 
 interface GroupedImages {
   [key: string]: ProjectImage[];
+}
+
+interface GroupedWorkerPhotos {
+  [workerId: string]: {
+    name: string;
+    checkIn: {
+      photo: string | null;
+      confidence: number | null;
+      time: string | null;
+    };
+    checkOut: {
+      photo: string | null;
+      confidence: number | null;
+      time: string | null;
+    };
+  };
 }
 
 interface GroupedAttendance {
@@ -86,12 +107,14 @@ interface AttendanceStats {
   verifiedWorkers: number;
   unverifiedWorkers: number;
   absentWorkers: number;
+  partiallyVerifiedWorkers: number;
   workerDetails: {
     all: WorkerDetail[];
     present: WorkerDetail[];
     verified: WorkerDetail[];
     unverified: WorkerDetail[];
     absent: WorkerDetail[];
+    partiallyVerified: WorkerDetail[];
   };
   lastUpdated: string;
 }
@@ -392,6 +415,51 @@ export default function GalleryPage() {
     return attendanceRecords.findIndex((rec) => rec.id === record.id);
   };
 
+  const groupAttendanceByWorker = (
+    records: AttendanceRecord[]
+  ): GroupedWorkerPhotos => {
+    const grouped: GroupedWorkerPhotos = {};
+
+    records.forEach((record) => {
+      // Create or update worker entry
+      if (!grouped[record.worker.id]) {
+        grouped[record.worker.id] = {
+          name: record.worker.name,
+          checkIn: {
+            photo: null,
+            confidence: null,
+            time: null,
+          },
+          checkOut: {
+            photo: null,
+            confidence: null,
+            time: null,
+          },
+        };
+      }
+
+      // Update check-in photo if available
+      if (record.workerInPhoto) {
+        grouped[record.worker.id].checkIn = {
+          photo: record.workerInPhoto,
+          confidence: record.inConfidence,
+          time: record.createdAt,
+        };
+      }
+
+      // Update check-out photo if available
+      if (record.workerOutPhoto) {
+        grouped[record.worker.id].checkOut = {
+          photo: record.workerOutPhoto,
+          confidence: record.outConfidence,
+          time: record.createdAt,
+        };
+      }
+    });
+
+    return grouped;
+  };
+
   if (isLoading) {
     return (
       <div className="p-4 sm:p-8 space-y-8">
@@ -501,7 +569,6 @@ export default function GalleryPage() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        {}
         <div className="flex justify-center mb-4">
           <TabsList className="flex p-1 bg-black/10 rounded-lg w-fit">
             <TabsTrigger
@@ -645,222 +712,237 @@ export default function GalleryPage() {
 
         <TabsContent value="workers" className="mt-6">
           <Card className="bg-white/[0.34] border-0 shadow-none mb-8">
+            <CardHeader>
+              <span className="text-base text-gray-500 -mb-6">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </CardHeader>
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
-                    <UsersIcon className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-500">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {/* Total Workers */}
+                <Card className="bg-white/[0.34] border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-gray-500">
                         Total Workers
-                      </p>
+                      </CardTitle>
                       <StatsTooltip
                         title="All Workers"
                         workers={attendanceStats?.workerDetails.all || []}
                       />
                     </div>
-                    <p className="text-2xl font-semibold mt-1">
-                      {isLoadingStats ? (
-                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
-                      ) : (
-                        attendanceStats?.totalWorkers || 0
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Assigned to project
-                    </p>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <UsersIcon className="h-4 w-4 text-gray-400 mr-2" />
+                      <span className="text-2xl font-bold">
+                        {attendanceStats?.totalWorkers || 0}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50">
-                    <Users className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-500">
+                {/* Present Workers */}
+                <Card className="bg-white/[0.34] border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-gray-500">
                         Present Today
-                      </p>
+                      </CardTitle>
                       <StatsTooltip
                         title="Present Workers"
                         workers={attendanceStats?.workerDetails.present || []}
                       />
                     </div>
-                    <p className="text-2xl font-semibold mt-1">
-                      {isLoadingStats ? (
-                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
-                      ) : (
-                        attendanceStats?.workersPresent || 0
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {attendanceStats &&
-                        `${Math.round(
-                          (attendanceStats.workersPresent /
-                            attendanceStats.totalWorkers) *
-                            100
-                        )}% rate`}
-                    </p>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <UserCheck className="h-4 w-4 text-green-500 mr-2" />
+                      <span className="text-2xl font-bold">
+                        {attendanceStats?.workersPresent || 0}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50">
-                    <UserCheck className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-500">
-                        Verified
-                      </p>
+                {/* Partially Verified Workers */}
+                <Card className="bg-white/[0.34] border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Partially Verified
+                      </CardTitle>
+                      <StatsTooltip
+                        title="Partially Verified Workers"
+                        workers={
+                          attendanceStats?.workerDetails.partiallyVerified || []
+                        }
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <UserCheck className="h-4 w-4 text-yellow-500 mr-2" />
+                      <span className="text-2xl font-bold">
+                        {attendanceStats?.partiallyVerifiedWorkers || 0}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Verified Workers */}
+                <Card className="bg-white/[0.34] border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Fully Verified
+                      </CardTitle>
                       <StatsTooltip
                         title="Verified Workers"
                         workers={attendanceStats?.workerDetails.verified || []}
                       />
                     </div>
-                    <p className="text-2xl font-semibold mt-1">
-                      {isLoadingStats ? (
-                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
-                      ) : (
-                        attendanceStats?.verifiedWorkers || 0
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {attendanceStats &&
-                        attendanceStats.workersPresent > 0 &&
-                        `${Math.round(
-                          (attendanceStats.verifiedWorkers /
-                            attendanceStats.workersPresent) *
-                            100
-                        )}% verification rate`}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-orange-50">
-                    <UserX className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-500">
-                        Unverified
-                      </p>
-                      <StatsTooltip
-                        title="Unverified Workers"
-                        workers={
-                          attendanceStats?.workerDetails.unverified || []
-                        }
-                      />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <UserCheck className="h-4 w-4 text-blue-500 mr-2" />
+                      <span className="text-2xl font-bold">
+                        {attendanceStats?.verifiedWorkers || 0}
+                      </span>
                     </div>
-                    <p className="text-2xl font-semibold mt-1">
-                      {isLoadingStats ? (
-                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
-                      ) : (
-                        attendanceStats?.unverifiedWorkers || 0
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Need verification
-                    </p>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex items-center gap-3 rounded-lg bg-white/[0.15] p-4 border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50">
-                    <Users className="h-5 w-5 text-red-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-500">
-                        Absent
-                      </p>
+                {/* Absent Workers */}
+                <Card className="bg-white/[0.34] border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Absent Today
+                      </CardTitle>
                       <StatsTooltip
                         title="Absent Workers"
                         workers={attendanceStats?.workerDetails.absent || []}
                       />
                     </div>
-                    <p className="text-2xl font-semibold mt-1">
-                      {isLoadingStats ? (
-                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
-                      ) : (
-                        attendanceStats?.absentWorkers || 0
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {attendanceStats &&
-                        `${Math.round(
-                          (attendanceStats.absentWorkers /
-                            attendanceStats.totalWorkers) *
-                            100
-                        )}% absence rate`}
-                    </p>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <UserX className="h-4 w-4 text-red-500 mr-2" />
+                      <span className="text-2xl font-bold">
+                        {attendanceStats?.absentWorkers || 0}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
 
-          {Object.entries(groupedAttendance).map(([date, records]) => (
-            <Card
-              key={date}
-              className="bg-white/[0.34] border-0 shadow-none mb-6"
-            >
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-medium text-gray-700">
-                  {date}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {records.map((record) => (
-                    <div
-                      key={record.id}
-                      className="group relative rounded-lg overflow-hidden bg-white/[0.15] border border-[rgba(0,0,0,0.08)] hover:bg-white/[0.25] transition-colors"
-                    >
-                      <div
-                        className="relative aspect-video cursor-pointer"
-                        onClick={() =>
-                          setSelectedWorkerImage(
-                            findWorkerPhotoIndexInAllRecords(record)
-                          )
-                        }
-                      >
-                        <Image
-                          src={record.photoUrl}
-                          alt={record.worker.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                          <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+          <TabsContent value="workers" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(groupAttendanceByWorker(attendanceRecords)).map(
+                ([workerId, data]) => (
+                  <Card
+                    key={workerId}
+                    className="bg-white/[0.15] border border-[rgba(0,0,0,0.08)] overflow-hidden hover:bg-white/[0.25] transition-colors"
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg font-medium">
+                          {data.name}
+                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          {data.checkIn.confidence && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                              Match:{" "}
+                              {data.checkIn.confidence > 99.99
+                                ? "100%"
+                                : `${data.checkIn.confidence.toFixed(1)}%`}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="p-3 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <p className="text-sm font-medium text-gray-700">
-                            {record.worker.name}
-                          </p>
-                          <div className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">
-                            {record.confidence > 99.99
-                              ? "100%"
-                              : `${record.confidence.toFixed(2)}%`}{" "}
-                            Match
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Check-in Photo */}
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-gray-500">
+                            Check-in
+                          </h4>
+                          <div className="relative aspect-[4/5] rounded-lg overflow-hidden group">
+                            {data.checkIn.photo ? (
+                              <>
+                                <Image
+                                  src={data.checkIn.photo}
+                                  alt={`${data.name} check-in`}
+                                  fill
+                                  className="object-cover transition-transform group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                {data.checkIn.time && (
+                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {new Date(
+                                      data.checkIn.time
+                                    ).toLocaleTimeString()}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-full h-full bg-black/[0.08] flex items-center justify-center">
+                                <p className="text-sm text-gray-500">
+                                  No photo
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500">
-                          {new Date(record.createdAt).toLocaleTimeString()}
-                        </p>
+
+                        {/* Check-out Photo */}
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-gray-500">
+                            Check-out
+                          </h4>
+                          <div className="relative aspect-[4/5] rounded-lg overflow-hidden group">
+                            {data.checkOut.photo ? (
+                              <>
+                                <Image
+                                  src={data.checkOut.photo}
+                                  alt={`${data.name} check-out`}
+                                  fill
+                                  className="object-cover transition-transform group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                {data.checkOut.time && (
+                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {new Date(
+                                      data.checkOut.time
+                                    ).toLocaleTimeString()}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-full h-full bg-black/[0.08] flex items-center justify-center">
+                                <p className="text-sm text-gray-500">
+                                  No photo
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    </CardContent>
+                  </Card>
+                )
+              )}
+            </div>
+          </TabsContent>
         </TabsContent>
       </Tabs>
 
@@ -868,15 +950,17 @@ export default function GalleryPage() {
         <ImageViewer
           images={attendanceRecords.map((record) => ({
             id: record.id,
-            url: record.photoUrl,
-            filename: record.worker.name,
+            url: record.workerInPhoto || record.workerOutPhoto || "",
+            filename: `${record.worker.name} - ${
+              record.workerInPhoto ? "Check In" : "Check Out"
+            }`,
             createdAt: record.createdAt,
           }))}
           currentImage={selectedWorkerImage}
           isOpen={selectedWorkerImage !== null}
           onClose={() => setSelectedWorkerImage(null)}
           onNavigate={(index: number) => setSelectedWorkerImage(index)}
-          onDelete={() => {}} // Attendance photos cannot be deleted
+          onDelete={async () => {}} // Attendance photos cannot be deleted
           projectId={id as string}
         />
       )}

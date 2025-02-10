@@ -88,17 +88,22 @@ model WorkerAssignment {
 }
 
 model Attendance {
-  id          String   @id @default(cuid())
-  worker      Worker   @relation(fields: [workerId], references: [id])
-  workerId    String
-  project     Project  @relation(fields: [projectId], references: [id])
-  projectId   String
-  date        DateTime @default(now())
-  present     Boolean  @default(false)
-  hoursWorked Float    @default(0)
-  overtime    Float    @default(0)
-  photoUrl    String? // Store the attendance verification photo
-  confidence  Float? // Store the facial recognition confidence score
+  id                String   @id @default(cuid())
+  worker            Worker   @relation(fields: [workerId], references: [id])
+  workerId          String
+  project           Project  @relation(fields: [projectId], references: [id])
+  projectId         String
+  date              DateTime @default(now())
+  present           Boolean  @default(false)
+  hoursWorked       Float    @default(0)
+  overtime          Float    @default(0)
+  photoUrl          String? // Store the attendance verification photo
+  confidence        Float?  // Store the facial recognition confidence score
+  workerInPhoto     String? // Store the check-in photo URL
+  workerOutPhoto    String? // Store the check-out photo URL
+  inConfidence      Float?  // Store the check-in facial recognition confidence score
+  outConfidence     Float?  // Store the check-out facial recognition confidence score
+  isPartiallyMarked Boolean  @default(false) // Indicates if only one photo is verified
 
   createdAt DateTime @default(now())
 

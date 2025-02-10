@@ -62,41 +62,64 @@ export async function GET(
           gte: today,
           lt: tomorrow,
         },
-        present: true,
       },
       include: {
-        worker: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+        worker: true
+      }
     });
 
     // Calculate statistics and group workers
-    const presentWorkers = todayAttendance.map((record) => ({
-      id: record.worker.id,
-      name: record.worker.name,
-    }));
-    const verifiedWorkers = todayAttendance
-      .filter((record) => record.photoUrl && record.confidence)
-      .map((record) => ({
-        id: record.worker.id,
-        name: record.worker.name,
-        confidence: record.confidence,
-      }));
-    const unverifiedWorkers = todayAttendance
-      .filter((record) => !record.photoUrl || !record.confidence)
+    const presentWorkers = todayAttendance
+      .filter((record) => record.present)
       .map((record) => ({
         id: record.worker.id,
         name: record.worker.name,
       }));
 
-    // Calculate absent workers (workers who are assigned but not present today)
-    const presentWorkerIds = new Set(presentWorkers.map((w) => w.id));
+    // Workers with both check-in and check-out photos
+    const fullyVerifiedWorkers = todayAttendance
+      .filter((record) => record.workerInPhoto && record.workerOutPhoto)
+      .map((record) => ({
+        id: record.worker.id,
+        name: record.worker.name,
+        inConfidence: record.inConfidence,
+        outConfidence: record.outConfidence,
+      }));
+
+    // Workers with only one photo (either check-in or check-out)
+    const partiallyVerifiedWorkers = todayAttendance
+      .filter(
+        (record) =>
+          (record.workerInPhoto && !record.workerOutPhoto) ||
+          (!record.workerInPhoto && record.workerOutPhoto)
+      )
+      .map((record) => ({
+        id: record.worker.id,
+        name: record.worker.name,
+        confidence: record.workerInPhoto
+          ? record.inConfidence
+          : record.outConfidence,
+      }));
+
+    // Workers marked present but without any photos
+    const unverifiedWorkers = todayAttendance
+      .filter(
+        (record) =>
+          record.present && !record.workerInPhoto && !record.workerOutPhoto
+      )
+      .map((record) => ({
+        id: record.worker.id,
+        name: record.worker.name,
+      }));
+
+    // Calculate absent workers (workers who are assigned but not present or partially verified)
+    const presentOrPartiallyVerifiedIds = new Set([
+      ...presentWorkers.map((w) => w.id),
+      ...partiallyVerifiedWorkers.map((w) => w.id)
+    ]);
+
     const absentWorkers = assignedWorkers
-      .filter((assignment) => !presentWorkerIds.has(assignment.worker.id))
+      .filter((assignment) => !presentOrPartiallyVerifiedIds.has(assignment.worker.id))
       .map((assignment) => ({
         id: assignment.worker.id,
         name: assignment.worker.name,
@@ -105,7 +128,8 @@ export async function GET(
     return NextResponse.json({
       totalWorkers,
       workersPresent: presentWorkers.length,
-      verifiedWorkers: verifiedWorkers.length,
+      verifiedWorkers: fullyVerifiedWorkers.length,
+      partiallyVerifiedWorkers: partiallyVerifiedWorkers.length,
       unverifiedWorkers: unverifiedWorkers.length,
       absentWorkers: absentWorkers.length,
       workerDetails: {
@@ -114,7 +138,8 @@ export async function GET(
           name: a.worker.name,
         })),
         present: presentWorkers,
-        verified: verifiedWorkers,
+        verified: fullyVerifiedWorkers,
+        partiallyVerified: partiallyVerifiedWorkers,
         unverified: unverifiedWorkers,
         absent: absentWorkers,
       },

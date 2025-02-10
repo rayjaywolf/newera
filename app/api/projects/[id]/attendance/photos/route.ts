@@ -7,21 +7,33 @@ export async function GET(
 ) {
   try {
     const projectId = params.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Fetch attendance records with photos and worker information
+    // Fetch today's attendance records with photos and worker information
     const attendanceRecords = await prisma.attendance.findMany({
       where: {
         projectId,
-        photoUrl: {
-          not: null,
+        date: {
+          gte: today,
+          lt: tomorrow,
         },
+        OR: [
+          { workerInPhoto: { not: null } },
+          { workerOutPhoto: { not: null } },
+        ],
       },
       select: {
         id: true,
-        photoUrl: true,
-        confidence: true,
+        workerInPhoto: true,
+        workerOutPhoto: true,
+        inConfidence: true,
+        outConfidence: true,
         date: true,
         createdAt: true,
+        isPartiallyMarked: true,
         worker: {
           select: {
             id: true,
@@ -30,7 +42,7 @@ export async function GET(
         },
       },
       orderBy: {
-        date: 'desc',
+        createdAt: 'desc',
       },
     });
 

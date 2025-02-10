@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AttendanceCameraProps {
   projectId: string;
@@ -30,6 +31,7 @@ export function AttendanceCamera({
   const [capturing, setCapturing] = useState(false);
   const [devices, setDevices] = useState<VideoDevice[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>("");
+  const [mode, setMode] = useState<"in" | "out">("in");
 
   const handleDevices = useCallback(
     (mediaDevices: MediaDeviceInfo[]) => {
@@ -73,6 +75,7 @@ export function AttendanceCamera({
       const formData = new FormData();
       formData.append("photo", blob);
       formData.append("projectId", projectId);
+      formData.append("mode", mode);
 
       const attendanceResponse = await fetch("/api/attendance/verify", {
         method: "POST",
@@ -84,7 +87,9 @@ export function AttendanceCamera({
       if (!attendanceResponse.ok) {
         if (attendanceResponse.status === 409 && data.alreadyPresent) {
           toast.warning(
-            `${data.attendance.worker.name} is already marked present for today`
+            `${data.attendance.worker.name} has already ${
+              mode === "in" ? "checked in" : "checked out"
+            } for today`
           );
           onSuccess(data.attendance);
           return;
@@ -94,7 +99,9 @@ export function AttendanceCamera({
 
       toast.success(`Face recognized: ${data.attendance.worker.name}`);
       setTimeout(() => {
-        toast.success("Attendance marked successfully!");
+        toast.success(
+          `${mode === "in" ? "Check-in" : "Check-out"} marked successfully!`
+        );
       }, 500);
       onSuccess(data.attendance);
     } catch (error) {
@@ -105,10 +112,21 @@ export function AttendanceCamera({
     } finally {
       setCapturing(false);
     }
-  }, [projectId, onSuccess]);
+  }, [projectId, onSuccess, mode]);
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <Tabs
+        defaultValue="in"
+        className="w-full"
+        onValueChange={(value) => setMode(value as "in" | "out")}
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="in">Check In</TabsTrigger>
+          <TabsTrigger value="out">Check Out</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {devices.length > 1 && (
         <div className="w-full max-w-xs">
           <Select value={selectedDevice} onValueChange={setSelectedDevice}>
@@ -141,7 +159,9 @@ export function AttendanceCamera({
         disabled={capturing}
         className="bg-black text-white font-semibold hover:bg-white hover:text-primary-accent transition-colors"
       >
-        {capturing ? "Processing..." : "Capture & Verify"}
+        {capturing
+          ? "Processing..."
+          : `Capture & Verify ${mode === "in" ? "Check In" : "Check Out"}`}
       </Button>
     </div>
   );

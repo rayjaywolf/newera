@@ -44,6 +44,9 @@ interface AttendanceRecord {
   hoursWorked: number;
   overtime: number;
   dailyIncome: number;
+  workerInPhoto?: string | null;
+  workerOutPhoto?: string | null;
+  isPartiallyMarked: boolean;
 }
 
 interface AttendanceState {
@@ -97,6 +100,9 @@ export default function AttendancePage() {
             record.overtime,
             record.worker.hourlyRate
           ),
+          workerInPhoto: record.workerInPhoto,
+          workerOutPhoto: record.workerOutPhoto,
+          isPartiallyMarked: record.isPartiallyMarked,
         };
       });
       setAttendance(attendanceState);
@@ -131,6 +137,7 @@ export default function AttendancePage() {
         hoursWorked: 0,
         overtime: 0,
         dailyIncome: 0,
+        isPartiallyMarked: false,
       };
 
       const worker = workers.find((w) => w.id === workerId);
@@ -164,6 +171,7 @@ export default function AttendancePage() {
         hoursWorked: 0,
         overtime: 0,
         dailyIncome: 0,
+        isPartiallyMarked: false,
       };
 
       const worker = workers.find((w) => w.id === workerId);
@@ -332,37 +340,39 @@ export default function AttendancePage() {
               </CardDescription>
             </div>
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mt-4 md:mt-0 w-full md:w-auto">
-              <Popover className="w-full md:w-auto">
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full md:w-auto justify-start text-left font-normal border-black/20",
-                      "hover:border-black transition-colors bg-transparent",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? (
-                      format(selectedDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full md:w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date: Date | undefined) => {
-                      if (date) {
-                        setSelectedDate(date);
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="w-full md:w-auto">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full md:w-auto justify-start text-left font-normal border-black/20",
+                        "hover:border-black transition-colors bg-transparent",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? (
+                        format(selectedDate, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full md:w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date: Date | undefined) => {
+                        if (date) {
+                          setSelectedDate(date);
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
               <Button
                 onClick={saveAttendance}
                 disabled={isSaving || !isToday(selectedDate)}
@@ -440,6 +450,7 @@ export default function AttendancePage() {
                           hoursWorked: 0,
                           overtime: 0,
                           dailyIncome: 0,
+                          isPartiallyMarked: false,
                         };
 
                         return (
@@ -461,12 +472,19 @@ export default function AttendancePage() {
                                     </AvatarFallback>
                                   )}
                                 </Avatar>
-                                <Link
-                                  href={`/projects/${params.id}/workers/${worker.id}`}
-                                  className="font-medium hover:text-[#E65F2B] transition-colors"
-                                >
-                                  {worker.name}
-                                </Link>
+                                <div className="flex items-center gap-2">
+                                  <Link
+                                    href={`/projects/${params.id}/workers/${worker.id}`}
+                                    className="font-medium hover:text-[#E65F2B] transition-colors"
+                                  >
+                                    {worker.name}
+                                  </Link>
+                                  {record.isPartiallyMarked && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      Partial
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </td>
                             <td className="px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-sm text-muted-foreground text-center">
