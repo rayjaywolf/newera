@@ -23,7 +23,8 @@ interface AddMaterialPageProps {
 const materialTypeLabels: Record<MaterialType, string> = {
   STEEL: "Steel",
   CEMENT: "Cement",
-  SAND: "Sand",
+  WASHING_SAND: "Washing Sand",
+  FINE_SAND: "Fine Sand",
   GRIT_10MM: "Grit (10mm)",
   GRIT_20MM: "Grit (20mm)",
   GRIT_40MM: "Grit (40mm)",

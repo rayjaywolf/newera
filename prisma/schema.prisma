@@ -135,23 +135,30 @@ enum JCBSubtype {
   PROCLAIM_210
 }
 
+enum JCBPartType {
+  BUCKET
+  BRAKES
+}
+
 enum SLMSubtype {
   SLM_4_3
   SLM_2_2
   SLM_2_1
+  MANUAL_MIXER
 }
 
 model MachineryUsage {
-  id         String        @id @default(cuid())
-  project    Project       @relation(fields: [projectId], references: [id])
-  projectId  String
-  type       MachineryType
-  jcbSubtype JCBSubtype?
-  slmSubtype SLMSubtype?
-  hoursUsed  Float
-  hourlyRate Float
-  date       DateTime
-  totalCost  Float
+  id          String        @id @default(cuid())
+  project     Project       @relation(fields: [projectId], references: [id])
+  projectId   String
+  type        MachineryType
+  jcbSubtype  JCBSubtype?
+  jcbPartType JCBPartType?
+  slmSubtype  SLMSubtype?
+  hoursUsed   Float
+  hourlyRate  Float
+  date        DateTime
+  totalCost   Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,7 +169,8 @@ model MachineryUsage {
 enum MaterialType {
   STEEL
   CEMENT
-  SAND
+  WASHING_SAND
+  FINE_SAND
   GRIT_10MM
   GRIT_20MM
   GRIT_40MM

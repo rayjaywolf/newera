@@ -16,6 +16,7 @@ import Link from "next/link";
 interface Machinery {
   type: string;
   jcbSubtype?: string | null;
+  jcbPartType?: string | null;
   slmSubtype?: string | null;
   totalHoursUsed: number;
   averageHourlyRate: number;
@@ -55,10 +56,29 @@ export function MachineryView({ machinery, projectId }: MachineryViewProps) {
   const getMachineryName = (machine: Machinery) => {
     const parts = [
       machine.type.toLowerCase(),
-      machine.jcbSubtype?.toLowerCase().replace("_", " "),
-      machine.slmSubtype?.toLowerCase().replace("_", " "),
+      machine.jcbSubtype?.toLowerCase().replace(/_/g, " "),
+      machine.type === "JCB" && machine.jcbPartType ? `${machine.jcbPartType.toLowerCase().replace(/_/g, " ")}` : null,
+      machine.slmSubtype?.toLowerCase().replace(/_/g, " "),
     ].filter(Boolean);
     return parts.join(" - ");
+  };
+
+  const getMachineryUrl = (machine: Machinery) => {
+    const parts = [];
+    parts.push(machine.type.toLowerCase());
+    
+    if (machine.type === "JCB") {
+      if (machine.jcbSubtype) {
+        parts.push("subtype", machine.jcbSubtype.toLowerCase());
+      }
+      if (machine.jcbPartType) {
+        parts.push("parttype", machine.jcbPartType.toLowerCase());
+      }
+    } else if (machine.type === "SLM" && machine.slmSubtype) {
+      parts.push("subtype", machine.slmSubtype.toLowerCase());
+    }
+    
+    return parts.join("_");
   };
 
   const setViewType = (newView: "grid" | "list") => {
@@ -98,24 +118,14 @@ export function MachineryView({ machinery, projectId }: MachineryViewProps) {
       {view === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {machinery.map((machine) => {
-            const machineryType = [
-              machine.type.toLowerCase(),
-              machine.jcbSubtype
-                ? `subtype_${machine.jcbSubtype.toLowerCase()}`
-                : null,
-              machine.slmSubtype
-                ? `subtype_${machine.slmSubtype.toLowerCase()}`
-                : null,
-            ]
-              .filter(Boolean)
-              .join("_");
+            const machineryType = getMachineryUrl(machine);
 
             return (
               <Link
                 href={`/projects/${projectId}/machinery/${encodeURIComponent(
                   machineryType
                 )}`}
-                key={`${machine.type}-${machine.jcbSubtype}-${machine.slmSubtype}`}
+                key={`${machine.type}-${machine.jcbSubtype}-${machine.jcbPartType}-${machine.slmSubtype}`}
                 className="rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition"
               >
                 <div className="flex flex-col">
@@ -172,21 +182,11 @@ export function MachineryView({ machinery, projectId }: MachineryViewProps) {
             </thead>
             <tbody className="divide-y divide-[rgba(0,0,0,0.08)]">
               {machinery.map((machine) => {
-                const machineryType = [
-                  machine.type.toLowerCase(),
-                  machine.jcbSubtype
-                    ? `subtype_${machine.jcbSubtype.toLowerCase()}`
-                    : null,
-                  machine.slmSubtype
-                    ? `subtype_${machine.slmSubtype.toLowerCase()}`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join("_");
+                const machineryType = getMachineryUrl(machine);
 
                 return (
                   <tr
-                    key={`${machine.type}-${machine.jcbSubtype}-${machine.slmSubtype}`}
+                    key={`${machine.type}-${machine.jcbSubtype}-${machine.jcbPartType}-${machine.slmSubtype}`}
                     className="hover:bg-white/[0.25] transition cursor-pointer"
                     onClick={() =>
                       router.push(

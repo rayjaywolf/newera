@@ -35,10 +35,11 @@ export const metadata: Metadata = {
   description: "Details of the selected material",
 };
 
-const unitMapping = {
+const unitMapping: Record<MaterialType, string> = {
   STEEL: "kg",
   CEMENT: "kg",
-  SAND: "cubic feet",
+  WASHING_SAND: "cubic feet",
+  FINE_SAND: "cubic feet",
   GRIT_10MM: "cubic feet",
   GRIT_20MM: "cubic feet",
   GRIT_40MM: "cubic feet",

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import { MachineryType, JCBSubtype, SLMSubtype, JCBPartType } from "@prisma/client";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -44,14 +44,21 @@ const jcbSubtypeLabels: Record<JCBSubtype, string> = {
   PROCLAIM_210: "Proclaim 210",
 };
 
+const jcbPartTypeLabels: Record<JCBPartType, string> = {
+  BUCKET: "Bucket",
+  BRAKES: "Brakes",
+};
+
 const slmSubtypeLabels: Record<SLMSubtype, string> = {
   SLM_4_3: "SLM 4.3",
   SLM_2_2: "SLM 2.2",
   SLM_2_1: "SLM 2.1",
+  MANUAL_MIXER: "Manual Mixer",
 };
 
 export default function AddMachineryPage({ params }: AddMachineryPageProps) {
   const [selectedType, setSelectedType] = useState<MachineryType | null>(null);
+  const [selectedJCBSubtype, setSelectedJCBSubtype] = useState<JCBSubtype | null>(null);
 
   return (
     <div className="p-4 sm:p-8">
@@ -70,9 +77,10 @@ export default function AddMachineryPage({ params }: AddMachineryPageProps) {
               <Select
                 name="type"
                 required
-                onValueChange={(value) =>
-                  setSelectedType(value as MachineryType)
-                }
+                onValueChange={(value) => {
+                  setSelectedType(value as MachineryType);
+                  setSelectedJCBSubtype(null);
+                }}
               >
                 <SelectTrigger className="bg-white/[0.15]">
                   <SelectValue placeholder="Select machinery type" />
@@ -87,22 +95,55 @@ export default function AddMachineryPage({ params }: AddMachineryPageProps) {
               </Select>
             </div>
 
-            {selectedType && (
-              <div className="space-y-2" id="subtypeContainer">
-                <Label htmlFor="subtype">Subtype</Label>
+            {selectedType === "JCB" && (
+              <div className="space-y-2">
+                <Label htmlFor="jcbSubtype">JCB Model</Label>
                 <Select
-                  name={selectedType === "JCB" ? "jcbSubtype" : "slmSubtype"}
+                  name="jcbSubtype"
                   required
+                  onValueChange={(value) => setSelectedJCBSubtype(value as JCBSubtype)}
                 >
                   <SelectTrigger className="bg-white/[0.15]">
-                    <SelectValue placeholder="Select subtype" />
+                    <SelectValue placeholder="Select JCB model" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(
-                      selectedType === "JCB"
-                        ? jcbSubtypeLabels
-                        : slmSubtypeLabels
-                    ).map(([value, label]) => (
+                    {Object.entries(jcbSubtypeLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {selectedType === "JCB" && selectedJCBSubtype && (
+              <div className="space-y-2">
+                <Label htmlFor="jcbPartType">Part Type</Label>
+                <Select name="jcbPartType" required>
+                  <SelectTrigger className="bg-white/[0.15]">
+                    <SelectValue placeholder="Select part type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(jcbPartTypeLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {selectedType === "SLM" && (
+              <div className="space-y-2">
+                <Label htmlFor="slmSubtype">SLM Model</Label>
+                <Select name="slmSubtype" required>
+                  <SelectTrigger className="bg-white/[0.15]">
+                    <SelectValue placeholder="Select SLM model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(slmSubtypeLabels).map(([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
                       </SelectItem>

@@ -12,6 +12,7 @@ import {
 import { useSearchParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { MaterialType } from "@prisma/client";
 
 interface Material {
   type: string;
@@ -62,10 +63,11 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
     materials.map((material) => material.type)
   );
 
-  const unitMapping = {
+  const unitMapping: Record<MaterialType, string> = {
     STEEL: "kg",
     CEMENT: "kg",
-    SAND: "cubic ft",
+    WASHING_SAND: "cubic ft",
+    FINE_SAND: "cubic ft",
     GRIT_10MM: "cubic ft",
     GRIT_20MM: "cubic ft",
     GRIT_40MM: "cubic ft",

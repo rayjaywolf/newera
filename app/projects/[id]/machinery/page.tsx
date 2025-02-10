@@ -15,6 +15,7 @@ interface MachineryPageProps {
 interface AggregatedMachinery {
   type: string;
   jcbSubtype: string | null;
+  jcbPartType: string | null;
   slmSubtype: string | null;
   totalHoursUsed: number;
   averageHourlyRate: number;
@@ -54,7 +55,7 @@ async function getProject(id: string) {
 
   // Aggregate machinery by type and subtype
   const aggregatedMachinery = project.machinery.reduce((acc, machine) => {
-    const key = `${machine.type}-${machine.jcbSubtype || ""}-${
+    const key = `${machine.type}-${machine.jcbSubtype || ""}-${machine.jcbPartType || ""}-${
       machine.slmSubtype || ""
     }`;
 
@@ -62,6 +63,7 @@ async function getProject(id: string) {
       acc[key] = {
         type: machine.type,
         jcbSubtype: machine.jcbSubtype,
+        jcbPartType: machine.jcbPartType,
         slmSubtype: machine.slmSubtype,
         totalHoursUsed: 0,
         totalCost: 0,

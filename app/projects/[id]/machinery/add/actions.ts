@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import { MachineryType, JCBSubtype, SLMSubtype, JCBPartType } from "@prisma/client";
 import { generateMachineryId } from "@/lib/id-generators";
 
 export async function addMachinery(formData: FormData) {
@@ -10,6 +10,8 @@ export async function addMachinery(formData: FormData) {
   const type = formData.get("type") as MachineryType;
   const jcbSubtype =
     type === "JCB" ? (formData.get("jcbSubtype") as JCBSubtype) : null;
+  const jcbPartType =
+    type === "JCB" ? (formData.get("jcbPartType") as JCBPartType) : null;
   const slmSubtype =
     type === "SLM" ? (formData.get("slmSubtype") as SLMSubtype) : null;
   const hoursUsed = parseFloat(formData.get("hoursUsed") as string);
@@ -22,6 +24,7 @@ export async function addMachinery(formData: FormData) {
       id: generateMachineryId(type, jcbSubtype, slmSubtype),
       type,
       jcbSubtype,
+      jcbPartType,
       slmSubtype,
       hoursUsed,
       hourlyRate,

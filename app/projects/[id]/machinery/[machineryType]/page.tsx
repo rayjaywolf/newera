@@ -20,7 +20,7 @@ import {
   Timer,
 } from "lucide-react";
 import cn from "classnames";
-import { MachineryType, JCBSubtype, SLMSubtype } from "@prisma/client";
+import { MachineryType, JCBSubtype, SLMSubtype, JCBPartType } from "@prisma/client";
 import dynamic from "next/dynamic";
 
 interface MachineryPageProps {
@@ -36,20 +36,42 @@ export const metadata: Metadata = {
 };
 
 async function getMachineryDetails(projectId: string, machineryType: string) {
-  const [type, subtype] = decodeURIComponent(machineryType)
+  const parts = decodeURIComponent(machineryType)
     .toUpperCase()
     .replace(/-/g, "_")
-    .split("_SUBTYPE_");
+    .split("_");
+
+  const type = parts[0] as MachineryType;
+  let jcbSubtype: JCBSubtype | null = null;
+  let jcbPartType: JCBPartType | null = null;
+  let slmSubtype: SLMSubtype | null = null;
+
+  if (type === "JCB") {
+    // Find JCB subtype and part type
+    for (let i = 1; i < parts.length; i++) {
+      if (parts[i] === "SUBTYPE" && parts[i + 1]) {
+        jcbSubtype = parts[i + 1] as JCBSubtype;
+        i++; // Skip the next part as we've used it
+      } else if (parts[i] === "PARTTYPE" && parts[i + 1]) {
+        jcbPartType = parts[i + 1] as JCBPartType;
+        i++; // Skip the next part as we've used it
+      }
+    }
+  } else if (type === "SLM") {
+    // Find SLM subtype
+    const subtypeIndex = parts.indexOf("SUBTYPE");
+    if (subtypeIndex !== -1 && parts[subtypeIndex + 1]) {
+      slmSubtype = parts[subtypeIndex + 1] as SLMSubtype;
+    }
+  }
 
   const machinery = await prisma.machineryUsage.findMany({
     where: {
       projectId,
-      type: type as MachineryType,
-      ...(type === "JCB" && subtype
-        ? { jcbSubtype: subtype as JCBSubtype }
-        : type === "SLM" && subtype
-        ? { slmSubtype: subtype as SLMSubtype }
-        : {}),
+      type,
+      ...(jcbSubtype ? { jcbSubtype } : {}),
+      ...(jcbPartType ? { jcbPartType } : {}),
+      ...(slmSubtype ? { slmSubtype } : {}),
     },
     orderBy: {
       date: "desc",
@@ -91,7 +113,9 @@ async function getMachineryDetails(projectId: string, machineryType: string) {
 
   return {
     type,
-    subtype,
+    jcbSubtype,
+    jcbPartType,
+    slmSubtype,
     totalHours,
     totalCost,
     averageRate,
@@ -128,7 +152,9 @@ export default async function MachineryPage({ params }: MachineryPageProps) {
   const getMachineryName = () => {
     const parts = [
       machinery.type.toLowerCase(),
-      machinery.subtype?.toLowerCase().replace(/_/g, " "),
+      machinery.jcbSubtype?.toLowerCase().replace(/_/g, " "),
+      machinery.jcbPartType?.toLowerCase().replace(/_/g, " "),
+      machinery.slmSubtype?.toLowerCase().replace(/_/g, " "),
     ].filter(Boolean);
     return parts.join(" - ");
   };
