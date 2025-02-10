@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { markWorkerInactive } from "./actions";
+import { markWorkerInactive, migrateWorker } from "./actions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { formatDate, getInitials } from "@/lib/utils";
@@ -24,17 +24,79 @@ import {
 import cn from "classnames";
 import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
 import { UploadPhotoDialog } from "@/components/workers/upload-photo-dialog";
+import { MigrateWorkerDialog } from "@/components/workers/migrate-worker-dialog";
 import dynamic from "next/dynamic";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 
+interface Project {
+  id: string;
+  projectId: string;
+  location: string;
+  clientName: string;
+}
+
+interface Attendance {
+  id: string;
+  date: Date;
+  present: boolean;
+  hoursWorked: number;
+  overtime: number;
+  projectId: string;
+  workerId: string;
+  photoUrl: string | null;
+  confidence: number | null;
+  workerInPhoto: string | null;
+  workerOutPhoto: string | null;
+  inConfidence: number | null;
+  outConfidence: number | null;
+  isPartiallyMarked: boolean;
+  createdAt: Date;
+}
+
+interface Advance {
+  id: string;
+  amount: number;
+  date: Date;
+  notes: string | null;
+  isPaid: boolean;
+  projectId: string;
+  workerId: string;
+  createdAt: Date;
+}
+
+interface WorkerAssignment {
+  id: string;
+  projectId: string;
+  workerId: string;
+  startDate: Date;
+  endDate: Date | null;
+}
+
+interface Worker {
+  id: string;
+  name: string;
+  type: string;
+  hourlyRate: number;
+  phoneNumber: string | null;
+  isActive: boolean;
+  photoUrl: string | null;
+  faceId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  attendance: Attendance[];
+  advances: Advance[];
+  assignments: WorkerAssignment[];
+}
+
 interface WorkerDetailsProps {
-  worker: any; // Replace with proper type
+  worker: Worker;
   params: {
     id: string;
     workerId: string;
   };
+  projects: Project[];
 }
 
 /**
@@ -45,10 +107,14 @@ function getWorkingDays(start: Date, end: Date): number {
   return Math.floor((end.getTime() - start.getTime()) / millisecondsPerDay) + 1;
 }
 
-export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
+export function WorkerDetails({ worker, params, projects }: WorkerDetailsProps) {
   const router = useRouter();
   const { id: projectId, workerId } = params;
   const [isDialogOpen, setDialogOpen] = useState(false);
+
+  // Get the current project's assignment
+  const currentAssignment = worker.assignments.find(a => a.projectId === projectId);
+  const isActiveInProject = currentAssignment?.isActive ?? false;
 
   const handleMarkInactive = async () => {
     setDialogOpen(true);
@@ -57,11 +123,15 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   const handleConfirmMarkInactive = async () => {
     const result = await markWorkerInactive(workerId, projectId);
     if (result.success) {
-      toast.success("Worker marked as inactive");
+      toast.success("Worker marked as inactive in this project");
       router.refresh();
     } else {
       toast.error(result.error || "Failed to mark worker as inactive");
     }
+  };
+
+  const handleMigrate = async (targetProjectId: string) => {
+    return migrateWorker(workerId, projectId, targetProjectId);
   };
 
   const AttendanceHistoryWithFilter = dynamic(
@@ -94,8 +164,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   // Calculate elapsed working days (up to today), counting all days
   const elapsedWorkingDays = getWorkingDays(effectiveStart, effectiveEnd);
 
-  // Count days present within the elapsed period.
-  const daysPresent = currentMonthAttendance.filter((record) => {
+  // Calculate attendance statistics
+  const daysPresent = currentMonthAttendance.filter((record: Attendance) => {
     const recordDate = new Date(record.date);
     return recordDate >= effectiveStart && recordDate <= effectiveEnd;
   }).length;
@@ -107,18 +177,18 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
   const attendancePercentage =
     elapsedWorkingDays > 0 ? (daysPresent / elapsedWorkingDays) * 100 : 0;
 
-  // Calculate hours, overtime, earnings, and advances (for the full month)
+  // Calculate hours, overtime, earnings, and advances
   const totalHours = currentMonthAttendance.reduce(
-    (acc, record) => acc + record.hoursWorked,
+    (acc: number, record: Attendance) => acc + record.hoursWorked,
     0
   );
   const totalOvertime = currentMonthAttendance.reduce(
-    (acc, record) => acc + record.overtime,
+    (acc: number, record: Attendance) => acc + record.overtime,
     0
   );
   const monthlyEarnings = (totalHours + totalOvertime) * worker.hourlyRate;
   const monthlyAdvances = currentMonthAdvances.reduce(
-    (acc, advance) => acc + advance.amount,
+    (acc: number, advance: Advance) => acc + advance.amount,
     0
   );
   const remainingBalance = monthlyEarnings - monthlyAdvances;
@@ -163,21 +233,29 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
                 variant="outline"
                 className={cn(
                   "px-6 py-2",
-                  worker.isActive
+                  isActiveInProject
                     ? "border-[#E65F2B] text-[#E65F2B]"
                     : "border-gray-500 text-gray-500"
                 )}
               >
-                {worker.isActive ? "Active" : "Inactive"}
+                {isActiveInProject ? "Active" : "Inactive"}
               </Badge>
-              {worker.isActive && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleMarkInactive}
-                >
-                  Mark as Inactive
-                </Button>
+              {isActiveInProject && (
+                <div className="flex gap-2">
+                  <MigrateWorkerDialog
+                    workerId={workerId}
+                    currentProjectId={projectId}
+                    projects={projects}
+                    onMigrate={handleMigrate}
+                  />
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleMarkInactive}
+                  >
+                    Mark as Inactive
+                  </Button>
+                </div>
               )}
             </div>
           </div>
@@ -350,8 +428,8 @@ export function WorkerDetails({ worker, params }: WorkerDetailsProps) {
         isOpen={isDialogOpen}
         onClose={() => setDialogOpen(false)}
         onConfirm={handleConfirmMarkInactive}
-        title="Confirm Mark as Inactive"
-        message="Are you sure you want to mark this worker as inactive?"
+        title="Mark Worker as Inactive"
+        message="Are you sure you want to mark this worker as inactive in this project? This action cannot be undone."
       />
     </div>
   );

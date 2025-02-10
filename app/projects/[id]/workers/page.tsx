@@ -33,22 +33,24 @@ async function getProject(id: string) {
     include: {
       workers: {
         where: {},
-        include: {
+        select: {
+          id: true,
+          workerId: true,
+          startDate: true,
+          endDate: true,
+          isActive: true,
           worker: {
             select: {
               id: true,
               name: true,
               type: true,
-              isActive: true,
               photoUrl: true,
             },
           },
         },
         orderBy: [
           {
-            worker: {
-              isActive: "desc",
-            },
+            isActive: "desc",
           },
           {
             startDate: "desc",
@@ -65,6 +67,17 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
   if (!project) {
     notFound();
   }
+
+  // Transform the data to match the expected format
+  const workersData = project.workers.map((assignment) => ({
+    workerId: assignment.workerId,
+    worker: {
+      ...assignment.worker,
+      isActive: assignment.isActive,
+    },
+    startDate: assignment.startDate,
+    endDate: assignment.endDate,
+  }));
 
   return (
     <div className="p-4 sm:p-8 space-y-8">
@@ -90,7 +103,7 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
               <p className="text-gray-500">No workers found in this project</p>
             </div>
           ) : (
-            <WorkersView workers={project.workers} projectId={params.id} />
+            <WorkersView workers={workersData} projectId={params.id} />
           )}
         </CardContent>
       </Card>

@@ -83,6 +83,7 @@ model WorkerAssignment {
   projectId String
   startDate DateTime
   endDate   DateTime?
+  isActive  Boolean   @default(true)  // Add this line
 
   @@unique([workerId, projectId])
 }
