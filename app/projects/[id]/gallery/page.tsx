@@ -877,9 +877,9 @@ export default function GalleryPage() {
                                   fill
                                   className="object-cover transition-transform group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 {data.checkIn.time && (
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs">
                                     {new Date(
                                       data.checkIn.time
                                     ).toLocaleTimeString()}
@@ -909,9 +909,9 @@ export default function GalleryPage() {
                                   fill
                                   className="object-cover transition-transform group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 {data.checkOut.time && (
-                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white text-xs">
                                     {new Date(
                                       data.checkOut.time
                                     ).toLocaleTimeString()}

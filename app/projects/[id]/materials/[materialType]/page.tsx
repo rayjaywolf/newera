@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 
 const unitMapping: Record<MaterialType, string> = {
   STEEL: "kg",
-  CEMENT: "kg",
+  CEMENT: "bags",
   WASHING_SAND: "cubic feet",
   FINE_SAND: "cubic feet",
   GRIT_10MM: "cubic feet",

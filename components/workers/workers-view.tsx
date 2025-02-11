@@ -103,7 +103,7 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                 )}
               </Avatar>
               <div className="flex-1">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4">
+                <div className="flex flex-row sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-medium text-lg">
                       {projectWorker.worker.name}

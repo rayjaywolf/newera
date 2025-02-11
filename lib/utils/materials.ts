@@ -3,9 +3,11 @@ import { MaterialType } from "@prisma/client";
 export function getMaterialUnit(type: MaterialType): string {
   switch (type) {
     case "STEEL":
-    case "CEMENT":
       return "kg";
-    case "SAND":
+    case "CEMENT":
+      return "bags";
+    case "WASHING_SAND":
+    case "FINE_SAND":
     case "GRIT_10MM":
     case "GRIT_20MM":
     case "GRIT_40MM":

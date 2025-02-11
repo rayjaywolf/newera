@@ -65,7 +65,7 @@ export function MaterialsView({ materials, projectId }: MaterialsViewProps) {
 
   const unitMapping: Record<MaterialType, string> = {
     STEEL: "kg",
-    CEMENT: "kg",
+    CEMENT: "bags",
     WASHING_SAND: "cubic ft",
     FINE_SAND: "cubic ft",
     GRIT_10MM: "cubic ft",
