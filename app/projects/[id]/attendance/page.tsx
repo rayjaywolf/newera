@@ -218,7 +218,7 @@ export default function AttendancePage() {
       if (!response.ok) throw new Error("Failed to save attendance");
 
       toast.success("Attendance saved successfully");
-      await fetchData(); // Use fetchData to refresh both workers and attendance
+      await fetchData();
     } catch (error) {
       console.error("Error saving attendance:", error);
       toast.error("Failed to save attendance");
@@ -228,7 +228,7 @@ export default function AttendancePage() {
   };
 
   const handleFaceRecognition = (attendanceRecord: any) => {
-    fetchData(); // Use fetchData
+    fetchData();
   };
 
   const getActiveWorkers = () => {
@@ -359,7 +359,10 @@ export default function AttendancePage() {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full md:w-auto p-0" align="start">
+                  <PopoverContent
+                    className="w-full md:w-auto p-0"
+                    align="start"
+                  >
                     <Calendar
                       mode="single"
                       selected={selectedDate}

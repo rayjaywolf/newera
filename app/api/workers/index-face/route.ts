@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    // Ensure collection exists
     await ensureCollection();
 
     const formData = await req.formData();
@@ -18,10 +17,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Convert file to buffer
     const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
 
-    // Index the face
     const faceId = await indexWorkerFace(photoBuffer, workerId);
 
     if (!faceId) {
@@ -31,10 +28,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Update worker with faceId if needed
     await prisma.worker.update({
       where: { id: workerId },
-      data: { 
+      data: {
         faceId: faceId,
       },
     });

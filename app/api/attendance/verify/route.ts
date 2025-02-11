@@ -80,12 +80,12 @@ export async function POST(req: Request) {
       },
     });
 
-    const filename = `attendance/${projectId}/${workerId}/${Date.now()}-${mode}-${photoFile.name
-      }`;
+    const filename = `attendance/${projectId}/${workerId}/${Date.now()}-${mode}-${
+      photoFile.name
+    }`;
     const { url } = await put(filename, photoFile, { access: "public" });
 
     if (existingAttendance) {
-      // If it's a check-in attempt but already has check-in photo
       if (mode === "in" && existingAttendance.workerInPhoto) {
         return NextResponse.json(
           {
@@ -97,7 +97,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // If it's a check-out attempt but already has check-out photo
       if (mode === "out" && existingAttendance.workerOutPhoto) {
         return NextResponse.json(
           {
@@ -109,22 +108,21 @@ export async function POST(req: Request) {
         );
       }
 
-      // Update existing attendance record
       const attendance = await prisma.attendance.update({
         where: { id: existingAttendance.id },
         data: {
           ...(mode === "in"
             ? {
-              workerInPhoto: url,
-              inConfidence: confidence,
-              isPartiallyMarked: true,
-            }
+                workerInPhoto: url,
+                inConfidence: confidence,
+                isPartiallyMarked: true,
+              }
             : {
-              workerOutPhoto: url,
-              outConfidence: confidence,
-              present: true,
-              isPartiallyMarked: false,
-            }),
+                workerOutPhoto: url,
+                outConfidence: confidence,
+                present: true,
+                isPartiallyMarked: false,
+              }),
         },
         include: {
           worker: {
@@ -137,7 +135,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, attendance });
     }
 
-    // Create new attendance record
     const attendance = await prisma.attendance.create({
       data: {
         workerId,
@@ -147,13 +144,13 @@ export async function POST(req: Request) {
         isPartiallyMarked: true,
         ...(mode === "in"
           ? {
-            workerInPhoto: url,
-            inConfidence: confidence,
-          }
+              workerInPhoto: url,
+              inConfidence: confidence,
+            }
           : {
-            workerOutPhoto: url,
-            outConfidence: confidence,
-          }),
+              workerOutPhoto: url,
+              outConfidence: confidence,
+            }),
       },
       include: {
         worker: {

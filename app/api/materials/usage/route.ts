@@ -1,46 +1,47 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { MaterialType } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { MaterialType } from "@prisma/client";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const projectId = searchParams.get('projectId');
-  const materialType = searchParams.get('materialType');
-  const fromDate = searchParams.get('fromDate');
-  const toDate = searchParams.get('toDate');
+  const projectId = searchParams.get("projectId");
+  const materialType = searchParams.get("materialType");
+  const fromDate = searchParams.get("fromDate");
+  const toDate = searchParams.get("toDate");
 
   if (!projectId || !materialType) {
     return NextResponse.json(
-      { error: 'Missing required parameters' },
+      { error: "Missing required parameters" },
       { status: 400 }
     );
   }
 
-  const dateFilter = fromDate && toDate ? {
-    date: {
-      gte: new Date(fromDate),
-      lte: new Date(toDate),
-    },
-  } : {};
+  const dateFilter =
+    fromDate && toDate
+      ? {
+          date: {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+          },
+        }
+      : {};
 
   try {
     const materials = await prisma.materialUsage.findMany({
       where: {
         projectId,
-        type: materialType.toUpperCase().replace(/-/g, '_') as MaterialType,
+        type: materialType.toUpperCase().replace(/-/g, "_") as MaterialType,
         ...dateFilter,
       },
       orderBy: {
-        date: 'desc',
+        date: "desc",
       },
     });
 
-    // Calculate aggregated data
     const totalVolume = materials.reduce((acc, mat) => acc + mat.volume, 0);
     const totalCost = materials.reduce((acc, mat) => acc + mat.cost, 0);
     const averageRate = Math.round(totalCost / totalVolume);
 
-    // Calculate monthly usage for the filtered period
     const currentMonth = new Date();
     const monthStart = new Date(
       currentMonth.getFullYear(),
@@ -54,10 +55,14 @@ export async function GET(request: Request) {
     );
 
     const monthlyUsage = materials.filter(
-      (mat) => new Date(mat.date) >= monthStart && new Date(mat.date) <= monthEnd
+      (mat) =>
+        new Date(mat.date) >= monthStart && new Date(mat.date) <= monthEnd
     );
 
-    const monthlyVolume = monthlyUsage.reduce((acc, mat) => acc + mat.volume, 0);
+    const monthlyVolume = monthlyUsage.reduce(
+      (acc, mat) => acc + mat.volume,
+      0
+    );
     const monthlyCost = monthlyUsage.reduce((acc, mat) => acc + mat.cost, 0);
 
     return NextResponse.json({
@@ -72,9 +77,9 @@ export async function GET(request: Request) {
       monthlyCost,
     });
   } catch (error) {
-    console.error('Error fetching material usage:', error);
+    console.error("Error fetching material usage:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch material usage' },
+      { error: "Failed to fetch material usage" },
       { status: 500 }
     );
   }

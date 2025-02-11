@@ -12,7 +12,6 @@ export async function GET(
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Fetch today's attendance records with photos and worker information
     const attendanceRecords = await prisma.attendance.findMany({
       where: {
         projectId,
@@ -42,7 +41,7 @@ export async function GET(
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 

@@ -53,11 +53,10 @@ async function getProject(id: string) {
 
   if (!project) return null;
 
-  // Aggregate machinery by type and subtype
   const aggregatedMachinery = project.machinery.reduce((acc, machine) => {
-    const key = `${machine.type}-${machine.jcbSubtype || ""}-${machine.jcbPartType || ""}-${
-      machine.slmSubtype || ""
-    }`;
+    const key = `${machine.type}-${machine.jcbSubtype || ""}-${
+      machine.jcbPartType || ""
+    }-${machine.slmSubtype || ""}`;
 
     if (!acc[key]) {
       acc[key] = {
@@ -67,7 +66,7 @@ async function getProject(id: string) {
         slmSubtype: machine.slmSubtype,
         totalHoursUsed: 0,
         totalCost: 0,
-        totalRate: 0, // For calculating average
+        totalRate: 0,
         lastUpdated: machine.date,
         entries: 0,
       };
@@ -86,7 +85,6 @@ async function getProject(id: string) {
     return acc;
   }, {} as Record<string, any>);
 
-  // Calculate average hourly rate and format the output
   const formattedMachinery = Object.values(aggregatedMachinery).map(
     (machine) => ({
       ...machine,
@@ -94,7 +92,6 @@ async function getProject(id: string) {
     })
   );
 
-  // Calculate total stats
   const machineryStats = formattedMachinery.reduce(
     (acc, curr) => ({
       totalCost: acc.totalCost + curr.totalCost,
@@ -105,7 +102,6 @@ async function getProject(id: string) {
     { totalCost: 0, totalHours: 0, totalTypes: 0, totalEntries: 0 }
   );
 
-  // Calculate overall average hourly rate
   machineryStats.averageHourlyRate =
     machineryStats.totalEntries > 0
       ? Math.round(

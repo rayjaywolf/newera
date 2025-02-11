@@ -1,6 +1,6 @@
-import { del } from '@vercel/blob';
-import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { del } from "@vercel/blob";
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function DELETE(
   request: Request,
@@ -12,20 +12,18 @@ export async function DELETE(
     });
 
     if (!image) {
-      return new NextResponse('Image not found', { status: 404 });
+      return new NextResponse("Image not found", { status: 404 });
     }
 
-    // Delete from Blob storage
     await del(image.url);
 
-    // Delete from database
     await prisma.projectImage.delete({
       where: { id: params.imageId },
     });
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Error deleting image:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Error deleting image:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

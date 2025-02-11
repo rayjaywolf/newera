@@ -84,7 +84,11 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
           projectId: params.id,
           date: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+            lt: new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + 1,
+              1
+            ),
           },
         },
       },
@@ -93,7 +97,11 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
           projectId: params.id,
           date: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+            lt: new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + 1,
+              1
+            ),
           },
         },
       },
@@ -104,29 +112,27 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
     notFound();
   }
 
-  // Convert date strings to Date objects
   const workerWithDates = {
     ...worker,
     createdAt: new Date(worker.createdAt),
     updatedAt: new Date(worker.updatedAt),
-    assignments: worker.assignments.map(assignment => ({
+    assignments: worker.assignments.map((assignment) => ({
       ...assignment,
       startDate: new Date(assignment.startDate),
       endDate: assignment.endDate ? new Date(assignment.endDate) : null,
     })),
-    attendance: worker.attendance.map(record => ({
+    attendance: worker.attendance.map((record) => ({
       ...record,
       date: new Date(record.date),
       createdAt: new Date(record.createdAt),
     })),
-    advances: worker.advances.map(advance => ({
+    advances: worker.advances.map((advance) => ({
       ...advance,
       date: new Date(advance.date),
       createdAt: new Date(advance.createdAt),
     })),
   };
 
-  // Fetch all projects for migration
   const projects = await prisma.project.findMany({
     where: {
       status: "ONGOING",
@@ -139,5 +145,11 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
     },
   });
 
-  return <WorkerDetails worker={workerWithDates} params={params} projects={projects} />;
+  return (
+    <WorkerDetails
+      worker={workerWithDates}
+      params={params}
+      projects={projects}
+    />
+  );
 }

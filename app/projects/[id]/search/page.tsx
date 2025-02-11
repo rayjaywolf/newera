@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-// Helper function to check if a string is a valid enum value
 function isValidEnum<T extends { [key: string]: string }>(
   enumObj: T,
   value: string
@@ -35,7 +34,6 @@ async function SearchResults({
 }) {
   const upperQuery = query.toUpperCase();
 
-  // Search across all entities
   const [
     projectResults,
     workerResults,
@@ -75,11 +73,10 @@ async function SearchResults({
         },
       },
     }),
-    // Enhanced material search to include partial matches
+
     prisma.materialUsage.findMany({
       where: {
         OR: [
-          // Check if query matches any part of the material type
           {
             type: {
               in: Object.values(MaterialType).filter((type) =>
@@ -87,7 +84,7 @@ async function SearchResults({
               ),
             },
           },
-          // Also check if the query exactly matches a MaterialType
+
           ...(isValidEnum(MaterialType, upperQuery)
             ? [
                 {
@@ -101,11 +98,10 @@ async function SearchResults({
         project: true,
       },
     }),
-    // Enhanced machinery search to include partial matches
+
     prisma.machineryUsage.findMany({
       where: {
         OR: [
-          // Check if query matches any part of the machinery type
           {
             type: {
               in: Object.values(MachineryType).filter((type) =>
@@ -113,7 +109,7 @@ async function SearchResults({
               ),
             },
           },
-          // Check if query matches any part of JCB subtype
+
           {
             jcbSubtype: {
               in: Object.values(JCBSubtype).filter((type) =>
@@ -121,7 +117,7 @@ async function SearchResults({
               ),
             },
           },
-          // Check if query matches any part of SLM subtype
+
           {
             slmSubtype: {
               in: Object.values(SLMSubtype).filter((type) =>
@@ -129,7 +125,7 @@ async function SearchResults({
               ),
             },
           },
-          // Also check if the query exactly matches any type/subtype
+
           ...(isValidEnum(MachineryType, upperQuery)
             ? [
                 {
@@ -176,7 +172,6 @@ async function SearchResults({
 
   return (
     <div className="space-y-8">
-      {/* Worker Results */}
       {workerResults.length > 0 && (
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
@@ -225,7 +220,6 @@ async function SearchResults({
         </Card>
       )}
 
-      {/* Material Usage Results */}
       {materialUsageResults.length > 0 && (
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
@@ -273,7 +267,6 @@ async function SearchResults({
         </Card>
       )}
 
-      {/* Machinery Usage Results */}
       {machineryUsageResults.length > 0 && (
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
@@ -342,7 +335,6 @@ async function SearchResults({
         </Card>
       )}
 
-      {/* Project Results */}
       {projectResults.length > 0 && (
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">

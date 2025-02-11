@@ -10,14 +10,18 @@ export async function POST(request: Request) {
     console.log("Received request body:", body);
 
     if (!name || !type || !hourlyRate || !projectId) {
-      console.error("Missing required fields:", { name, type, hourlyRate, projectId });
+      console.error("Missing required fields:", {
+        name,
+        type,
+        hourlyRate,
+        projectId,
+      });
       return new NextResponse(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400 }
       );
     }
 
-    // Validate worker type
     if (!Object.values(WorkerType).includes(type)) {
       console.error("Invalid worker type:", type);
       return new NextResponse(
@@ -26,17 +30,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if project exists
     const project = await prisma.project.findUnique({
       where: { projectId },
     });
 
     if (!project) {
       console.error("Project not found:", projectId);
-      return new NextResponse(
-        JSON.stringify({ error: "Project not found" }),
-        { status: 404 }
-      );
+      return new NextResponse(JSON.stringify({ error: "Project not found" }), {
+        status: 404,
+      });
     }
 
     console.log("Creating worker with data:", {
@@ -47,7 +49,6 @@ export async function POST(request: Request) {
       projectId,
     });
 
-    // Create worker
     const worker = await prisma.worker.create({
       data: {
         name,
@@ -60,11 +61,10 @@ export async function POST(request: Request) {
 
     console.log("Worker created:", worker);
 
-    // Create worker assignment
     const assignment = await prisma.workerAssignment.create({
       data: {
         workerId: worker.id,
-        projectId: project.id, // Use project.id instead of projectId
+        projectId: project.id,
         startDate: new Date(),
       },
     });
@@ -75,9 +75,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating worker:", error);
     return new NextResponse(
-      JSON.stringify({ 
-        error: "Error creating worker", 
-        details: error instanceof Error ? error.message : String(error)
+      JSON.stringify({
+        error: "Error creating worker",
+        details: error instanceof Error ? error.message : String(error),
       }),
       { status: 500 }
     );

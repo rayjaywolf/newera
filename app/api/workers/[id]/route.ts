@@ -36,28 +36,24 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get the worker's faceId before deletion
     const worker = await prisma.worker.findUnique({
       where: { id: params.id },
-      select: { faceId: true }
+      select: { faceId: true },
     });
 
-    // Delete the worker
     await prisma.worker.delete({
       where: { id: params.id },
     });
 
-    // If worker had a faceId, delete it from Rekognition
     if (worker?.faceId) {
       try {
-        await fetch('/api/workers/delete-face', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("/api/workers/delete-face", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ faceId: worker.faceId }),
         });
       } catch (error) {
-        console.error('Failed to delete face from Rekognition:', error);
-        // Continue with the response even if face deletion fails
+        console.error("Failed to delete face from Rekognition:", error);
       }
     }
 

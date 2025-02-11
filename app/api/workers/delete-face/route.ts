@@ -13,7 +13,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Delete face from Rekognition collection
     await deleteFaceFromCollection(faceId);
 
     return NextResponse.json({

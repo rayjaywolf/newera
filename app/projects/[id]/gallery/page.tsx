@@ -368,7 +368,6 @@ export default function GalleryPage() {
       await handleDelete(imageToDelete.id);
       setImageToDelete(null);
     } catch (error) {
-      // Error already handled in handleDelete
     } finally {
       setIsDeleting(false);
     }
@@ -422,7 +421,6 @@ export default function GalleryPage() {
     const grouped: GroupedWorkerPhotos = {};
 
     records.forEach((record) => {
-      // Create or update worker entry
       if (!grouped[record.worker.id]) {
         grouped[record.worker.id] = {
           name: record.worker.name,
@@ -439,7 +437,6 @@ export default function GalleryPage() {
         };
       }
 
-      // Update check-in photo if available
       if (record.workerInPhoto) {
         grouped[record.worker.id].checkIn = {
           photo: record.workerInPhoto,
@@ -448,7 +445,6 @@ export default function GalleryPage() {
         };
       }
 
-      // Update check-out photo if available
       if (record.workerOutPhoto) {
         grouped[record.worker.id].checkOut = {
           photo: record.workerOutPhoto,
@@ -464,7 +460,6 @@ export default function GalleryPage() {
   if (isLoading) {
     return (
       <div className="p-4 sm:p-8 space-y-8">
-        {/* Tabs Skeleton */}
         <div className="flex justify-center mb-4">
           <div className="flex p-1 bg-black/10 rounded-lg w-fit gap-1">
             <Skeleton className="h-9 w-28 bg-white" />
@@ -472,7 +467,6 @@ export default function GalleryPage() {
           </div>
         </div>
 
-        {/* Header Card Skeleton */}
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -491,7 +485,6 @@ export default function GalleryPage() {
           </CardHeader>
         </Card>
 
-        {/* Stats Card Skeleton */}
         <Card className="bg-white/[0.34] border-0 shadow-none">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -512,7 +505,6 @@ export default function GalleryPage() {
           </CardContent>
         </Card>
 
-        {/* Image Grid Skeleton */}
         {[...Array(2)].map((_, groupIndex) => (
           <Card
             key={groupIndex}
@@ -819,7 +811,6 @@ export default function GalleryPage() {
                   </CardContent>
                 </Card>
 
-                {/* Absent Workers */}
                 <Card className="bg-white/[0.34] border-[rgb(0,0,0,0.08)] shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -851,7 +842,7 @@ export default function GalleryPage() {
                 ([workerId, data]) => (
                   <Card
                     key={workerId}
-                    className="bg-white/[0.15] border border-[rgba(0,0,0,0.08)] overflow-hidden hover:bg-white/[0.25] transition-colors"
+                    className="bg-white/[0.34] border border-[rgba(0,0,0,0.08)] overflow-hidden hover:bg-white/[0.25] transition-colors"
                   >
                     <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">
@@ -905,7 +896,6 @@ export default function GalleryPage() {
                           </div>
                         </div>
 
-                        {/* Check-out Photo */}
                         <div className="space-y-3">
                           <h4 className="text-sm font-medium text-gray-500">
                             Check-out

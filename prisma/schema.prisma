@@ -28,7 +28,6 @@ model Project {
   endDate    DateTime?
   status     ProjectStatus @default(ONGOING)
 
-  // Relations
   workers    WorkerAssignment[]
   machinery  MachineryUsage[]
   materials  MaterialUsage[]
@@ -53,11 +52,10 @@ model Worker {
   hourlyRate  Float
   phoneNumber String?
   isActive    Boolean       @default(true)
-  photoUrl    String? // Reference photo for facial recognition
-  faceId      String? // AWS Rekognition Face ID
-  photos      WorkerPhoto[] // All photos of the worker
+  photoUrl    String?
+  faceId      String?
+  photos      WorkerPhoto[]
 
-  // Relations
   assignments WorkerAssignment[]
   attendance  Attendance[]
   advances    Advance[]
@@ -83,7 +81,7 @@ model WorkerAssignment {
   projectId String
   startDate DateTime
   endDate   DateTime?
-  isActive  Boolean   @default(true)  // Add this line
+  isActive  Boolean   @default(true)
 
   @@unique([workerId, projectId])
 }
@@ -98,13 +96,13 @@ model Attendance {
   present           Boolean  @default(false)
   hoursWorked       Float    @default(0)
   overtime          Float    @default(0)
-  photoUrl          String? // Store the attendance verification photo
-  confidence        Float?  // Store the facial recognition confidence score
-  workerInPhoto     String? // Store the check-in photo URL
-  workerOutPhoto    String? // Store the check-out photo URL
-  inConfidence      Float?  // Store the check-in facial recognition confidence score
-  outConfidence     Float?  // Store the check-out facial recognition confidence score
-  isPartiallyMarked Boolean  @default(false) // Indicates if only one photo is verified
+  photoUrl          String?
+  confidence        Float?
+  workerInPhoto     String?
+  workerOutPhoto    String?
+  inConfidence      Float?
+  outConfidence     Float?
+  isPartiallyMarked Boolean  @default(false)
 
   createdAt DateTime @default(now())
 
@@ -217,8 +215,8 @@ model WorkerPhoto {
   url       String
   worker    Worker   @relation(fields: [workerId], references: [id])
   workerId  String
-  projectId String // To associate with specific project
-  tag       String // For categorizing different types of photos
+  projectId String
+  tag       String
   createdAt DateTime @default(now())
 
   @@index([workerId])

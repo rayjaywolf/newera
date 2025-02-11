@@ -28,7 +28,6 @@ export async function GET(
       },
     });
 
-    // Transform the data to match the Worker interface
     const transformedWorkers = workers.map((assignment) => ({
       ...assignment.worker,
       startDate: assignment.startDate.toISOString(),
@@ -62,7 +61,6 @@ export async function POST(
     } = body;
 
     if (isExisting && workerId) {
-      // Assign existing worker to project
       await prisma.workerAssignment.create({
         data: {
           workerId,
@@ -72,10 +70,9 @@ export async function POST(
       });
       return NextResponse.json({ success: true, id: workerId });
     } else {
-      // Create new worker with custom ID
       const worker = await prisma.worker.create({
         data: {
-          id, // Use the custom generated ID
+          id,
           name,
           type,
           hourlyRate,
@@ -90,7 +87,6 @@ export async function POST(
         },
       });
 
-      // If photo was uploaded, create WorkerPhoto entry
       if (photoUrl) {
         await prisma.workerPhoto.create({
           data: {

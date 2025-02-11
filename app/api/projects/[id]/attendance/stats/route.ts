@@ -11,7 +11,6 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const timeZone = searchParams.get("timeZone") || "UTC";
 
-    // Get current date and convert to client's timezone
     const now = new Date();
     const today = fromZonedTime(
       new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
@@ -30,7 +29,6 @@ export async function GET(
       timeZone
     );
 
-    // Get all active workers assigned to the project with their details
     const assignedWorkers = await prisma.workerAssignment.findMany({
       where: {
         projectId,
@@ -54,7 +52,6 @@ export async function GET(
       (assignment) => assignment.worker.id
     );
 
-    // Get attendance records for today with worker details
     const todayAttendance = await prisma.attendance.findMany({
       where: {
         projectId,
@@ -64,11 +61,10 @@ export async function GET(
         },
       },
       include: {
-        worker: true
-      }
+        worker: true,
+      },
     });
 
-    // Calculate statistics and group workers
     const presentWorkers = todayAttendance
       .filter((record) => record.present)
       .map((record) => ({
@@ -76,7 +72,6 @@ export async function GET(
         name: record.worker.name,
       }));
 
-    // Workers with both check-in and check-out photos
     const fullyVerifiedWorkers = todayAttendance
       .filter((record) => record.workerInPhoto && record.workerOutPhoto)
       .map((record) => ({
@@ -86,7 +81,6 @@ export async function GET(
         outConfidence: record.outConfidence,
       }));
 
-    // Workers with only one photo (either check-in or check-out)
     const partiallyVerifiedWorkers = todayAttendance
       .filter(
         (record) =>
@@ -101,7 +95,6 @@ export async function GET(
           : record.outConfidence,
       }));
 
-    // Workers marked present but without any photos
     const unverifiedWorkers = todayAttendance
       .filter(
         (record) =>
@@ -112,14 +105,15 @@ export async function GET(
         name: record.worker.name,
       }));
 
-    // Calculate absent workers (workers who are assigned but not present or partially verified)
     const presentOrPartiallyVerifiedIds = new Set([
       ...presentWorkers.map((w) => w.id),
-      ...partiallyVerifiedWorkers.map((w) => w.id)
+      ...partiallyVerifiedWorkers.map((w) => w.id),
     ]);
 
     const absentWorkers = assignedWorkers
-      .filter((assignment) => !presentOrPartiallyVerifiedIds.has(assignment.worker.id))
+      .filter(
+        (assignment) => !presentOrPartiallyVerifiedIds.has(assignment.worker.id)
+      )
       .map((assignment) => ({
         id: assignment.worker.id,
         name: assignment.worker.name,

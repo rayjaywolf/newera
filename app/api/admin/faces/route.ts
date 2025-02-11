@@ -4,28 +4,25 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Get all faces from Rekognition
     const faces = await listAllFaces();
 
-    // Get all workers with faceIds
     const workers = await prisma.worker.findMany({
       where: {
-        faceId: { not: null }
+        faceId: { not: null },
       },
       select: {
         id: true,
         name: true,
         faceId: true,
         photoUrl: true,
-      }
+      },
     });
 
-    // Map faces to workers
-    const facesWithWorkers = faces.map(face => {
-      const worker = workers.find(w => w.faceId === face.FaceId);
+    const facesWithWorkers = faces.map((face) => {
+      const worker = workers.find((w) => w.faceId === face.FaceId);
       return {
         ...face,
-        worker: worker || null
+        worker: worker || null,
       };
     });
 

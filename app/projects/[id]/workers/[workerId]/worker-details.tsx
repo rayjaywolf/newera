@@ -107,13 +107,18 @@ function getWorkingDays(start: Date, end: Date): number {
   return Math.floor((end.getTime() - start.getTime()) / millisecondsPerDay) + 1;
 }
 
-export function WorkerDetails({ worker, params, projects }: WorkerDetailsProps) {
+export function WorkerDetails({
+  worker,
+  params,
+  projects,
+}: WorkerDetailsProps) {
   const router = useRouter();
   const { id: projectId, workerId } = params;
   const [isDialogOpen, setDialogOpen] = useState(false);
 
-  // Get the current project's assignment
-  const currentAssignment = worker.assignments.find(a => a.projectId === projectId);
+  const currentAssignment = worker.assignments.find(
+    (a) => a.projectId === projectId
+  );
   const isActiveInProject = currentAssignment?.isActive ?? false;
 
   const handleMarkInactive = async () => {
@@ -139,45 +144,34 @@ export function WorkerDetails({ worker, params, projects }: WorkerDetailsProps) 
     { ssr: false }
   );
 
-  // Attendance and advances for the current month
   const currentMonthAttendance = worker.attendance;
   const currentMonthAdvances = worker.advances;
 
-  // Get current date info
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  // Calculate full month details (for reference)
   const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const fullMonthWorkingDays = totalDaysInMonth; // Changed: count all days
+  const fullMonthWorkingDays = totalDaysInMonth;
 
-  // Define the effective period for calculating attendance so far.
-  // The effective start is the later of the 1st of the month or the worker's join date.
   const startOfMonth = new Date(currentYear, currentMonth, 1);
   const joinDate = new Date(worker.assignments[0].startDate);
   const effectiveStart = joinDate > startOfMonth ? joinDate : startOfMonth;
 
-  // The effective end is the current date, so that only days that have passed are considered.
   const effectiveEnd = currentDate;
 
-  // Calculate elapsed working days (up to today), counting all days
   const elapsedWorkingDays = getWorkingDays(effectiveStart, effectiveEnd);
 
-  // Calculate attendance statistics
   const daysPresent = currentMonthAttendance.filter((record: Attendance) => {
     const recordDate = new Date(record.date);
     return recordDate >= effectiveStart && recordDate <= effectiveEnd;
   }).length;
 
-  // Calculate days absent as the elapsed working days minus the days present.
   const daysAbsent = Math.max(0, elapsedWorkingDays - daysPresent);
 
-  // Attendance percentage based on days that have already passed.
   const attendancePercentage =
     elapsedWorkingDays > 0 ? (daysPresent / elapsedWorkingDays) * 100 : 0;
 
-  // Calculate hours, overtime, earnings, and advances
   const totalHours = currentMonthAttendance.reduce(
     (acc: number, record: Attendance) => acc + record.hoursWorked,
     0
@@ -229,17 +223,6 @@ export function WorkerDetails({ worker, params, projects }: WorkerDetailsProps) 
               </div>
             </div>
             <div className="flex items-start sm:items-center gap-4">
-              <Badge
-                variant="outline"
-                className={cn(
-                  "px-6 py-2",
-                  isActiveInProject
-                    ? "border-[#E65F2B] text-[#E65F2B]"
-                    : "border-gray-500 text-gray-500"
-                )}
-              >
-                {isActiveInProject ? "Active" : "Inactive"}
-              </Badge>
               {isActiveInProject && (
                 <div className="flex gap-2">
                   <MigrateWorkerDialog
@@ -257,6 +240,17 @@ export function WorkerDetails({ worker, params, projects }: WorkerDetailsProps) 
                   </Button>
                 </div>
               )}
+              <Badge
+                variant="outline"
+                className={cn(
+                  "px-6 py-2",
+                  isActiveInProject
+                    ? "border-[#E65F2B] text-[#E65F2B]"
+                    : "border-gray-500 text-gray-500"
+                )}
+              >
+                {isActiveInProject ? "Active" : "Inactive"}
+              </Badge>
             </div>
           </div>
         </CardHeader>
