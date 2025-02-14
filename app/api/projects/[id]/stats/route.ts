@@ -26,6 +26,7 @@ export async function GET(
         prisma.workerAssignment.count({
           where: {
             projectId: id,
+            isActive: true,
             startDate: { lte: dayEnd },
             OR: [{ endDate: null }, { endDate: { gt: dayStart } }],
           },
@@ -50,10 +51,24 @@ export async function GET(
   );
 
   const attendance = await prisma.attendance.findMany({
-    where: { projectId: id },
+    where: {
+      projectId: id,
+      worker: {
+        assignments: {
+          some: {
+            projectId: id,
+            isActive: true
+          }
+        }
+      }
+    },
     include: {
       worker: {
-        select: { hourlyRate: true },
+        select: {
+          id: true,
+          name: true,
+          hourlyRate: true
+        },
       },
     },
   });
@@ -67,29 +82,50 @@ export async function GET(
   });
 
   const workers = await prisma.workerAssignment.findMany({
-    where: { projectId: id },
-    include: { worker: true },
+    where: {
+      projectId: id,
+      isActive: true
+    },
+    include: {
+      worker: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          hourlyRate: true,
+          photoUrl: true
+        }
+      }
+    },
   });
 
   const advances = await prisma.advance.findMany({
     where: { projectId: id },
   });
 
-  const worker = await prisma.worker.findMany({
+  const activeWorkers = await prisma.worker.findMany({
     where: {
       assignments: {
         some: {
           projectId: id,
-        },
-      },
+          isActive: true
+        }
+      }
     },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      hourlyRate: true,
+      photoUrl: true
+    }
   });
 
   return NextResponse.json({
     attendance,
     materials,
     machinery,
-    worker,
+    worker: activeWorkers,
     workers,
     advances,
     dailyStats,

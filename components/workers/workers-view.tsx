@@ -20,10 +20,10 @@ interface Worker {
   worker: {
     id: string;
     name: string;
-    isActive: boolean;
     type: string;
     photoUrl?: string | null;
   };
+  isActive: boolean;
   startDate: string;
   endDate: string | null;
 }
@@ -88,9 +88,9 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
             <Link
               key={projectWorker.workerId}
               href={`/projects/${projectId}/workers/${projectWorker.workerId}`}
-              className="flex items-start sm:items-center gap-4 rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
+              className="flex items-center gap-4 rounded-lg bg-white/[0.15] p-4 hover:bg-white/[0.25] transition border border-[rgba(0,0,0,0.08)]"
             >
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-16 w-16">
                 {projectWorker.worker.photoUrl ? (
                   <AvatarImage
                     src={projectWorker.worker.photoUrl}
@@ -126,12 +126,12 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                     variant="secondary"
                     className={cn(
                       "h-fit",
-                      projectWorker.worker.isActive
+                      projectWorker.isActive
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-700"
                     )}
                   >
-                    {projectWorker.worker.isActive ? "Active" : "Inactive"}
+                    {projectWorker.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </div>
@@ -225,12 +225,12 @@ export function WorkersView({ workers, projectId }: WorkersViewProps) {
                       variant="secondary"
                       className={cn(
                         "h-fit",
-                        projectWorker.worker.isActive
+                        projectWorker.isActive
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
                       )}
                     >
-                      {projectWorker.worker.isActive ? "Active" : "Inactive"}
+                      {projectWorker.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </td>
                 </tr>

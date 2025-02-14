@@ -60,15 +60,22 @@ async function SearchResults({
     }),
     prisma.worker.findMany({
       where: {
-        name: {
-          contains: query,
-          mode: "insensitive",
+        OR: [
+          { name: { contains: upperQuery, mode: "insensitive" } },
+          { type: { equals: upperQuery as any } },
+        ],
+        assignments: {
+          some: {
+            projectId,
+            isActive: true,
+          },
         },
       },
       include: {
         assignments: {
-          include: {
-            project: true,
+          where: {
+            projectId,
+            isActive: true,
           },
         },
       },
@@ -206,12 +213,12 @@ async function SearchResults({
                     variant="secondary"
                     className={cn(
                       "h-fit",
-                      worker.isActive
+                      worker.assignments.some(a => a.isActive)
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-100 text-gray-700"
                     )}
                   >
-                    {worker.isActive ? "Active" : "Inactive"}
+                    {worker.assignments.some(a => a.isActive) ? "Active" : "Inactive"}
                   </Badge>
                 </Link>
               ))}

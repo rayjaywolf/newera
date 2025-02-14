@@ -31,6 +31,7 @@ interface MigrateWorkerDialogProps {
   currentProjectId: string;
   projects: Project[];
   onMigrate: (targetProjectId: string) => Promise<{ success: boolean; error?: string }>;
+  trigger?: React.ReactNode;
 }
 
 export function MigrateWorkerDialog({
@@ -38,6 +39,7 @@ export function MigrateWorkerDialog({
   currentProjectId,
   projects,
   onMigrate,
+  trigger
 }: MigrateWorkerDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -72,9 +74,7 @@ export function MigrateWorkerDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Migrate Worker
-        </Button>
+        {trigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

@@ -42,25 +42,40 @@ export async function generateMetadata({
   };
 }
 
-// Update the getProject function to include payment records
 async function getProject(id: string) {
   return await prisma.project.findUnique({
     where: { id },
     include: {
       workers: {
         where: {
-          worker: {
-            isActive: true,
-          },
+          isActive: true,
         },
         include: {
-          worker: true,
+          worker: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              hourlyRate: true,
+              photoUrl: true,
+            },
+          },
         },
         orderBy: {
           startDate: "desc",
         },
       },
       attendance: {
+        where: {
+          worker: {
+            assignments: {
+              some: {
+                projectId: id,
+                isActive: true,
+              },
+            },
+          },
+        },
         include: {
           worker: true,
         },
@@ -357,12 +372,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   variant="secondary"
                   className={cn(
                     "h-fit",
-                    assignment.worker.isActive
+                    assignment.isActive
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-700"
                   )}
                 >
-                  {assignment.worker.isActive ? "Active" : "Inactive"}
+                  {assignment.isActive ? "Active" : "Inactive"}
                 </Badge>
               </Link>
             ))}

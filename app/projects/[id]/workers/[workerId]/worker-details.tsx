@@ -1,17 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { markWorkerInactive, migrateWorker } from "./actions";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { getInitials, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
-import { formatDate, getInitials } from "@/lib/utils";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
@@ -20,14 +26,25 @@ import {
   UserCheck,
   UserX,
   Percent,
+  Trash2,
+  MoreVertical,
+  UserPlus,
+  Pencil,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import cn from "classnames";
+import dynamic from "next/dynamic";
+import { markWorkerInactive, migrateWorker } from "./actions";
 import { AddAdvanceDialog } from "@/components/workers/add-advance-dialog";
 import { UploadPhotoDialog } from "@/components/workers/upload-photo-dialog";
 import { MigrateWorkerDialog } from "@/components/workers/migrate-worker-dialog";
-import dynamic from "next/dynamic";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { EditWorkerDialog } from "@/components/workers/edit-worker-dialog";
 import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 
 interface Project {
@@ -72,6 +89,7 @@ interface WorkerAssignment {
   workerId: string;
   startDate: Date;
   endDate: Date | null;
+  isActive: boolean;
 }
 
 interface Worker {
@@ -80,7 +98,6 @@ interface Worker {
   type: string;
   hourlyRate: number;
   phoneNumber: string | null;
-  isActive: boolean;
   photoUrl: string | null;
   faceId: string | null;
   createdAt: Date;
@@ -99,9 +116,6 @@ interface WorkerDetailsProps {
   projects: Project[];
 }
 
-/**
- * Returns the number of days between two dates (inclusive)
- */
 function getWorkingDays(start: Date, end: Date): number {
   const millisecondsPerDay = 24 * 60 * 60 * 1000;
   return Math.floor((end.getTime() - start.getTime()) / millisecondsPerDay) + 1;
@@ -115,6 +129,9 @@ export function WorkerDetails({
   const router = useRouter();
   const { id: projectId, workerId } = params;
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showMigrateDialog, setShowMigrateDialog] = useState(false);
 
   const currentAssignment = worker.assignments.find(
     (a) => a.projectId === projectId
@@ -137,6 +154,29 @@ export function WorkerDetails({
 
   const handleMigrate = async (targetProjectId: string) => {
     return migrateWorker(workerId, projectId, targetProjectId);
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/workers/${worker.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete worker");
+      }
+
+      toast.success("Worker deleted successfully");
+      router.push(`/projects/${params.id}/workers`);
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting worker:", error);
+      toast.error("Failed to delete worker");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
   };
 
   const AttendanceHistoryWithFilter = dynamic(
@@ -193,6 +233,34 @@ export function WorkerDetails({
 
   return (
     <div className="p-4 sm:p-8 space-y-8">
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Worker</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this worker? This action cannot be undone.
+              This will permanently delete the worker and all related data including:
+              <ul className="list-disc list-inside mt-2">
+                <li>Project assignments</li>
+                <li>Attendance records</li>
+                <li>Advance payments</li>
+                <li>Photos and face recognition data</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Worker"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Worker Details Card */}
       <Card className="bg-white/[0.34] border-0 shadow-none">
         <CardHeader className="pb-6">
@@ -223,23 +291,6 @@ export function WorkerDetails({
               </div>
             </div>
             <div className="flex items-start sm:items-center gap-4">
-              {isActiveInProject && (
-                <div className="flex gap-2">
-                  <MigrateWorkerDialog
-                    workerId={workerId}
-                    currentProjectId={projectId}
-                    projects={projects}
-                    onMigrate={handleMigrate}
-                  />
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleMarkInactive}
-                  >
-                    Mark as Inactive
-                  </Button>
-                </div>
-              )}
               <Badge
                 variant="outline"
                 className={cn(
@@ -251,6 +302,51 @@ export function WorkerDetails({
               >
                 {isActiveInProject ? "Active" : "Inactive"}
               </Badge>
+              {isActiveInProject && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <MoreVertical className="h-4 w-4" />
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <EditWorkerDialog
+                      worker={worker}
+                      trigger={
+                        <button className="w-full flex items-center px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit Worker
+                        </button>
+                      }
+                    />
+                    <MigrateWorkerDialog
+                      workerId={workerId}
+                      currentProjectId={projectId}
+                      projects={projects}
+                      onMigrate={handleMigrate}
+                      trigger={
+                        <button className="w-full flex items-center px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Migrate Worker
+                        </button>
+                      }
+                    />
+                    <DropdownMenuItem onClick={handleMarkInactive}>
+                      <UserX className="h-4 w-4" />
+                      Mark as Inactive
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-100"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Worker
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
         </CardHeader>

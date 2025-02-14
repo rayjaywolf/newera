@@ -9,10 +9,8 @@ export async function GET(
     const workers = await prisma.workerAssignment.findMany({
       where: {
         projectId: params.id,
+        isActive: true,
         endDate: null,
-        worker: {
-          isActive: true,
-        },
       },
       select: {
         worker: {

@@ -32,10 +32,8 @@ export async function GET(
     const assignedWorkers = await prisma.workerAssignment.findMany({
       where: {
         projectId,
+        isActive: true,
         endDate: null,
-        worker: {
-          isActive: true,
-        },
       },
       include: {
         worker: {

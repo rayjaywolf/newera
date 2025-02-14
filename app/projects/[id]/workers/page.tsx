@@ -73,10 +73,10 @@ export default async function WorkersPage({ params }: WorkersPageProps) {
     workerId: assignment.workerId,
     worker: {
       ...assignment.worker,
-      isActive: assignment.isActive,
     },
-    startDate: assignment.startDate,
-    endDate: assignment.endDate,
+    isActive: assignment.isActive,
+    startDate: assignment.startDate.toISOString(),
+    endDate: assignment.endDate?.toISOString() || null,
   }));
 
   return (
