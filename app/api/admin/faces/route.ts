@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { listAllFaces } from "@/lib/face-recognition";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const faces = await listAllFaces();
@@ -26,7 +29,13 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(facesWithWorkers);
+    return NextResponse.json(facesWithWorkers, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching faces:", error);
     return NextResponse.json(

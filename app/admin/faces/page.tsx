@@ -36,7 +36,12 @@ export default function FacesPage() {
 
   const fetchFaces = async () => {
     try {
-      const response = await fetch("/api/admin/faces");
+      const response = await fetch("/api/admin/faces", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch faces");
       }
@@ -65,8 +70,12 @@ export default function FacesPage() {
         throw new Error("Failed to delete face");
       }
 
+      // Remove the deleted face from the local state immediately
+      setFaces(faces.filter((face) => face.FaceId !== faceId));
       toast.success("Face deleted successfully");
-      fetchFaces(); // Refresh the list
+
+      // Refetch to ensure consistency
+      await fetchFaces();
     } catch (error) {
       console.error("Error deleting face:", error);
       toast.error("Failed to delete face");
@@ -76,14 +85,16 @@ export default function FacesPage() {
   };
 
   if (loading) {
-    return <div className="p-8">
-      <Skeleton className="h-8 w-[200px] mb-4" />
-      <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
+    return (
+      <div className="p-8">
+        <Skeleton className="h-8 w-[200px] mb-4" />
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
       </div>
-    </div>;
+    );
   }
 
   return (
