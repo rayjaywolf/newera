@@ -129,11 +129,22 @@ export async function POST(request: NextRequest) {
               },
             });
           } else {
+            const nowInUserTz = fromZonedTime(new Date(), timeZone);
+            const todayStartInUserTz = fromZonedTime(
+              new Date(
+                nowInUserTz.getFullYear(),
+                nowInUserTz.getMonth(),
+                nowInUserTz.getDate()
+              ),
+              timeZone
+            );
+            const isToday = startOfDay.getTime() === todayStartInUserTz.getTime();
+
             return prisma.attendance.create({
               data: {
                 projectId,
                 workerId: record.workerId,
-                date: new Date(),
+                date: isToday ? new Date() : startOfDay,
                 present: true,
                 hoursWorked: record.hoursWorked || 0,
                 overtime: record.overtime || 0,

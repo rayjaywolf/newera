@@ -241,17 +241,19 @@ export default function AttendancePage() {
     });
   };
 
-  const isToday = useCallback((date: Date) => {
+  const isWithinAttendanceWindow = useCallback((date: Date) => {
     const today = new Date();
-    console.log(`Date: ${today}`);
-    const localToday = new Date(today.toLocaleString());
-    console.log(`Local Date: ${localToday}`);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    const todayDate = new Date(today);
+    todayDate.setHours(0, 0, 0, 0);
 
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
+    return selectedDate >= yesterday && selectedDate <= todayDate;
   }, []);
 
   if (loading) {
@@ -378,11 +380,11 @@ export default function AttendancePage() {
               </div>
               <Button
                 onClick={saveAttendance}
-                disabled={isSaving || !isToday(selectedDate)}
+                disabled={isSaving || !isWithinAttendanceWindow(selectedDate)}
                 className={cn(
                   "w-full md:w-auto bg-[#060606] text-white font-semibold hover:bg-white hover:text-[#E65F2B] transition-colors",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#060606]",
-                  !isToday(selectedDate) && "opacity-50 cursor-not-allowed"
+                  !isWithinAttendanceWindow(selectedDate) && "opacity-50 cursor-not-allowed"
                 )}
               >
                 {isSaving ? "Saving..." : "Save Attendance"}
@@ -396,7 +398,7 @@ export default function AttendancePage() {
               <TabsList className="flex p-1 bg-black/10 rounded-lg w-fit">
                 <TabsTrigger
                   value="manual"
-                  disabled={!isToday(selectedDate)}
+                  disabled={!isWithinAttendanceWindow(selectedDate)}
                   className={cn(
                     "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                     "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
@@ -409,7 +411,7 @@ export default function AttendancePage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="facial"
-                  disabled={!isToday(selectedDate)}
+                  disabled={!isWithinAttendanceWindow(selectedDate)}
                   className={cn(
                     "w-full md:w-auto rounded-md transition-colors hover:bg-black hover:text-white data-[state=active]:shadow-none",
                     "data-[state=active]:bg-white data-[state=active]:text-primary-accent"
@@ -499,7 +501,7 @@ export default function AttendancePage() {
                               <div className="flex justify-center">
                                 <Checkbox
                                   checked={record.present}
-                                  disabled={!isToday(selectedDate)}
+                                  disabled={!isWithinAttendanceWindow(selectedDate)}
                                   onCheckedChange={(checked) =>
                                     handleAttendanceChange(
                                       worker.id,
@@ -511,7 +513,7 @@ export default function AttendancePage() {
                                     "h-5 w-5 border border-black/20 rounded-sm shadow-none",
                                     "data-[state=checked]:bg-black data-[state=checked]:border-black [&>span]:text-white",
                                     "hover:border-black transition-colors",
-                                    !isToday(selectedDate) &&
+                                    !isWithinAttendanceWindow(selectedDate) &&
                                       "opacity-50 cursor-not-allowed"
                                   )}
                                 />
@@ -525,7 +527,7 @@ export default function AttendancePage() {
                                     record.hoursWorked + record.overtime || ""
                                   }
                                   disabled={
-                                    !isToday(selectedDate) || !record.present
+                                    !isWithinAttendanceWindow(selectedDate) || !record.present
                                   }
                                   onChange={(e) =>
                                     handleTotalHoursChange(
@@ -537,7 +539,7 @@ export default function AttendancePage() {
                                     "h-8 w-16 md:w-20 text-center",
                                     "focus-visible:ring-0 focus-visible:ring-offset-0",
                                     "border-black/20 focus-visible:border-black",
-                                    (!isToday(selectedDate) ||
+                                    (!isWithinAttendanceWindow(selectedDate) ||
                                       !record.present) &&
                                       "opacity-50 cursor-not-allowed"
                                   )}
@@ -568,15 +570,14 @@ export default function AttendancePage() {
             <TabsContent value="facial">
               <div className="rounded-lg border border-[rgba(0,0,0,0.08)] p-4 md:p-6">
                 <div className="max-w-full md:max-w-2xl mx-auto">
-                  {isToday(selectedDate) ? (
+                  {isWithinAttendanceWindow(selectedDate) ? (
                     <AttendanceCamera
                       projectId={params.id as string}
                       onSuccess={handleFaceRecognition}
                     />
                   ) : (
                     <div className="text-center p-8 text-muted-foreground">
-                      Facial recognition is only available for today's
-                      attendance
+                      Facial recognition is only available for today and yesterday
                     </div>
                   )}
                   <p className="text-sm text-muted-foreground mt-4 text-center">

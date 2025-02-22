@@ -222,3 +222,43 @@ model WorkerPhoto {
   @@index([workerId])
   @@index([projectId])
 }
+
+enum AdminWorkerType {
+  ENGINEER
+  DRIVER
+  MACHINERY_OPERATOR
+}
+
+model AdminWorker {
+  id          String          @id @default(cuid())
+  name        String
+  type        AdminWorkerType
+  dailyIncome Float
+  phoneNumber String?
+  isActive    Boolean         @default(true)
+  photoUrl    String?
+  faceId      String?
+
+  attendance AdminAttendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+}
+
+model AdminAttendance {
+  id         String      @id @default(cuid())
+  worker     AdminWorker @relation(fields: [workerId], references: [id])
+  workerId   String
+  date       DateTime    @default(now())
+  present    Boolean     @default(false)
+  photoUrl   String?
+  confidence Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workerId, date])
+  @@index([workerId])
+}
