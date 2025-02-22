@@ -23,6 +23,21 @@ export async function GET(request: Request) {
   } : {};
 
   try {
+    const worker = await prisma.worker.findUnique({
+      where: { id: workerId },
+      select: {
+        hourlyRate: true,
+        dailyIncome: true,
+      },
+    });
+
+    if (!worker) {
+      return NextResponse.json(
+        { error: 'Worker not found' },
+        { status: 404 }
+      );
+    }
+
     const attendance = await prisma.attendance.findMany({
       where: {
         projectId,
@@ -34,7 +49,14 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(attendance);
+    const attendanceWithEarnings = attendance.map(record => ({
+      ...record,
+      earnings: worker.dailyIncome
+        ? worker.dailyIncome
+        : (record.hoursWorked + record.overtime) * (worker.hourlyRate || 0)
+    }));
+
+    return NextResponse.json(attendanceWithEarnings);
   } catch (error) {
     console.error('Error fetching worker attendance:', error);
     return NextResponse.json(

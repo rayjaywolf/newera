@@ -47,18 +47,22 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
+    console.log("Received request body:", body);
+
     const {
       id,
       workerId,
       name,
       type,
       hourlyRate,
+      dailyIncome,
       phoneNumber,
       isExisting,
       photoUrl,
     } = body;
 
     if (isExisting && workerId) {
+      console.log("Creating assignment for existing worker:", { workerId, projectId: params.id });
       await prisma.workerAssignment.create({
         data: {
           workerId,
@@ -68,12 +72,24 @@ export async function POST(
       });
       return NextResponse.json({ success: true, id: workerId });
     } else {
+      console.log("Creating new worker with data:", {
+        id,
+        name,
+        type,
+        hourlyRate,
+        dailyIncome,
+        phoneNumber,
+        photoUrl,
+        projectId: params.id
+      });
+
       const worker = await prisma.worker.create({
         data: {
           id,
           name,
           type,
           hourlyRate,
+          dailyIncome,
           phoneNumber,
           photoUrl,
           assignments: {
@@ -85,7 +101,10 @@ export async function POST(
         },
       });
 
+      console.log("Worker created successfully:", worker);
+
       if (photoUrl) {
+        console.log("Creating worker photo record");
         await prisma.workerPhoto.create({
           data: {
             url: photoUrl,

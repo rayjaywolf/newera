@@ -49,7 +49,8 @@ model Worker {
   id          String        @id @default(cuid())
   name        String
   type        WorkerType
-  hourlyRate  Float
+  hourlyRate  Float?
+  dailyIncome Float?
   phoneNumber String?
   isActive    Boolean       @default(true)
   photoUrl    String?

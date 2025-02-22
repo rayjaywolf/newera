@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { formatDate, getInitials } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { WorkerDetails } from "./worker-details";
+import { Worker, Project, Attendance, Advance, WorkerAssignment } from "@prisma/client";
+
+interface WorkerWithRelations extends Worker {
+  assignments: (WorkerAssignment & {
+    project: Project;
+  })[];
+  attendance: (Attendance & {
+    earnings?: number;
+  })[];
+  advances: Advance[];
+}
 
 interface WorkerPageProps {
   params: {
@@ -51,12 +62,15 @@ async function getWorkerDetails(projectId: string, workerId: string) {
   if (worker) {
     worker.attendance = worker.attendance.map((attendance) => ({
       ...attendance,
-      date: new Date(attendance.date).toLocaleString(),
+      date: new Date(attendance.date),
+      earnings: worker.dailyIncome 
+        ? worker.dailyIncome 
+        : (worker.hourlyRate || 0) * attendance.hoursWorked + (worker.hourlyRate || 0) * attendance.overtime * 1.5
     }));
 
     worker.advances = worker.advances.map((advance) => ({
       ...advance,
-      date: new Date(advance.date).toLocaleString(),
+      date: new Date(advance.date)
     }));
   }
 
@@ -125,6 +139,9 @@ export default async function WorkerPage({ params }: WorkerPageProps) {
       ...record,
       date: new Date(record.date),
       createdAt: new Date(record.createdAt),
+      earnings: worker.dailyIncome 
+        ? worker.dailyIncome 
+        : (worker.hourlyRate || 0) * record.hoursWorked + (worker.hourlyRate || 0) * record.overtime * 1.5
     })),
     advances: worker.advances.map((advance) => ({
       ...advance,

@@ -35,7 +35,8 @@ interface Worker {
   name: string;
   type: string;
   photoUrl: string | null;
-  hourlyRate: number;
+  hourlyRate?: number;
+  dailyIncome?: number;
   startDate: string;
 }
 
@@ -98,7 +99,7 @@ export default function AttendancePage() {
           dailyIncome: calculateDailyIncome(
             record.hoursWorked,
             record.overtime,
-            record.worker.hourlyRate
+            record.worker
           ),
           workerInPhoto: record.workerInPhoto,
           workerOutPhoto: record.workerOutPhoto,
@@ -121,9 +122,12 @@ export default function AttendancePage() {
   const calculateDailyIncome = (
     hours: number,
     overtime: number,
-    rate: number
+    worker: Worker
   ) => {
-    return (hours + overtime) * rate;
+    if (worker.dailyIncome) {
+      return worker.dailyIncome;
+    }
+    return (hours + overtime) * (worker.hourlyRate || 0);
   };
 
   const handleAttendanceChange = (
@@ -150,7 +154,7 @@ export default function AttendancePage() {
         updatedRecord.dailyIncome = calculateDailyIncome(
           updatedRecord.hoursWorked,
           updatedRecord.overtime,
-          worker.hourlyRate
+          worker
         );
       }
 
@@ -162,6 +166,9 @@ export default function AttendancePage() {
   };
 
   const handleTotalHoursChange = (workerId: string, totalHours: number) => {
+    const worker = workers.find((w) => w.id === workerId);
+    if (!worker || worker.dailyIncome) return;
+
     const hoursWorked = Math.min(8, totalHours);
     const overtime = Math.max(0, totalHours - 8);
 
@@ -174,20 +181,17 @@ export default function AttendancePage() {
         isPartiallyMarked: false,
       };
 
-      const worker = workers.find((w) => w.id === workerId);
       const updatedRecord = {
         ...workerRecord,
         hoursWorked,
         overtime,
       };
 
-      if (worker) {
-        updatedRecord.dailyIncome = calculateDailyIncome(
-          updatedRecord.hoursWorked,
-          updatedRecord.overtime,
-          worker.hourlyRate
-        );
-      }
+      updatedRecord.dailyIncome = calculateDailyIncome(
+        updatedRecord.hoursWorked,
+        updatedRecord.overtime,
+        worker
+      );
 
       return {
         ...prev,
@@ -441,7 +445,7 @@ export default function AttendancePage() {
                           Present
                         </th>
                         <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
-                          Total Hours
+                          Total Hours/Daily Income
                         </th>
                         <th className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider bg-secondary/40">
                           Daily Income
@@ -521,42 +525,36 @@ export default function AttendancePage() {
                             </td>
                             <td className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap">
                               <div className="flex justify-center">
-                                <Input
-                                  type="number"
-                                  value={
-                                    record.hoursWorked + record.overtime || ""
-                                  }
-                                  disabled={
-                                    !isWithinAttendanceWindow(selectedDate) || !record.present
-                                  }
-                                  onChange={(e) =>
-                                    handleTotalHoursChange(
-                                      worker.id,
-                                      parseFloat(e.target.value)
-                                    )
-                                  }
-                                  className={cn(
-                                    "h-8 w-16 md:w-20 text-center",
-                                    "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                    "border-black/20 focus-visible:border-black",
-                                    (!isWithinAttendanceWindow(selectedDate) ||
-                                      !record.present) &&
-                                      "opacity-50 cursor-not-allowed"
-                                  )}
-                                />
+                                {worker.dailyIncome ? (
+                                  <span>₹{worker.dailyIncome.toLocaleString()}</span>
+                                ) : (
+                                  <Input
+                                    type="number"
+                                    value={record.hoursWorked + record.overtime || ""}
+                                    disabled={
+                                      !isWithinAttendanceWindow(selectedDate) ||
+                                      !record.present
+                                    }
+                                    onChange={(e) =>
+                                      handleTotalHoursChange(
+                                        worker.id,
+                                        parseFloat(e.target.value)
+                                      )
+                                    }
+                                    className={cn(
+                                      "h-8 w-16 md:w-20 text-center",
+                                      "focus-visible:ring-0 focus-visible:ring-offset-0",
+                                      "border-black/20 focus-visible:border-black",
+                                      (!isWithinAttendanceWindow(selectedDate) ||
+                                        !record.present) &&
+                                        "opacity-50 cursor-not-allowed"
+                                    )}
+                                  />
+                                )}
                               </div>
                             </td>
-                            <td className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 whitespace-nowrap text-right">
-                              <span
-                                className={cn(
-                                  "font-medium",
-                                  record.dailyIncome
-                                    ? "text-[#E65F2B]"
-                                    : "text-muted-foreground"
-                                )}
-                              >
-                                ₹{record.dailyIncome?.toFixed(2) || "0.00"}
-                              </span>
+                            <td className="w-[20%] px-4 md:px-4 py-1.5 md:py-2 text-right">
+                              ₹{record.dailyIncome.toLocaleString()}
                             </td>
                           </tr>
                         );

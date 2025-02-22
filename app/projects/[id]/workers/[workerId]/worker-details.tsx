@@ -97,6 +97,7 @@ interface Worker {
   name: string;
   type: string;
   hourlyRate: number;
+  dailyIncome: number | null;
   phoneNumber: string | null;
   photoUrl: string | null;
   faceId: string | null;
@@ -220,7 +221,9 @@ export function WorkerDetails({
     (acc: number, record: Attendance) => acc + record.overtime,
     0
   );
-  const monthlyEarnings = (totalHours + totalOvertime) * worker.hourlyRate;
+  const monthlyEarnings = worker.dailyIncome
+    ? daysPresent * worker.dailyIncome
+    : (totalHours + totalOvertime) * (worker.hourlyRate || 0);
   const monthlyAdvances = currentMonthAdvances.reduce(
     (acc: number, advance: Advance) => acc + advance.amount,
     0
@@ -353,9 +356,12 @@ export function WorkerDetails({
         <CardContent>
           <dl className="grid gap-8 sm:grid-cols-3">
             <div>
-              <dt className="font-medium text-gray-500 mb-1">Hourly Rate</dt>
+              <dt className="font-medium text-gray-500 mb-1">
+                {worker.dailyIncome ? "Daily Income" : "Hourly Rate"}
+              </dt>
               <dd className="text-lg">
-                ₹{worker.hourlyRate.toLocaleString()}/hr
+                ₹{(worker.dailyIncome || worker.hourlyRate || 0).toLocaleString()}
+                {worker.dailyIncome ? "/day" : "/hr"}
               </dd>
             </div>
             {worker.assignments.length > 0 && (
@@ -363,9 +369,7 @@ export function WorkerDetails({
                 <div>
                   <dt className="font-medium text-gray-500 mb-1">Start Date</dt>
                   <dd className="text-lg">
-                    {new Date(
-                      worker.assignments[0].startDate
-                    ).toLocaleDateString()}
+                    {new Date(worker.assignments[0].startDate).toLocaleDateString()}
                   </dd>
                 </div>
                 {worker.assignments[0].endDate && (

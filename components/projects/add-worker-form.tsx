@@ -52,9 +52,22 @@ const workerSchema = z.object({
   workerId: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   type: z.nativeEnum(WorkerType),
-  hourlyRate: z.string().min(1, "Hourly rate is required"),
+  incomeType: z.enum(['hourly', 'daily']),
+  hourlyRate: z.string().optional(),
+  dailyIncome: z.string().optional(),
   phoneNumber: z.string().optional(),
   photo: z.instanceof(File).optional(),
+}).refine((data) => {
+  if (data.incomeType === 'hourly' && !data.hourlyRate) {
+    return false;
+  }
+  if (data.incomeType === 'daily' && !data.dailyIncome) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please provide the required income rate",
+  path: ['hourlyRate']
 });
 
 interface AddWorkerFormProps {
@@ -269,15 +282,20 @@ export default function AddWorkerForm({
   const [loading, setLoading] = useState(false);
   const [isExistingWorker, setIsExistingWorker] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [incomeType, setIncomeType] = useState<'hourly' | 'daily'>('hourly');
 
   const form = useForm<z.infer<typeof workerSchema>>({
     resolver: zodResolver(workerSchema),
     defaultValues: {
       name: "",
+      incomeType: "hourly",
       hourlyRate: "",
+      dailyIncome: "",
       phoneNumber: "",
     },
   });
+
+  const watchIncomeType = form.watch("incomeType");
 
   async function onSubmit(values: z.infer<typeof workerSchema>) {
     try {
@@ -318,17 +336,36 @@ export default function AddWorkerForm({
         body: JSON.stringify({
           ...values,
           id: generatedId,
-          hourlyRate: parseFloat(values.hourlyRate),
+          hourlyRate: values.incomeType === 'hourly' ? parseFloat(values.hourlyRate || '0') : null,
+          dailyIncome: values.incomeType === 'daily' ? parseFloat(values.dailyIncome || '0') : null,
           isExisting: isExistingWorker,
           photoUrl,
         }),
       });
 
+      console.log('Request payload:', {
+        ...values,
+        id: generatedId,
+        hourlyRate: values.incomeType === 'hourly' ? parseFloat(values.hourlyRate || '0') : null,
+        dailyIncome: values.incomeType === 'daily' ? parseFloat(values.dailyIncome || '0') : null,
+        isExisting: isExistingWorker,
+        photoUrl,
+      });
+
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Failed to add worker:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
         throw new Error("Failed to add worker");
       }
 
-      const { id: newWorkerId } = await response.json();
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+
+      const { id: newWorkerId } = responseData;
 
       // Index the worker's face if photo was uploaded
       if (photoFile && newWorkerId) {
@@ -476,25 +513,85 @@ export default function AddWorkerForm({
             />
             <FormField
               control={form.control}
-              name="hourlyRate"
+              name="incomeType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    Hourly Rate
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
-                      placeholder="Enter hourly rate"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <FormLabel className="text-sm font-medium">Income Type</FormLabel>
+                  <div className="flex gap-4">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="hourly"
+                        value="hourly"
+                        checked={field.value === 'hourly'}
+                        onChange={(e) => {
+                          field.onChange('hourly');
+                          setIncomeType('hourly');
+                        }}
+                        className="mr-2"
+                      />
+                      <label htmlFor="hourly">Hourly Rate</label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="daily"
+                        value="daily"
+                        checked={field.value === 'daily'}
+                        onChange={(e) => {
+                          field.onChange('daily');
+                          setIncomeType('daily');
+                        }}
+                        className="mr-2"
+                      />
+                      <label htmlFor="daily">Daily Income</label>
+                    </div>
+                  </div>
                 </FormItem>
               )}
             />
+            {watchIncomeType === 'hourly' && (
+              <FormField
+                control={form.control}
+                name="hourlyRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Hourly Rate</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
+                        placeholder="Enter hourly rate"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {watchIncomeType === 'daily' && (
+              <FormField
+                control={form.control}
+                name="dailyIncome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Daily Income</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        className="bg-white/[0.15] border-[rgb(0,0,0,0.08)]"
+                        placeholder="Enter daily income"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="phoneNumber"

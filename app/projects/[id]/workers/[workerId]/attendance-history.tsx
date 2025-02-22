@@ -9,7 +9,10 @@ import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 interface AttendanceHistoryProps {
   projectId: string;
   workerId: string;
-  worker: any;
+  worker: {
+    hourlyRate?: number;
+    dailyIncome?: number;
+  };
   initialData: any;
 }
 
@@ -71,12 +74,16 @@ export default function AttendanceHistory({
                 <th className="text-left py-4 px-6 font-medium text-gray-500 w-1/4">
                   Date
                 </th>
-                <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                  Hours
-                </th>
-                <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
-                  Overtime
-                </th>
+                {!worker.dailyIncome && (
+                  <>
+                    <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
+                      Hours
+                    </th>
+                    <th className="text-center py-4 px-6 font-medium text-gray-500 w-1/4">
+                      Overtime
+                    </th>
+                  </>
+                )}
                 <th className="text-right py-4 px-6 font-medium text-gray-500 w-1/4">
                   Earnings
                 </th>
@@ -96,16 +103,24 @@ export default function AttendanceHistory({
                     <td className="py-4 px-6 text-left">
                       {formatDate(record.date)}
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      {record.hoursWorked}
-                    </td>
-                    <td className="py-4 px-6 text-center">{record.overtime}</td>
+                    {!worker.dailyIncome && (
+                      <>
+                        <td className="py-4 px-6 text-center">
+                          {record.hoursWorked}
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          {record.overtime}
+                        </td>
+                      </>
+                    )}
                     <td className="py-4 px-6 text-right">
                       ₹
-                      {(
-                        (record.hoursWorked + record.overtime) *
-                        worker.hourlyRate
-                      ).toLocaleString()}
+                      {worker.dailyIncome
+                        ? worker.dailyIncome.toLocaleString()
+                        : (
+                            (record.hoursWorked + record.overtime) *
+                            (worker.hourlyRate || 0)
+                          ).toLocaleString()}
                     </td>
                   </tr>
                 ))}

@@ -57,6 +57,7 @@ async function getProject(id: string) {
               name: true,
               type: true,
               hourlyRate: true,
+              dailyIncome: true,
               photoUrl: true,
             },
           },
@@ -365,7 +366,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     Since {formatDate(assignment.startDate)}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Rate: ₹{assignment.worker.hourlyRate}/hr
+                    {assignment.worker.dailyIncome 
+                      ? `₹${assignment.worker.dailyIncome}/day`
+                      : `₹${assignment.worker.hourlyRate}/hr`}
                   </p>
                 </div>
                 <Badge

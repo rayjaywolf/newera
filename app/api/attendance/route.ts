@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
+const prismaClient = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
