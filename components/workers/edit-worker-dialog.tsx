@@ -41,7 +41,7 @@ export function EditWorkerDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(worker.name);
   const [type, setType] = useState(worker.type);
-  const [hourlyRate, setHourlyRate] = useState(worker.hourlyRate.toString());
+  const [hourlyRate, setHourlyRate] = useState(worker.hourlyRate?.toString() || "0");
   const [phoneNumber, setPhoneNumber] = useState(worker.phoneNumber || "");
   const router = useRouter();
 
