@@ -8,7 +8,7 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const { name, type, hourlyRate, phoneNumber, faceId, photoUrl } = body;
+    const { name, type, hourlyRate, dailyIncome, phoneNumber, faceId, photoUrl } = body;
 
     const updatedWorker = await prisma.worker.update({
       where: {
@@ -17,7 +17,8 @@ export async function PATCH(
       data: {
         ...(name && { name }),
         ...(type && { type }),
-        ...(hourlyRate && { hourlyRate }),
+        ...(hourlyRate !== undefined && { hourlyRate: parseFloat(hourlyRate) }),
+        ...(dailyIncome !== undefined && { dailyIncome: parseFloat(dailyIncome) }),
         ...(phoneNumber !== undefined && { phoneNumber }),
         ...(faceId && { faceId }),
         ...(photoUrl && { photoUrl }),

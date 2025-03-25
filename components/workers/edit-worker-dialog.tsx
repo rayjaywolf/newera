@@ -27,7 +27,8 @@ interface EditWorkerDialogProps {
     id: string;
     name: string;
     type: string;
-    hourlyRate: number;
+    hourlyRate: number | null;
+    dailyIncome: number | null;
     phoneNumber: string | null;
   };
   trigger?: React.ReactNode;
@@ -41,7 +42,8 @@ export function EditWorkerDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(worker.name);
   const [type, setType] = useState(worker.type);
-  const [hourlyRate, setHourlyRate] = useState(worker.hourlyRate?.toString() || "0");
+  const [hourlyRate, setHourlyRate] = useState(worker.hourlyRate?.toString() || "");
+  const [dailyIncome, setDailyIncome] = useState(worker.dailyIncome?.toString() || "");
   const [phoneNumber, setPhoneNumber] = useState(worker.phoneNumber || "");
   const router = useRouter();
 
@@ -58,7 +60,8 @@ export function EditWorkerDialog({
         body: JSON.stringify({
           name,
           type,
-          hourlyRate: parseFloat(hourlyRate),
+          hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
+          dailyIncome: dailyIncome ? parseFloat(dailyIncome) : null,
           phoneNumber: phoneNumber || null,
         }),
       });
@@ -132,11 +135,32 @@ export function EditWorkerDialog({
                 id="hourlyRate"
                 type="number"
                 value={hourlyRate}
-                onChange={(e) => setHourlyRate(e.target.value)}
+                onChange={(e) => {
+                  setHourlyRate(e.target.value);
+                  if (e.target.value) setDailyIncome("");
+                }}
                 className="col-span-3"
-                required
                 min="0"
                 step="0.01"
+                placeholder="Leave empty for daily rate"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dailyIncome" className="text-right">
+                Daily Income
+              </Label>
+              <Input
+                id="dailyIncome"
+                type="number"
+                value={dailyIncome}
+                onChange={(e) => {
+                  setDailyIncome(e.target.value);
+                  if (e.target.value) setHourlyRate("");
+                }}
+                className="col-span-3"
+                min="0"
+                step="0.01"
+                placeholder="Leave empty for hourly rate"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

@@ -223,7 +223,7 @@ export function WorkerDetails({
   );
   const monthlyEarnings = worker.dailyIncome
     ? daysPresent * worker.dailyIncome
-    : (totalHours + totalOvertime) * (worker.hourlyRate || 0);
+    : (totalHours * (worker.hourlyRate || 0)) + (totalOvertime * (worker.hourlyRate || 0) * 1.5);
   const monthlyAdvances = currentMonthAdvances.reduce(
     (acc: number, advance: Advance) => acc + advance.amount,
     0
